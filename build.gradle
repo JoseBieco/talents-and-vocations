@@ -53,6 +53,13 @@ repositories {
 dependencies {
     implementation minecraft.dependency('net.minecraftforge:forge:26.3-66.0.9')
     annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.6'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 tasks.withType(JavaCompile).configureEach {
