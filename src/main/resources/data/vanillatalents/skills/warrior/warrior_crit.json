@@ -1,0 +1,21 @@
+{
+  "id": "warrior_crit",
+  "treeCategory": "warrior",
+  "name": "talent.vanillatalents.warrior_crit.name",
+  "description": "talent.vanillatalents.warrior_crit.desc",
+  "icon": "minecraft:diamond_sword",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "warrior_sweep",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

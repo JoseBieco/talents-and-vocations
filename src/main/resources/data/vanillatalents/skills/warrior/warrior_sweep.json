@@ -1,0 +1,21 @@
+{
+  "id": "warrior_sweep",
+  "treeCategory": "warrior",
+  "name": "talent.vanillatalents.warrior_sweep.name",
+  "description": "talent.vanillatalents.warrior_sweep.desc",
+  "icon": "minecraft:golden_sword",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "warrior_strength",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.15
+  }
+}

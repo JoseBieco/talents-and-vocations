@@ -1,0 +1,21 @@
+{
+  "id": "warrior_axe_speed",
+  "treeCategory": "warrior",
+  "name": "talent.vanillatalents.warrior_axe_speed.name",
+  "description": "talent.vanillatalents.warrior_axe_speed.desc",
+  "icon": "minecraft:iron_axe",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "warrior_strength",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.05
+  }
+}

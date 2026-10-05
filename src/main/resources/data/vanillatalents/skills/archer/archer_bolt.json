@@ -1,0 +1,21 @@
+{
+  "id": "archer_bolt",
+  "treeCategory": "archer",
+  "name": "talent.vanillatalents.archer_bolt.name",
+  "description": "talent.vanillatalents.archer_bolt.desc",
+  "icon": "minecraft:tipped_arrow",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "archer_reload",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.08
+  }
+}

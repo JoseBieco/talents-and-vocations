@@ -1,0 +1,22 @@
+{
+  "id": "miner_prospector",
+  "treeCategory": "miner",
+  "name": "talent.vanillatalents.miner_prospector.name",
+  "description": "talent.vanillatalents.miner_prospector.desc",
+  "icon": "minecraft:spyglass",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "miner_fortune",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 1,
+    "y": 2
+  },
+  "values": {
+    "radius_per_level": 2,
+    "cooldown": 200
+  }
+}

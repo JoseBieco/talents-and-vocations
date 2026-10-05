@@ -1,0 +1,21 @@
+{
+  "id": "farmer_hoe_care",
+  "treeCategory": "farmer",
+  "name": "talent.vanillatalents.farmer_hoe_care.name",
+  "description": "talent.vanillatalents.farmer_hoe_care.desc",
+  "icon": "minecraft:diamond_hoe",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "farmer_area_harvest",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": -4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.15
+  }
+}
