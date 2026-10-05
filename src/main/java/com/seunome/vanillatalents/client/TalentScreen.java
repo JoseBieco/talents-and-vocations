@@ -62,6 +62,7 @@ public class TalentScreen extends Screen {
     // Estado do arrastar.
     private boolean draggingTree;
     private boolean deselectOnRelease;
+    private boolean lastClickBought;
 
     public TalentScreen() {
         super(Component.translatable("gui.vanillatalents.title"));
@@ -106,6 +107,7 @@ public class TalentScreen extends Screen {
         }
         if (tree != null && tree != shownTree) treeView.setTree(tree);
         shownTree = tree;
+        treeView.reclamp();
 
         panel = new NodeDetailPanel(panelX(), treeY - 1, PANEL_W, treeH + 2);
         addRenderableWidget(panel.buyButton());
@@ -279,12 +281,17 @@ public class TalentScreen extends Screen {
         draggingTree = true;
         TalentNode node = treeView.nodeAt(event.x(), event.y());
         deselectOnRelease = node == null;
+        boolean bought = false;
         if (node != null) {
+            boolean alreadySelected = node.id().equals(selectedId);
             selectedId = node.id();
-            if (doubleClick && TalentRules.canPurchase(ClientTalentState.data(), TalentRegistries.client(), node.id()) == PurchaseResult.OK) {
+            if (doubleClick && alreadySelected && !lastClickBought
+                    && TalentRules.canPurchase(ClientTalentState.data(), TalentRegistries.client(), node.id()) == PurchaseResult.OK) {
                 ModNetwork.sendToServer(new C2SBuyNode(node.id()));
+                bought = true;
             }
         }
+        lastClickBought = bought;
         return true;
     }
 
