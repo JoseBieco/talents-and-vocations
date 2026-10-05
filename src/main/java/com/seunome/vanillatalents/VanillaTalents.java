@@ -3,6 +3,7 @@ package com.seunome.vanillatalents;
 import com.mojang.logging.LogUtils;
 import com.seunome.vanillatalents.client.ClientSetup;
 import com.seunome.vanillatalents.data.TalentDataLoader;
+import com.seunome.vanillatalents.effect.FarmerEffects;
 import com.seunome.vanillatalents.effect.MinerEffects;
 import com.seunome.vanillatalents.effect.loot.TalentLootModifier;
 import com.seunome.vanillatalents.network.ModNetwork;
@@ -25,6 +26,7 @@ public final class VanillaTalents {
         ModNetwork.register();
         DebugCommands.register();
         MinerEffects.registerLoot();
+        FarmerEffects.registerLoot();
         if (FMLEnvironment.dist.isClient()) ClientSetup.init();
     }
 }

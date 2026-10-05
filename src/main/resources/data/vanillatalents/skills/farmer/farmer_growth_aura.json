@@ -17,6 +17,7 @@
   },
   "values": {
     "chance": 0.05,
-    "radius_base": 2
+    "radius_base": 2,
+    "interval": 100
   }
 }
