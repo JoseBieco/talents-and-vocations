@@ -10,6 +10,7 @@ public final class ClientSetup {
     public static void init() {
         KeyBindings.register();
         ClientEffects.register();
+        OreHighlights.register();
         Talents.setClientView(ClientTalentState::data);
     }
 }

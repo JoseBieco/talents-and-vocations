@@ -27,6 +27,6 @@ public final class ClientPacketHandlers {
     }
 
     public static void prospectorHighlight(S2CProspectorHighlight msg) {
-        ClientEffects.highlight(msg.positions());
+        OreHighlights.show(msg.positions());
     }
 }
