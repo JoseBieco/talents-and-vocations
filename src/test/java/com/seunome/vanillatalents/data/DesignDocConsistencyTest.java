@@ -148,4 +148,16 @@ class DesignDocConsistencyTest {
         }
         return rows;
     }
+
+    @Test
+    void classSummaries_matchDesignTotals() {
+        var miner = com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, TreeCategory.MINER);
+        assertEquals("miner_haste", miner.rootId());
+        assertEquals("miner_vein", miner.capstoneId());
+        assertEquals(12, miner.nodeCount());
+        assertEquals(36, miner.totalPoints());
+        assertEquals(37, com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, TreeCategory.ARCHER).totalPoints());
+        assertEquals("common_second_wind",
+                com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, TreeCategory.COMMON).capstoneId());
+    }
 }

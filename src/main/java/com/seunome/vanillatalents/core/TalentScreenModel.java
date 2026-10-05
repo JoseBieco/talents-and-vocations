@@ -11,7 +11,68 @@ public final class TalentScreenModel {
 
     public record GridBounds(int minX, int maxX, int minY, int maxY) {}
 
+    /** Resumo de uma árvore para o jogador: pontos gastos, nós no máximo e totais. */
+    public record TreeSummary(int spent, int maxedNodes, int nodeCount, int totalPoints) {}
+
+    /** Resumo estático de uma classe: nó raiz, capstone e totais. */
+    public record ClassSummary(String rootId, String capstoneId, int nodeCount, int totalPoints) {}
+
     private TalentScreenModel() {}
+
+    /** Chave de tradução do motivo de bloqueio, ou null se a compra é possível. */
+    public static String blockReasonKey(PurchaseResult r) {
+        return switch (r) {
+            case OK -> null;
+            case UNKNOWN_NODE -> "gui.vanillatalents.reason.unknown";
+            case NO_CLASS_SELECTED -> "gui.vanillatalents.reason.no_class";
+            case WRONG_CLASS -> "gui.vanillatalents.reason.wrong_class";
+            case MAXED -> "gui.vanillatalents.reason.maxed";
+            case NOT_ENOUGH_POINTS -> "gui.vanillatalents.reason.no_points";
+            case PREREQUISITE_NOT_MET -> "gui.vanillatalents.reason.prerequisite";
+        };
+    }
+
+    public static TreeSummary treeSummary(SkillView v, TalentRegistry r, TreeCategory tree) {
+        int spent = 0, maxed = 0, total = 0;
+        List<TalentNode> nodes = r.tree(tree);
+        for (TalentNode n : nodes) {
+            int level = TalentRules.effectiveLevel(v, r, n.id());
+            spent += level;
+            if (level >= n.maxLevel()) maxed++;
+            total += n.maxLevel();
+        }
+        return new TreeSummary(spent, maxed, nodes.size(), total);
+    }
+
+    public static ClassSummary classSummary(TalentRegistry r, TreeCategory tree) {
+        List<TalentNode> nodes = r.tree(tree);
+        if (nodes.isEmpty()) return new ClassSummary(null, null, 0, 0);
+        String root = null;
+        int total = 0;
+        for (TalentNode n : nodes) {
+            if (root == null && n.prerequisites().isEmpty()) root = n.id();
+            total += n.maxLevel();
+        }
+        return new ClassSummary(root, nodes.get(nodes.size() - 1).id(), nodes.size(), total);
+    }
+
+    /** Limita o deslocamento do arrastar a [viewSize - contentSize, 0]; conteúdo menor que a vista fica em 0. */
+    public static int clampScroll(int contentSize, int viewSize, int scroll) {
+        if (contentSize <= viewSize) return 0;
+        return Math.max(viewSize - contentSize, Math.min(0, scroll));
+    }
+
+    /** Textura de bloco (ladrilhada) usada como fundo da árvore. */
+    public static String backgroundTexture(TreeCategory tree) {
+        return switch (tree) {
+            case COMMON -> "textures/block/stone.png";
+            case MINER -> "textures/block/deepslate.png";
+            case FARMER -> "textures/block/farmland.png";
+            case EXPLORER -> "textures/block/grass_block_side.png";
+            case WARRIOR -> "textures/block/polished_blackstone.png";
+            case ARCHER -> "textures/block/oak_planks.png";
+        };
+    }
 
     public static List<Prerequisite> unmetPrerequisites(SkillView v, TalentRegistry r, TalentNode n) {
         List<Prerequisite> unmet = new ArrayList<>();
