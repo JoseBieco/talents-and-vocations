@@ -97,3 +97,8 @@ Decisões tomadas durante a implementação (`Ruling`), pendências e achados da
 
 - Clique nos nós não comprava: no MC 26.x os botões do mouse seguem o SDL3 (`InputConstants.MOUSE_BUTTON_LEFT = 1`); `TalentScreen` comparava `event.button() == 0`. Evidência: save do mundo com `CurrentClass=archer`, `AvailablePoints=20`, `UnlockedNodes` vazio. Regressão coberta por `InputConstantsUsageTest`.
 - Texto do botão "Trocar classe" sobreposto: o rótulo "Classe: X" ficava no mesmo canto do botão; movido para cima dele.
+
+## Melhorias pedidas após o teste em jogo
+
+- **Converter tudo:** botão "Converter tudo (N PT)" ao lado do "Converter". `C2SConvertXp` ganhou o campo `all`; o servidor recalcula N com `XpCostRules.maxConversions` a partir do XP real e cobra `N × custo` de uma vez. Debug: `/vt debug convertall`.
+- **Faro Mineral com contorno através das paredes:** as partículas foram trocadas por BlockDisplays criados só no cliente, sempre brilhando (contorno nativo, visível através das paredes), com cor por tipo de minério via tags `c:ores/*` (branco para minérios de mods), escala 0,98 centrada para não cintilar com o bloco real, máximo de 256 por ativação. `particle_ticks` virou `highlight_ticks` (60). Decisão: subclasse de `Display.BlockDisplay` que força `isCurrentlyGlowing()`, porque no cliente `setGlowingTag` não liga o flag; bloco, cor e escala entram por `load(ValueInput)` (API pública), sem AccessTransformer novo.

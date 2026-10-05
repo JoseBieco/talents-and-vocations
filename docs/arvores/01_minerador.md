@@ -50,7 +50,7 @@ graph TD
 |---|---|---|---|---|
 | `miner_fortune` | Toque de Midas | 5% de chance de drop extra em minérios (acumula com Fortuna) | 4 | `miner_haste` = 5 |
 | `miner_ore_xp` | Veio de Saber | +10% de XP de minérios (carvão, lápis-lazúli, redstone, diamante, esmeralda, quartzo) | 3 | `miner_fortune` ≥ 2 |
-| `miner_prospector` | Faro Mineral | Agachado e parado por 2 s, minérios num raio de 2/4/6 blocos emitem partículas por 3 s. Recarga de 10 s. | 3 | `miner_fortune` ≥ 2 |
+| `miner_prospector` | Faro Mineral | Agachado e parado por 2 s, minérios num raio de 2/4/6 blocos ficam com contorno colorido por tipo, visível através das paredes, por 3 s. Recarga de 10 s. | 3 | `miner_fortune` ≥ 2 |
 
 ### Ramo Profundezas
 
@@ -83,5 +83,5 @@ graph TD
 - **`miner_fortune` só dispara em minérios que dropam item** (não em minério com Toque Suave). Aplicar **depois** da Fortuna: rolar o drop vanilla e, com 5–20% de chance, duplicar o resultado. **Decisão em aberto:** incluir minérios de ferro, ouro e cobre (que dropam material bruto)? Recomendo que sim, pois é o principal atrativo da classe.
 - **Loop de XP:** `miner_ore_xp` aumenta XP, que compra PT. +30% de XP de minério é pouco no total, mas se o playtest mostrar farm de quartzo no Nether como fonte de PT, restringir ao Overworld.
 - **Veio (capstone):** é o nó mais caro em performance. Usar busca em largura com limite de blocos, só no servidor, e disparar apenas em blocos com a tag de minério (`#c:ores` ou equivalente). Não deve encadear com `miner_fortune` em mais de 1 rolagem por bloco.
-- **Faro Mineral:** custo de rede (partículas para o cliente); enviar uma única lista de posições por ativação, não um pacote por bloco.
+- **Faro Mineral:** custo de rede: enviar uma única lista de posições por ativação, não um pacote por bloco. O destaque é feito no cliente com BlockDisplays brilhantes só dele (contorno visível através das paredes, cor por tipo de minério, máximo de 256 por ativação).
 - **Visão noturna:** usar duração curta (ex.: 15 s renovada a cada 10 s) para evitar o "piscar" de Visão Noturna perto de acabar.

@@ -63,7 +63,7 @@
   "talent.vanillatalents.miner_ore_xp.name": "Vein of Knowledge",
   "talent.vanillatalents.miner_ore_xp.desc": "+10% XP from ores (coal, lapis, redstone, diamond, emerald, quartz) per level",
   "talent.vanillatalents.miner_prospector.name": "Ore Sense",
-  "talent.vanillatalents.miner_prospector.desc": "Crouch still for 2 s: ores within 2/4/6 blocks emit particles for 3 s. 10 s cooldown.",
+  "talent.vanillatalents.miner_prospector.desc": "Crouch still for 2 s: ores within 2/4/6 blocks get a colored outline, visible through walls, for 3 s. 10 s cooldown.",
   "talent.vanillatalents.miner_darkvision.name": "Eyes of the Deep",
   "talent.vanillatalents.miner_darkvision.desc": "Continuous Night Vision while Y < 0",
   "talent.vanillatalents.miner_footing.name": "Sure Footing",
