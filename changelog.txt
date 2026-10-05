@@ -1,0 +1,18 @@
+26.3 Changelog
+66.0
+====
+ - 66.0.9 Fix MDK including wrong resources. Fixes #10892
+ - 66.0.8 Fix checkLicense tasks with projectInfo task
+ - 66.0.7 Move tests and mdk to sub-project (#10887)
+          This introduces two new artifacts
+          forge-examiner: A new mod locator that allows for a single directory to be split into multiple modules
+          forge-tests: Our test mods, showing examples of data gen, game tests, and various Forge features
+          Adds a new system useful for projects with multiple sub-projects that use datagen
+ - 66.0.6 Match ForgeRenderTypes OIT pipelines to vanilla, fixes #10890 (#10891)
+ - 66.0.5 Fix entities not being pushed by fluids
+ - 66.0.4 Fix typo in BlockScanUtils patch, fixes placing cushions. Closes #10889
+ - 66.0.3 Migrate to fully declarative ForgeGradlePlugin and local build-logic
+ - 66.0.2 Fix players dropping items. Closes #10885
+ - 66.0.1 Fix players not drowning propely
+ - 66.0.0 26.3 - Initial update
+
