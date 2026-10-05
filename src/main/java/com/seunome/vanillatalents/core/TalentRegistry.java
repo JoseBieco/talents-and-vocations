@@ -62,10 +62,6 @@ public final class TalentRegistry {
         return null;
     }
 
-    private static int minRequired(int maxLevel) {
-        return (maxLevel + 1) / 2;
-    }
-
     private static Map<String, String> prerequisiteErrors(Map<String, TalentNode> remaining) {
         Map<String, String> discard = new LinkedHashMap<>();
         for (TalentNode n : remaining.values()) {
@@ -75,9 +71,9 @@ public final class TalentRegistry {
                     discard.put(n.id(), "pré-requisito '" + p.nodeId() + "' inexistente ou descartado");
                 } else if (pre.tree() != n.tree()) {
                     discard.put(n.id(), "pré-requisito '" + p.nodeId() + "' é de outra árvore");
-                } else if (p.level() < minRequired(pre.maxLevel()) || p.level() > pre.maxLevel()) {
+                } else if (p.level() < TalentRules.minRequiredLevel(pre.maxLevel()) || p.level() > pre.maxLevel()) {
                     discard.put(n.id(), "nível exigido de '" + p.nodeId() + "' (" + p.level() + ") fora de "
-                            + minRequired(pre.maxLevel()) + ".." + pre.maxLevel());
+                            + TalentRules.minRequiredLevel(pre.maxLevel()) + ".." + pre.maxLevel());
                 }
                 if (discard.containsKey(n.id())) break;
             }
