@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="[66,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="vanillatalents"
+version="1.0.0"
+displayName="Vanilla+ Talents"
+authors="SeuNome"
+
+description='''Vanilla+ Talents expande o late game do Minecraft adicionando árvores de habilidades. Converta XP em Pontos de Talento e personalize o seu jogo com classes como Minerador, Guerreiro e mais!'''
+
+[[dependencies.vanillatalents]]
+    modId="forge"
+    mandatory=true
+    versionRange="[66,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.vanillatalents]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[26.3,26.4,)"
+    ordering="NONE"
+    side="BOTH"
