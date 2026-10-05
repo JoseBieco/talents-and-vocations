@@ -150,3 +150,11 @@ Decisões tomadas durante a implementação (`Ruling`), pendências e achados da
 - Final: minor (deferred): ClassScreen sem estado "Carregando talentos…" com registro vazio
 - Final: minor (deferred): caches de ícone (TreeView/ClassScreen) não limpam após /reload
 - Final: minor (deferred): botões Converter não atualizam ao pegar XP até o próximo sync (já era assim)
+
+## Rolagem do painel e zoom da árvore
+
+- Roda do mouse sobre o painel de detalhes (talentos e classes) rola o texto; barra fina à direita quando não cabe; Comprar/motivo e o botão da classe ficam fixos; trocar de nó volta ao topo; a rolagem sobrevive ao sync.
+- Roda do mouse sobre a árvore dá zoom em 50/75/100/125%, mantendo parado o ponto sob o cursor; nível lembrado por árvore enquanto o jogo estiver aberto; indicador "N%" por 1 s.
+- `core/TreeViewport` (8 testes) guarda o deslocamento em double: corrige o arrasto lento em escala de GUI alta que ficou pendente na revisão final da UI.
+- Ícone de item desconhecido passa a mostrar barreira; cache de ícones limpo ao trocar de árvore.
+- Checklist manual: rolar o painel com descrição longa (talentos e classes) · zoom in/out nas 6 árvores · arrastar devagar com GUI no máximo · clicar em nós com zoom 50% e 125% (o clique acerta o nó).

@@ -65,4 +65,12 @@ public final class VanillaGui {
         if (capstone) return obtained ? CHALLENGE_FRAME_OBTAINED : CHALLENGE_FRAME_UNOBTAINED;
         return obtained ? TASK_FRAME_OBTAINED : TASK_FRAME_UNOBTAINED;
     }
+
+    /** Barra de rolagem fina (trilho + polegar) na coluna {@code x}, entre {@code top} e {@code bottom}. */
+    public static void scrollbar(GuiGraphicsExtractor g, int x, int top, int bottom,
+                                 com.seunome.vanillatalents.core.TalentScreenModel.@org.jspecify.annotations.Nullable ScrollThumb thumb) {
+        if (thumb == null) return;
+        g.fill(x, top, x + 2, bottom, 0x55000000);
+        g.fill(x, top + thumb.top(), x + 2, top + thumb.top() + thumb.height(), COLOR_PANEL);
+    }
 }
