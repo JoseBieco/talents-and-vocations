@@ -24,7 +24,8 @@ public final class TalentScreenModel {
     public static RespecPreview respecPreview(Map<String, Integer> levels, String currentClass, EconomySettings settings) {
         if (TalentRules.NO_CLASS.equals(currentClass)) return new RespecPreview(0, 0, 0);
         int spent = RespecRules.spentClassPoints(levels, currentClass);
-        return new RespecPreview(settings.respecFeeLevels(), spent, RespecRules.refund(spent, settings.respecRefundPercent()));
+        return new RespecPreview(RespecRules.feeFor(spent, settings.respecFeeLevels()), spent,
+                RespecRules.refund(spent, settings.respecRefundPercent()));
     }
 
     public static GridBounds gridBounds(List<TalentNode> nodes) {

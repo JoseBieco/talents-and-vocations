@@ -16,6 +16,11 @@ public final class RespecRules {
         return total;
     }
 
+    /** Taxa efetiva: trocar sem ter gasto nada na classe atual não custa nada (nada é zerado). */
+    public static int feeFor(int spentOnCurrentClass, int feeLevels) {
+        return spentOnCurrentClass <= 0 ? 0 : feeLevels;
+    }
+
     public static int refund(int spent, int percent) {
         return Math.floorDiv(spent * percent, 100);
     }
