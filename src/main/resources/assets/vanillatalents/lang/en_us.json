@@ -124,7 +124,7 @@
   "talent.vanillatalents.warrior_strength.name": "Strong Arm",
   "talent.vanillatalents.warrior_strength.desc": "+0.5 melee damage with swords and axes per level",
   "talent.vanillatalents.warrior_sweep.name": "Sweep",
-  "talent.vanillatalents.warrior_sweep.desc": "+15% sword sweep attack damage per level",
+  "talent.vanillatalents.warrior_sweep.desc": "+0.15 sword sweeping damage ratio per level",
   "talent.vanillatalents.warrior_crit.name": "Precise Strike",
   "talent.vanillatalents.warrior_crit.desc": "+10% critical hit damage per level (vanilla: ×1.5)",
   "talent.vanillatalents.warrior_bloodlust.name": "Bloodlust",

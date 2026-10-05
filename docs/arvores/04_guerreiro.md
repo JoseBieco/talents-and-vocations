@@ -40,7 +40,7 @@ graph TD
 
 | ID | Nome | Efeito por nível | Max | Pré-requisitos |
 |---|---|---|---|---|
-| `warrior_sweep` | Varredura | +15% de dano do ataque de varredura da espada | 3 | `warrior_strength` ≥ 3 |
+| `warrior_sweep` | Varredura | +0,15 no atributo de dano de varredura (`SWEEPING_DAMAGE_RATIO`) da espada | 3 | `warrior_strength` ≥ 3 |
 | `warrior_crit` | Golpe Preciso | +10% de dano em acertos críticos (vanilla: ×1,5) | 3 | `warrior_sweep` ≥ 2 |
 | `warrior_bloodlust` | Sede de Batalha | Abater um mob hostil com espada cura 1 de vida (meio coração). Recarga de 2 s. | 2 | `warrior_crit` ≥ 2 |
 
@@ -85,3 +85,4 @@ graph TD
 - **Golpe Amplo:** não afeta jogadores, animais domesticados, aldeões nem golens; não encadeia (o dano extra não dispara outro Golpe Amplo, Carrasco nem Sede de Batalha).
 - **Rachador:** como é % da armadura do alvo, é forte contra mobs com armadura (zumbis e piglins brutos) e irrelevante contra a maioria; é intencional.
 - **PvP:** todos os valores foram pensados para PvE. Em servidores, Couro Duro + Firme podem pesar; considerar um multiplicador de PvP no config.
+- **Varredura (implementação):** a vanilla não separa o dano de varredura num evento, então `warrior_sweep` soma +0,15 por nível ao atributo `SWEEPING_DAMAGE_RATIO` (fração do dano do golpe aplicada aos alvos da varredura), em vez de "+15% do dano da varredura".
