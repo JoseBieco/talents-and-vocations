@@ -34,6 +34,10 @@ public final class Config {
             .comment("Fertile Aura stops if the player has not moved for this many ticks")
             .defineInRange("auraIdleTicks", 1200, 0, 72000);
 
+    public static final ForgeConfigSpec.DoubleValue FALL_REDUCTION_CAP = BUILDER
+            .comment("Maximum fall damage reduction from Landing + Roll (0.6 = never below 40% of the damage)")
+            .defineInRange("fallReductionCap", 0.6, 0.0, 1.0);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private Config() {}
