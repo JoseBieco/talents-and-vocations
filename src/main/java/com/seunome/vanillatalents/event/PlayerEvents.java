@@ -5,6 +5,7 @@ import com.seunome.vanillatalents.capability.PlayerSkillProvider;
 import com.seunome.vanillatalents.capability.SkillAccess;
 import com.seunome.vanillatalents.core.TalentNode;
 import com.seunome.vanillatalents.data.TalentRegistries;
+import com.seunome.vanillatalents.effect.AttributeSync;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.network.S2CSyncDefinitions;
 import com.seunome.vanillatalents.server.TalentActions;
@@ -13,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -45,25 +47,41 @@ public class PlayerEvents {
 
     @SubscribeEvent
     public static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) TalentActions.sync(player);
+        if (event.getEntity() instanceof ServerPlayer player) refresh(player);
     }
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) TalentActions.sync(player);
+        if (event.getEntity() instanceof ServerPlayer player) refresh(player);
     }
 
     @SubscribeEvent
     public static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) TalentActions.sync(player);
+        if (event.getEntity() instanceof ServerPlayer player) refresh(player);
     }
 
-    /** Login e /reload: envia as definições de nós do servidor ao(s) cliente(s). */
+    @SubscribeEvent
+    public static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        AttributeSync.forget(event.getEntity().getUUID());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent.Post event) {
+        if (event.player() instanceof ServerPlayer player) AttributeSync.tick(player);
+    }
+
+    /** Login e /reload: envia as definições de nós e reaplica atributos (maxLevel pode ter mudado). */
     @SubscribeEvent
     public static void onDatapackSync(OnDatapackSyncEvent event) {
         List<TalentNode> nodes = List.copyOf(TalentRegistries.server().all());
         for (ServerPlayer player : event.getPlayers()) {
             ModNetwork.sendTo(player, new S2CSyncDefinitions(nodes));
+            AttributeSync.apply(player);
         }
+    }
+
+    private static void refresh(ServerPlayer player) {
+        AttributeSync.apply(player);
+        TalentActions.sync(player);
     }
 }

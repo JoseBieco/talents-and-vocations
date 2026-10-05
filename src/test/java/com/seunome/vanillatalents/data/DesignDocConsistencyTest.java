@@ -111,6 +111,23 @@ class DesignDocConsistencyTest {
         }
     }
 
+    @Test
+    void attributeNodesExistAndHaveTheirValues() {
+        for (String id : com.seunome.vanillatalents.core.AttributeBonuses.NODE_IDS) {
+            assertTrue(registry.get(id).isPresent(), id);
+        }
+        for (TreeCategory tree : TreeCategory.values()) {
+            if (!tree.isClass()) continue;
+            com.seunome.vanillatalents.core.SkillView maxed = new com.seunome.vanillatalents.core.SkillView() {
+                public String currentClass() { return tree.id(); }
+                public int availablePoints() { return 0; }
+                public int rawLevel(String nodeId) { return 10; }
+            };
+            var ctx = new com.seunome.vanillatalents.core.AttributeBonuses.Context(false, false, true, 0);
+            assertDoesNotThrow(() -> com.seunome.vanillatalents.core.AttributeBonuses.compute(maxed, registry, ctx), tree.id());
+        }
+    }
+
     private static final Pattern ROW = Pattern.compile("^\\| `([a-z_]+)` \\| ([^|]+?) \\| [^|]* \\| (\\d+) \\| ([^|]*) \\|$");
     private static final Pattern PREREQ = Pattern.compile("`([a-z_]+)` (?:≥|=) (\\d+)");
 
