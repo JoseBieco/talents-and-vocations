@@ -4,12 +4,14 @@ import com.seunome.vanillatalents.Config;
 import com.seunome.vanillatalents.capability.PlayerSkillData;
 import com.seunome.vanillatalents.capability.SkillAccess;
 import com.seunome.vanillatalents.core.CostMode;
+import com.seunome.vanillatalents.core.EconomySettings;
 import com.seunome.vanillatalents.core.PurchaseResult;
 import com.seunome.vanillatalents.core.RespecCheck;
 import com.seunome.vanillatalents.core.XpCostRules;
 import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.network.S2CSyncPlayer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Optional;
@@ -59,8 +61,20 @@ public final class TalentActions {
         return check;
     }
 
+    public static EconomySettings economy() {
+        return new EconomySettings(Config.COST_MODE.get(), Config.COST_LEVELS.get(), Config.COST_POINTS.get(),
+                Config.RESPEC_FEE_LEVELS.get(), Config.RESPEC_REFUND_PERCENT.get());
+    }
+
+    /** Envia o PlayerSkillData e, em "Settings", os custos vigentes (o cliente não confia na própria config). */
     public static void sync(ServerPlayer player) {
         Optional<PlayerSkillData> data = SkillAccess.get(player);
-        data.ifPresent(d -> ModNetwork.sendTo(player, new S2CSyncPlayer(d.serializeNBT(player.registryAccess()))));
+        data.ifPresent(d -> {
+            CompoundTag tag = d.serializeNBT(player.registryAccess());
+            CompoundTag settings = new CompoundTag();
+            economy().toMap().forEach(settings::putInt);
+            tag.put(S2CSyncPlayer.SETTINGS_KEY, settings);
+            ModNetwork.sendTo(player, new S2CSyncPlayer(tag));
+        });
     }
 }

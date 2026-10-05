@@ -1,12 +1,14 @@
 package com.seunome.vanillatalents;
 
 import com.mojang.logging.LogUtils;
+import com.seunome.vanillatalents.client.KeyBindings;
 import com.seunome.vanillatalents.data.TalentDataLoader;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.server.DebugCommands;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.slf4j.Logger;
 
 @Mod(VanillaTalents.MODID)
@@ -19,5 +21,6 @@ public final class VanillaTalents {
         TalentDataLoader.register();
         ModNetwork.register();
         DebugCommands.register();
+        if (FMLEnvironment.dist.isClient()) KeyBindings.register();
     }
 }

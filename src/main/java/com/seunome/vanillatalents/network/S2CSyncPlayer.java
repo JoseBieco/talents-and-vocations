@@ -8,6 +8,9 @@ import net.minecraftforge.event.network.CustomPayloadEvent;
 /** Estado completo do PlayerSkillData do jogador, enviado pelo servidor. */
 public record S2CSyncPlayer(CompoundTag data) {
 
+    /** Sub-tag com EconomySettings; ignorada por PlayerSkillData.deserializeNBT. */
+    public static final String SETTINGS_KEY = "Settings";
+
     public static void encode(S2CSyncPlayer msg, FriendlyByteBuf buf) {
         buf.writeNbt(msg.data);
     }
