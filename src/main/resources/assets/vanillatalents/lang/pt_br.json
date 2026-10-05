@@ -169,5 +169,11 @@
   "talent.vanillatalents.archer_marker.name": "Marcador",
   "talent.vanillatalents.archer_marker.desc": "Flechas que acertam aplicam Brilho no alvo por 2 s por nível",
   "talent.vanillatalents.archer_pierce.name": "Flecha Perfurante",
-  "talent.vanillatalents.archer_pierce.desc": "Flechas de arco com carga total atravessam 1 alvo adicional (como Perfuração I), causando 70% do dano no segundo alvo"
+  "talent.vanillatalents.archer_pierce.desc": "Flechas de arco com carga total atravessam 1 alvo adicional (como Perfuração I), causando 70% do dano no segundo alvo",
+  "gui.vanillatalents.reason.unknown": "Talento desconhecido.",
+  "gui.vanillatalents.reason.no_class": "Escolha uma classe primeiro.",
+  "gui.vanillatalents.reason.wrong_class": "Pertence a outra classe.",
+  "gui.vanillatalents.reason.maxed": "Já está no nível máximo.",
+  "gui.vanillatalents.reason.no_points": "Pontos insuficientes.",
+  "gui.vanillatalents.reason.prerequisite": "Pré-requisitos não cumpridos."
 }

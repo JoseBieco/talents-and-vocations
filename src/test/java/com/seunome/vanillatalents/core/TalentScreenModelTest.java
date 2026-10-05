@@ -82,4 +82,59 @@ class TalentScreenModelTest {
         assertEquals(s, EconomySettings.fromMap(s.toMap()));
         assertEquals(EconomySettings.DEFAULTS, EconomySettings.fromMap(Map.of()));
     }
+
+    @Test
+    void blockReasonKey_mapsEveryResult() {
+        String p = "gui.vanillatalents.reason";
+        assertNull(TalentScreenModel.blockReasonKey(PurchaseResult.OK));
+        assertEquals(p + ".unknown", TalentScreenModel.blockReasonKey(PurchaseResult.UNKNOWN_NODE));
+        assertEquals(p + ".no_class", TalentScreenModel.blockReasonKey(PurchaseResult.NO_CLASS_SELECTED));
+        assertEquals(p + ".wrong_class", TalentScreenModel.blockReasonKey(PurchaseResult.WRONG_CLASS));
+        assertEquals(p + ".maxed", TalentScreenModel.blockReasonKey(PurchaseResult.MAXED));
+        assertEquals(p + ".no_points", TalentScreenModel.blockReasonKey(PurchaseResult.NOT_ENOUGH_POINTS));
+        assertEquals(p + ".prerequisite", TalentScreenModel.blockReasonKey(PurchaseResult.PREREQUISITE_NOT_MET));
+    }
+
+    @Test
+    void treeSummary_sumsSpentAndCountsMaxed() {
+        var v = new TalentRulesTest.FakeView().lvl("common_health", 5).lvl("common_saturation", 2);
+        var s = TalentScreenModel.treeSummary(v, REG, TreeCategory.COMMON);
+        assertEquals(7, s.spent());
+        assertEquals(1, s.maxedNodes());
+        assertEquals(5, s.nodeCount());
+        assertEquals(17, s.totalPoints());
+    }
+
+    @Test
+    void classSummary_rootCapstoneAndTotals() {
+        var s = TalentScreenModel.classSummary(REG, TreeCategory.MINER);
+        assertEquals("miner_haste", s.rootId());
+        assertEquals("miner_darkvision", s.capstoneId());
+        assertEquals(2, s.nodeCount());
+        assertEquals(6, s.totalPoints());
+        var empty = TalentScreenModel.classSummary(REG, TreeCategory.WARRIOR);
+        assertNull(empty.rootId());
+        assertNull(empty.capstoneId());
+        assertEquals(0, empty.nodeCount());
+        assertEquals(0, empty.totalPoints());
+    }
+
+    @Test
+    void clampScroll_limitsToContentRange() {
+        assertEquals(0, TalentScreenModel.clampScroll(200, 300, -50));
+        assertEquals(-100, TalentScreenModel.clampScroll(400, 300, -150));
+        assertEquals(0, TalentScreenModel.clampScroll(400, 300, 20));
+        assertEquals(-60, TalentScreenModel.clampScroll(400, 300, -60));
+    }
+
+    @Test
+    void backgroundTexture_exactPathForEveryTree() {
+        assertEquals("textures/block/stone.png", TalentScreenModel.backgroundTexture(TreeCategory.COMMON));
+        assertEquals("textures/block/deepslate.png", TalentScreenModel.backgroundTexture(TreeCategory.MINER));
+        assertEquals("textures/block/farmland.png", TalentScreenModel.backgroundTexture(TreeCategory.FARMER));
+        assertEquals("textures/block/grass_block_side.png", TalentScreenModel.backgroundTexture(TreeCategory.EXPLORER));
+        assertEquals("textures/block/polished_blackstone.png", TalentScreenModel.backgroundTexture(TreeCategory.WARRIOR));
+        assertEquals("textures/block/oak_planks.png", TalentScreenModel.backgroundTexture(TreeCategory.ARCHER));
+        for (TreeCategory t : TreeCategory.values()) assertNotNull(TalentScreenModel.backgroundTexture(t));
+    }
 }

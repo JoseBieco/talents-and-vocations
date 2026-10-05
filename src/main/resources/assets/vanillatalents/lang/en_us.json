@@ -169,5 +169,11 @@
   "talent.vanillatalents.archer_marker.name": "Marker",
   "talent.vanillatalents.archer_marker.desc": "Arrows that hit apply Glowing to the target for 2 s per level",
   "talent.vanillatalents.archer_pierce.name": "Piercing Arrow",
-  "talent.vanillatalents.archer_pierce.desc": "Fully drawn bow arrows pass through 1 extra target (like Piercing I), dealing 70% damage to the second target"
+  "talent.vanillatalents.archer_pierce.desc": "Fully drawn bow arrows pass through 1 extra target (like Piercing I), dealing 70% damage to the second target",
+  "gui.vanillatalents.reason.unknown": "Unknown talent.",
+  "gui.vanillatalents.reason.no_class": "Choose a class first.",
+  "gui.vanillatalents.reason.wrong_class": "Belongs to another class.",
+  "gui.vanillatalents.reason.maxed": "Already at max level.",
+  "gui.vanillatalents.reason.no_points": "Not enough points.",
+  "gui.vanillatalents.reason.prerequisite": "Prerequisites not met."
 }
