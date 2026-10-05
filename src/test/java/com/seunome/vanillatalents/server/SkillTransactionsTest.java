@@ -82,6 +82,19 @@ class SkillTransactionsTest {
     }
 
     @Test
+    void changeClass_withNothingSpentIsFreeEvenWithoutLevels() {
+        PlayerSkillData d = data("miner", 2);
+        d.upgradeNode("common_health");
+        var result = SkillTransactions.changeClass(d, "archer", 0, 10, 25);
+        assertEquals(RespecCheck.OK_PAID, result.check());
+        assertEquals(0, result.feeLevels());
+        assertEquals(0, result.refund());
+        assertEquals("archer", d.getCurrentClass());
+        assertEquals(2, d.getAvailablePoints());
+        assertEquals(Map.of("common_health", 1), d.getUnlockedNodes());
+    }
+
+    @Test
     void changeClass_rejectedChangesNothing() {
         PlayerSkillData d = data("miner", 2);
         d.upgradeNode("miner_haste");

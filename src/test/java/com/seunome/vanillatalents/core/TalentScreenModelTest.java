@@ -32,6 +32,13 @@ class TalentScreenModelTest {
     }
 
     @Test
+    void respecPreview_nothingSpentHasNoFee() {
+        var preview = TalentScreenModel.respecPreview(Map.of("common_health", 5), "miner", EconomySettings.DEFAULTS);
+        assertEquals(0, preview.feeLevels());
+        assertEquals(0, preview.spent());
+    }
+
+    @Test
     void respecPreview_firstChoiceIsFree() {
         var preview = TalentScreenModel.respecPreview(Map.of(), TalentRules.NO_CLASS, EconomySettings.DEFAULTS);
         assertEquals(0, preview.feeLevels());
