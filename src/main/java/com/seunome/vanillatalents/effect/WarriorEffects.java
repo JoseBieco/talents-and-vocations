@@ -1,5 +1,6 @@
 package com.seunome.vanillatalents.effect;
 
+import com.seunome.vanillatalents.Config;
 import com.seunome.vanillatalents.VanillaTalents;
 import com.seunome.vanillatalents.core.RecursionGuard;
 import com.seunome.vanillatalents.core.formula.WarriorFormulas;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
@@ -81,7 +83,23 @@ public final class WarriorEffects {
                 || source.is(DamageTypeTags.BYPASSES_ARMOR)) return amount;
         int level = Talents.level(victim, "warrior_resistance");
         if (level <= 0) return amount;
-        return (float) (amount * WarriorFormulas.physicalMultiplier(level, Talents.value(victim, "warrior_resistance", "per_level")));
+        double pvp = source.getEntity() instanceof Player ? Config.PVP_DAMAGE_MULTIPLIER.get() : 1.0;
+        return (float) (amount * WarriorFormulas.physicalMultiplier(level, Talents.value(victim, "warrior_resistance", "per_level"), pvp));
+    }
+
+    /** warrior_steadfast em PvP: o golpe deste tick veio de um jogador → Firme vale só pvpDamageMultiplier. */
+    @SubscribeEvent
+    public static void onKnockBack(LivingKnockBackEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer victim)) return;
+        double pvp = Config.PVP_DAMAGE_MULTIPLIER.get();
+        if (pvp >= 1.0) return;
+        boolean byPlayer = victim.getLastHurtByMob() instanceof Player && victim.getLastHurtByMobTimestamp() == victim.tickCount;
+        if (!byPlayer) return;
+        int level = Talents.level(victim, "warrior_steadfast");
+        if (level <= 0) return;
+        double bonus = level * Talents.value(victim, "warrior_steadfast", "per_level");
+        double factor = WarriorFormulas.steadfastPvpFactor(victim.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), bonus, pvp);
+        event.setStrength((float) (event.getStrength() * factor));
     }
 
     /** warrior_strength, warrior_executioner, warrior_armor_break e warrior_cleave. */
