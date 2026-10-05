@@ -109,7 +109,9 @@ public class TalentScreen extends Screen {
         shownTree = tree;
         treeView.reclamp();
 
+        NodeDetailPanel previousPanel = panel;
         panel = new NodeDetailPanel(panelX(), treeY - 1, PANEL_W, treeH + 2);
+        panel.keepScrollFrom(previousPanel);
         addRenderableWidget(panel.buyButton());
 
         TreeCategory currentClass = TreeCategory.byId(data.getCurrentClass()).filter(TreeCategory::isClass).orElse(null);
@@ -293,6 +295,20 @@ public class TalentScreen extends Screen {
         }
         lastClickBought = bought;
         return true;
+    }
+
+    /** Roda do mouse: zoom sobre a árvore, rolagem sobre o painel de detalhes. */
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scrollY != 0 && treeView != null && visibleTree() != null && treeView.contains(mouseX, mouseY)) {
+            treeView.zoom(scrollY > 0 ? 1 : -1, mouseX, mouseY);
+            return true;
+        }
+        if (scrollY != 0 && panel != null && panel.contains(mouseX, mouseY)) {
+            panel.scroll(scrollY);
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override

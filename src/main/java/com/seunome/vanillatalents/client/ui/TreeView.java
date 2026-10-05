@@ -4,6 +4,7 @@ import com.seunome.vanillatalents.capability.PlayerSkillData;
 import com.seunome.vanillatalents.client.ClientTalentState;
 import com.seunome.vanillatalents.core.*;
 import com.seunome.vanillatalents.data.TalentRegistries;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -14,11 +15,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Área rolável com o fundo de bloco, as conexões e os nós de uma árvore de talentos. */
+/**
+ * Área com o fundo de bloco, as conexões e os nós de uma árvore de talentos, com arrastar e zoom (roda do mouse).
+ * O conteúdo é desenhado em coordenadas próprias e posicionado pela {@link TreeViewport} via pose.
+ */
 public final class TreeView {
 
     public static final int CELL_W = 32;
@@ -34,11 +39,15 @@ public final class TreeView {
     private static final int COLOR_SELECTED = 0xFFFFFF55;
     private static final int COLOR_LOCKED = 0x99000000;
     private static final int COLOR_EDGE = 0x66000000;
+    private static final long ZOOM_LABEL_MS = 1000;
+
+    /** Nível de zoom lembrado por árvore enquanto o jogo estiver aberto. */
+    private static final Map<TreeCategory, Integer> ZOOM_MEMORY = new EnumMap<>(TreeCategory.class);
 
     private final int x, y, w, h;
     private @Nullable TreeCategory tree;
-    private int scrollX, scrollY;
-    private double accX, accY;
+    private TreeViewport viewport;
+    private long zoomChangedAt = Long.MIN_VALUE;
     private final Map<String, ItemStack> icons = new HashMap<>();
 
     public TreeView(int x, int y, int w, int h) {
@@ -46,41 +55,37 @@ public final class TreeView {
         this.y = y;
         this.w = w;
         this.h = h;
+        this.viewport = new TreeViewport(w, h);
     }
 
-    /** Troca a árvore exibida e zera o deslocamento. */
+    /** Troca a árvore exibida: volta ao canto e restaura o zoom lembrado dessa árvore. */
     public void setTree(TreeCategory tree) {
         this.tree = tree;
-        scrollX = 0;
-        scrollY = 0;
-        accX = 0;
-        accY = 0;
+        icons.clear();
+        viewport = new TreeViewport(w, h);
+        reclamp();
+        viewport.setZoomIndex(ZOOM_MEMORY.getOrDefault(tree, TreeViewport.DEFAULT_ZOOM_INDEX));
     }
 
     public boolean contains(double mx, double my) {
         return mx >= x && mx < x + w && my >= y && my < y + h;
     }
 
-    /** Arrasta o conteúdo; o deslocamento é limitado por eixo. */
     public void drag(double dx, double dy) {
-        if (tree == null) return;
-        accX += dx;
-        accY += dy;
-        clampScroll();
+        if (tree != null) viewport.drag(dx, dy);
     }
 
-    /** Reaplica os limites (o conteúdo pode ter encolhido após um sync/recarga). */
+    /** Aproxima ({@code steps > 0}) ou afasta mantendo parado o ponto sob o cursor. */
+    public void zoom(int steps, double mouseX, double mouseY) {
+        if (tree == null || !viewport.zoomAt(steps, mouseX - x, mouseY - y)) return;
+        ZOOM_MEMORY.put(tree, viewport.zoomIndex());
+        zoomChangedAt = Util.getMillis();
+    }
+
+    /** Reaplica os limites (o conteúdo pode ter mudado após um sync/recarga). */
     public void reclamp() {
-        if (tree == null) return;
-        clampScroll();
-    }
-
-    private void clampScroll() {
         TalentScreenModel.GridBounds b = bounds();
-        scrollX = TalentScreenModel.clampScroll(contentW(b), w, (int) Math.round(accX));
-        scrollY = TalentScreenModel.clampScroll(contentH(b), h, (int) Math.round(accY));
-        accX = scrollX;
-        accY = scrollY;
+        viewport.setContent(contentW(b), contentH(b));
     }
 
     private List<TalentNode> nodes() {
@@ -99,23 +104,13 @@ public final class TreeView {
         return (b.maxY() - b.minY()) * CELL_H + FRAME + 2 * PAD;
     }
 
-    /** Origem (em tela) da célula de posição mínima; o conteúdo é centralizado quando cabe. */
-    private int originX(TalentScreenModel.GridBounds b) {
-        int cw = contentW(b);
-        return x + (cw <= w ? (w - cw) / 2 : scrollX) + PAD;
+    /** Posição do nó em coordenadas de conteúdo (antes do zoom e do deslocamento). */
+    private static int nodeX(TalentNode n, TalentScreenModel.GridBounds b) {
+        return PAD + (n.position().x() - b.minX()) * CELL_W;
     }
 
-    private int originY(TalentScreenModel.GridBounds b) {
-        int ch = contentH(b);
-        return y + (ch <= h ? (h - ch) / 2 : scrollY) + PAD;
-    }
-
-    private int nodeX(TalentNode n, TalentScreenModel.GridBounds b) {
-        return originX(b) + (n.position().x() - b.minX()) * CELL_W;
-    }
-
-    private int nodeY(TalentNode n, TalentScreenModel.GridBounds b) {
-        return originY(b) + (n.position().y() - b.minY()) * CELL_H;
+    private static int nodeY(TalentNode n, TalentScreenModel.GridBounds b) {
+        return PAD + (n.position().y() - b.minY()) * CELL_H;
     }
 
     /** Nó sob o ponto (coordenadas de tela), ou null. */
@@ -124,16 +119,18 @@ public final class TreeView {
         List<TalentNode> nodes = nodes();
         if (nodes.isEmpty()) return null;
         TalentScreenModel.GridBounds b = TalentScreenModel.gridBounds(nodes);
+        double cx = viewport.toContentX(mouseX - x), cy = viewport.toContentY(mouseY - y);
         for (TalentNode n : nodes) {
             int nx = nodeX(n, b), ny = nodeY(n, b);
-            if (mouseX >= nx && mouseX < nx + FRAME && mouseY >= ny && mouseY < ny + FRAME) return n;
+            if (cx >= nx && cx < nx + FRAME && cy >= ny && cy < ny + FRAME) return n;
         }
         return null;
     }
 
     public void render(GuiGraphicsExtractor g, @Nullable String selectedId, int mouseX, int mouseY) {
         if (tree == null) return;
-        VanillaGui.tiled(g, Identifier.withDefaultNamespace(TalentScreenModel.backgroundTexture(tree)), x, y, w, h, scrollX, scrollY);
+        int offX = (int) Math.round(viewport.offsetX()), offY = (int) Math.round(viewport.offsetY());
+        VanillaGui.tiled(g, Identifier.withDefaultNamespace(TalentScreenModel.backgroundTexture(tree)), x, y, w, h, offX, offY);
         g.fillGradient(x, y, x + w, y + EDGE, COLOR_EDGE, 0);
         g.fillGradient(x, y + h - EDGE, x + w, y + h, 0, COLOR_EDGE);
 
@@ -145,14 +142,24 @@ public final class TreeView {
         TalentNode capstone = nodes.get(nodes.size() - 1);
         Font font = Minecraft.getInstance().font;
 
+        // O scissor é transformado pela pose atual: liga antes de aplicar o zoom.
         g.enableScissor(x, y, x + w, y + h);
+        g.pose().pushMatrix();
+        g.pose().translate((float) (x + viewport.offsetX()), (float) (y + viewport.offsetY()));
+        g.pose().scale((float) viewport.zoom(), (float) viewport.zoom());
         for (TalentNode n : nodes) drawConnections(g, data, registry, n, b);
         for (TalentNode n : nodes) drawNode(g, font, data, registry, n, b, n == capstone, n.id().equals(selectedId));
+        g.pose().popMatrix();
         g.disableScissor();
+
+        if (Util.getMillis() - zoomChangedAt < ZOOM_LABEL_MS) {
+            String label = Math.round(viewport.zoom() * 100) + "%";
+            g.text(font, label, x + w - font.width(label) - 4, y + 4, 0xFFFFFFFF, true);
+        }
     }
 
-    private void drawConnections(GuiGraphicsExtractor g, PlayerSkillData data, TalentRegistry registry,
-                                 TalentNode child, TalentScreenModel.GridBounds b) {
+    private static void drawConnections(GuiGraphicsExtractor g, PlayerSkillData data, TalentRegistry registry,
+                                        TalentNode child, TalentScreenModel.GridBounds b) {
         int cx = nodeX(child, b) + FRAME / 2;
         int cy = nodeY(child, b);
         int midY = cy - (CELL_H - FRAME) / 2;
@@ -201,7 +208,8 @@ public final class TreeView {
     private ItemStack icon(TalentNode n) {
         return icons.computeIfAbsent(n.id(), id -> {
             Identifier itemId = Identifier.tryParse(n.icon());
-            return new ItemStack(itemId == null ? Items.BARRIER : BuiltInRegistries.ITEM.getValue(itemId));
+            return new ItemStack(itemId == null || !BuiltInRegistries.ITEM.containsKey(itemId)
+                    ? Items.BARRIER : BuiltInRegistries.ITEM.getValue(itemId));
         });
     }
 }

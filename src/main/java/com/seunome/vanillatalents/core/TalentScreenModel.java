@@ -62,6 +62,26 @@ public final class TalentScreenModel {
         return Math.max(viewSize - contentSize, Math.min(0, scroll));
     }
 
+    /** Pixels rolados por "dente" da roda do mouse nos painéis de texto. */
+    public static final int WHEEL_STEP = 10;
+    private static final int MIN_THUMB = 8;
+
+    /** Posição e altura (em px, relativas ao topo do trilho) da barra de rolagem. */
+    public record ScrollThumb(int top, int height) {}
+
+    /** Nova rolagem (≤ 0) de um painel de texto depois de girar a roda; {@code wheel > 0} sobe. */
+    public static int wheelScroll(int contentH, int viewH, int current, double wheel) {
+        return clampScroll(contentH, viewH, current + (int) Math.round(wheel * WHEEL_STEP));
+    }
+
+    /** Barra de rolagem do painel, ou null quando o texto cabe. */
+    public static ScrollThumb scrollThumb(int contentH, int viewH, int scroll, int trackH) {
+        if (contentH <= viewH) return null;
+        int height = Math.max(MIN_THUMB, trackH * viewH / contentH);
+        int top = (int) Math.round((double) -scroll / (contentH - viewH) * (trackH - height));
+        return new ScrollThumb(top, height);
+    }
+
     /** Textura de bloco (ladrilhada) usada como fundo da árvore. */
     public static String backgroundTexture(TreeCategory tree) {
         return switch (tree) {

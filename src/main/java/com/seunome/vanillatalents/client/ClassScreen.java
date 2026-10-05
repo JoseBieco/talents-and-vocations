@@ -65,6 +65,8 @@ public class ClassScreen extends Screen {
 
     private int left, top, winW, winH;
     private int listX, listY, panelX, panelY, panelW, panelH;
+    /** Rolagem do texto do painel (≤ 0) e as medidas do último quadro. */
+    private int detailScroll, detailContentH, detailViewH;
 
     public ClassScreen(Screen parent) {
         super(Component.translatable("gui.vanillatalents.classes.title"));
@@ -219,9 +221,14 @@ public class ClassScreen extends Screen {
         VanillaGui.insetPanel(g, panelX, panelY - 1, panelW, panelH + 2);
         if (selected != null) {
             // Texto corrido é recortado acima da área reservada ao status e ao botão.
-            g.enableScissor(panelX, panelY, panelX + panelW, statusY() - 1);
-            drawDetails(g, selected);
+            int top = panelY + PAD, bottom = statusY() - 1;
+            g.enableScissor(panelX, panelY, panelX + panelW, bottom);
+            detailContentH = drawDetails(g, selected, top + detailScroll) - detailScroll - top;
             g.disableScissor();
+            detailViewH = bottom - top;
+            detailScroll = TalentScreenModel.clampScroll(detailContentH, detailViewH, detailScroll);
+            VanillaGui.scrollbar(g, panelX + panelW - PAD + 1, top, bottom,
+                    TalentScreenModel.scrollThumb(detailContentH, detailViewH, detailScroll, bottom - top));
             if (hasClass() && !enoughLevels()) {
                 g.text(font, Component.translatable("gui.vanillatalents.respec.not_enough", preview().feeLevels()),
                         panelX + PAD, statusY(), COLOR_DANGER, true);
@@ -254,10 +261,10 @@ public class ClassScreen extends Screen {
         }
     }
 
-    private void drawDetails(GuiGraphicsExtractor g, TreeCategory tree) {
+    /** Desenha o texto do painel a partir de {@code y} e devolve o y logo abaixo da última linha. */
+    private int drawDetails(GuiGraphicsExtractor g, TreeCategory tree, int y) {
         int x = panelX + PAD;
-        int textW = panelW - 2 * PAD;
-        int y = panelY + PAD;
+        int textW = panelW - 2 * PAD - 3;
 
         g.text(font, className(tree), x, y, COLOR_TEXT, true);
         y += LINE_H + 2;
@@ -275,7 +282,7 @@ public class ClassScreen extends Screen {
 
         if (!hasClass()) {
             g.text(font, Component.translatable("gui.vanillatalents.select_class.first_free"), x, y, COLOR_TEXT, true);
-            return;
+            return y + LINE_H;
         }
         TalentScreenModel.RespecPreview preview = preview();
         if (preview.feeLevels() > 0) {
@@ -287,6 +294,7 @@ public class ClassScreen extends Screen {
         g.text(font, Component.translatable("gui.vanillatalents.classes.refund", preview.refund()), x, y, COLOR_TEXT, true);
         y += LINE_H;
         g.text(font, Component.translatable("gui.vanillatalents.classes.common_safe"), x, y, COLOR_MUTED, false);
+        return y + LINE_H;
     }
 
     private int drawNodeRow(GuiGraphicsExtractor g, int x, int y, int textW, String key, @Nullable TalentNode node, boolean capstone) {
@@ -310,10 +318,22 @@ public class ClassScreen extends Screen {
         if (isCurrent(tree)) return true;
         if (tree != selected) {
             selected = tree;
+            detailScroll = 0;
             confirm.reset();
             rebuildWidgets();
         }
         return true;
+    }
+
+    /** Roda do mouse rola o texto do painel de detalhes. */
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        boolean overPanel = mouseX >= panelX && mouseX < panelX + panelW && mouseY >= panelY && mouseY < statusY();
+        if (scrollY != 0 && selected != null && overPanel) {
+            detailScroll = TalentScreenModel.wheelScroll(detailContentH, detailViewH, detailScroll, scrollY);
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override

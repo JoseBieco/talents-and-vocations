@@ -120,6 +120,26 @@ class TalentScreenModelTest {
     }
 
     @Test
+    void wheelScroll_movesTenPixelsPerNotchWithinBounds() {
+        assertEquals(-10, TalentScreenModel.wheelScroll(300, 100, 0, -1));
+        assertEquals(-30, TalentScreenModel.wheelScroll(300, 100, -10, -2));
+        assertEquals(-200, TalentScreenModel.wheelScroll(300, 100, -195, -1), "não passa do fim");
+        assertEquals(0, TalentScreenModel.wheelScroll(300, 100, -5, 3), "não passa do início");
+        assertEquals(0, TalentScreenModel.wheelScroll(80, 100, 0, -1), "texto que cabe não rola");
+    }
+
+    @Test
+    void scrollThumb_sizeAndPositionFollowContent() {
+        assertNull(TalentScreenModel.scrollThumb(80, 100, 0, 100), "sem barra quando cabe");
+        var top = TalentScreenModel.scrollThumb(400, 100, 0, 100);
+        assertEquals(0, top.top());
+        assertEquals(25, top.height());
+        var bottom = TalentScreenModel.scrollThumb(400, 100, -300, 100);
+        assertEquals(75, bottom.top());
+        assertEquals(8, TalentScreenModel.scrollThumb(10000, 100, 0, 100).height(), "altura mínima");
+    }
+
+    @Test
     void clampScroll_limitsToContentRange() {
         assertEquals(0, TalentScreenModel.clampScroll(200, 300, -50));
         assertEquals(-100, TalentScreenModel.clampScroll(400, 300, -150));
