@@ -195,6 +195,11 @@ public class ClassScreen extends Screen {
         return TalentScreenModel.classSummary(TalentRegistries.client(), tree);
     }
 
+    /** Linha de status (motivo em vermelho): fixa logo acima do botão de ação. */
+    private int statusY() {
+        return panelY + panelH - PAD - BUTTON_H - PAD - LINE_H;
+    }
+
     private int rowAt(double mx, double my) {
         if (mx < listX || mx >= listX + LIST_W || my < listY) return -1;
         int i = (int) ((my - listY) / ROW_H);
@@ -210,7 +215,16 @@ public class ClassScreen extends Screen {
         for (int i = 0; i < classes.size(); i++) drawRow(g, i, mouseX, mouseY);
 
         VanillaGui.insetPanel(g, panelX, panelY - 1, panelW, panelH + 2);
-        if (selected != null) drawDetails(g, selected);
+        if (selected != null) {
+            // Texto corrido é recortado acima da área reservada ao status e ao botão.
+            g.enableScissor(panelX, panelY, panelX + panelW, statusY() - 1);
+            drawDetails(g, selected);
+            g.disableScissor();
+            if (hasClass() && !enoughLevels()) {
+                g.text(font, Component.translatable("gui.vanillatalents.respec.not_enough", preview().feeLevels()),
+                        panelX + PAD, statusY(), COLOR_DANGER, true);
+            }
+        }
 
         super.extractRenderState(g, mouseX, mouseY, a);
     }
@@ -271,10 +285,6 @@ public class ClassScreen extends Screen {
         g.text(font, Component.translatable("gui.vanillatalents.classes.refund", preview.refund()), x, y, COLOR_TEXT, true);
         y += LINE_H;
         g.text(font, Component.translatable("gui.vanillatalents.classes.common_safe"), x, y, COLOR_MUTED, false);
-        y += LINE_H + 2;
-        if (!enoughLevels()) {
-            g.text(font, Component.translatable("gui.vanillatalents.respec.not_enough", preview.feeLevels()), x, y, COLOR_DANGER, true);
-        }
     }
 
     private int drawNodeRow(GuiGraphicsExtractor g, int x, int y, int textW, String key, @Nullable TalentNode node, boolean capstone) {
