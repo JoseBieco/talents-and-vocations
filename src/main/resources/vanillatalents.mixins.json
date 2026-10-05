@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.seunome.vanillatalents.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "FoodDataMixin",
+    "ItemStackMixin",
+    "PlayerMixin",
+    "ServerPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

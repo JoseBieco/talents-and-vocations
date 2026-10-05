@@ -25,6 +25,8 @@ minecraft {
 
             systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
             systemProperty 'forge.enabledGameTestNamespaces', 'vanillatalents'
+            // Mixin requires either specifying the config via command line, or in the Manifest
+            args '--mixin.config=vanillatalents.mixins.json'
         }
 
         register('client')
@@ -60,6 +62,13 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+tasks.named('jar', Jar) {
+    manifest {
+        // Add our config to the manifest of our jar to have Mixin detect us at runtime.
+        attributes['MixinConfigs'] = 'vanillatalents.mixins.json'
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
