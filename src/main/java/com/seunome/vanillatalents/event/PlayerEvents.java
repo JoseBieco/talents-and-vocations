@@ -2,6 +2,7 @@ package com.seunome.vanillatalents.event;
 
 import com.seunome.vanillatalents.VanillaTalents;
 import com.seunome.vanillatalents.capability.PlayerSkillProvider;
+import com.seunome.vanillatalents.capability.SkillAccess;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -23,17 +24,13 @@ public class PlayerEvents {
         }
     }
 
+    /** Copia sempre: morte e saída do End criam um novo ServerPlayer. */
     @SubscribeEvent
     public static void onPlayerCloned(PlayerEvent.Clone event) {
-        if (event.isWasDeath()) {
-            event.getOriginal().reviveCaps();
-            event.getOriginal().getCapability(PlayerSkillProvider.PLAYER_SKILL).ifPresent(oldStore -> {
-                event.getEntity().getCapability(PlayerSkillProvider.PLAYER_SKILL).ifPresent(newStore -> {
-                    var registries = event.getEntity().registryAccess();
-                    newStore.deserializeNBT(registries, oldStore.serializeNBT(registries));
-                });
-            });
-            event.getOriginal().invalidateCaps();
-        }
+        Player original = event.getOriginal();
+        original.reviveCaps();
+        SkillAccess.get(original).ifPresent(oldStore ->
+                SkillAccess.get(event.getEntity()).ifPresent(newStore -> newStore.copyFrom(oldStore)));
+        original.invalidateCaps();
     }
 }
