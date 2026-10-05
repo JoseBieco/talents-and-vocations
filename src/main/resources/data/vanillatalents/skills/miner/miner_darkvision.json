@@ -16,7 +16,7 @@
     "y": 1
   },
   "values": {
-    "interval": 200,
-    "duration": 300
+    "interval": 20,
+    "duration": 400
   }
 }

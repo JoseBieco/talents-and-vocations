@@ -1,8 +1,9 @@
 package com.seunome.vanillatalents;
 
 import com.mojang.logging.LogUtils;
-import com.seunome.vanillatalents.client.KeyBindings;
+import com.seunome.vanillatalents.client.ClientSetup;
 import com.seunome.vanillatalents.data.TalentDataLoader;
+import com.seunome.vanillatalents.effect.MinerEffects;
 import com.seunome.vanillatalents.effect.loot.TalentLootModifier;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.server.DebugCommands;
@@ -23,6 +24,7 @@ public final class VanillaTalents {
         TalentLootModifier.registerSerializer(context.getModBusGroup());
         ModNetwork.register();
         DebugCommands.register();
-        if (FMLEnvironment.dist.isClient()) KeyBindings.register();
+        MinerEffects.registerLoot();
+        if (FMLEnvironment.dist.isClient()) ClientSetup.init();
     }
 }

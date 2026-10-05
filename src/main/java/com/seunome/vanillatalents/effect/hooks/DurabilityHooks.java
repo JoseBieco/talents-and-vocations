@@ -27,7 +27,7 @@ public final class DurabilityHooks {
         if (nodeId == null) return amount;
         int level = Talents.level(player, nodeId);
         if (level <= 0) return amount;
-        double skip = HookFormulas.chance(level, Talents.value(nodeId, "per_level"));
+        double skip = HookFormulas.chance(level, Talents.value(player, nodeId, "per_level"));
         return HookFormulas.keptDamage(amount, skip, player.getRandom()::nextDouble);
     }
 }

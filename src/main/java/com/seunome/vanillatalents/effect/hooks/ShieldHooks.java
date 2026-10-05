@@ -13,6 +13,6 @@ public final class ShieldHooks {
     public static float disableTicksMultiplier(Player player) {
         int level = Talents.level(player, "warrior_shield");
         if (level <= 0) return 1f;
-        return (float) HookFormulas.reductionMultiplier(level, Talents.value("warrior_shield", "per_level"));
+        return (float) HookFormulas.reductionMultiplier(level, Talents.value(player, "warrior_shield", "per_level"));
     }
 }
