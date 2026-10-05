@@ -30,6 +30,26 @@ class XpCostRulesTest {
     }
 
     @Test
+    void xpNeededForNextLevel_matchesVanilla() {
+        assertEquals(7, XpCostRules.xpNeededForNextLevel(0));
+        assertEquals(35, XpCostRules.xpNeededForNextLevel(14));
+        assertEquals(37, XpCostRules.xpNeededForNextLevel(15));
+        assertEquals(107, XpCostRules.xpNeededForNextLevel(29));
+        assertEquals(112, XpCostRules.xpNeededForNextLevel(30));
+        for (int level = 0; level < 40; level++) {
+            assertEquals(XpCostRules.totalXpForLevel(level + 1) - XpCostRules.totalXpForLevel(level),
+                    XpCostRules.xpNeededForNextLevel(level), "level " + level);
+        }
+    }
+
+    @Test
+    void currentTotalXp_addsBarProgress() {
+        assertEquals(55, XpCostRules.currentTotalXp(5, 0f));
+        assertEquals(55 + 9, XpCostRules.currentTotalXp(5, 0.5f)); // nível 5 precisa de 17
+        assertEquals(0, XpCostRules.currentTotalXp(0, 0f));
+    }
+
+    @Test
     void canAfford_levels() {
         assertFalse(XpCostRules.canAfford(CostMode.LEVELS, 4, 1000, 5));
         assertTrue(XpCostRules.canAfford(CostMode.LEVELS, 5, 0, 5));

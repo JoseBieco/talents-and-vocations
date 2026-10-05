@@ -2,6 +2,8 @@ package com.seunome.vanillatalents;
 
 import com.mojang.logging.LogUtils;
 import com.seunome.vanillatalents.data.TalentDataLoader;
+import com.seunome.vanillatalents.network.ModNetwork;
+import com.seunome.vanillatalents.server.DebugCommands;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -15,5 +17,7 @@ public final class VanillaTalents {
     public VanillaTalents(FMLJavaModLoadingContext context) {
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         TalentDataLoader.register();
+        ModNetwork.register();
+        DebugCommands.register();
     }
 }

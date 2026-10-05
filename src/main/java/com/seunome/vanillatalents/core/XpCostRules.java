@@ -11,6 +11,21 @@ public final class XpCostRules {
         return (9 * level * level - 325 * level + 4440) / 2;
     }
 
+    /** Pontos para ir de {@code level} a {@code level + 1} (vanilla Player.getXpNeededForNextLevel). */
+    public static int xpNeededForNextLevel(int level) {
+        if (level >= 30) return 112 + (level - 30) * 9;
+        if (level >= 15) return 37 + (level - 15) * 5;
+        return 7 + level * 2;
+    }
+
+    /**
+     * XP real que o jogador tem agora. O {@code totalExperience} vanilla não serve: é uma pontuação
+     * que não diminui quando níveis são gastos em encantamentos.
+     */
+    public static int currentTotalXp(int level, float progress) {
+        return totalXpForLevel(level) + Math.round(progress * xpNeededForNextLevel(level));
+    }
+
     public static boolean canAfford(CostMode mode, int playerLevel, int playerTotalXp, int amount) {
         return switch (mode) {
             case LEVELS -> playerLevel >= amount;
