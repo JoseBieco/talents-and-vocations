@@ -124,7 +124,7 @@
   "talent.vanillatalents.warrior_strength.name": "Braço Forte",
   "talent.vanillatalents.warrior_strength.desc": "+0,5 de dano corpo a corpo com espadas e machados por nível",
   "talent.vanillatalents.warrior_sweep.name": "Varredura",
-  "talent.vanillatalents.warrior_sweep.desc": "+15% de dano do ataque de varredura da espada por nível",
+  "talent.vanillatalents.warrior_sweep.desc": "+0,15 de dano de varredura da espada (fração do golpe) por nível",
   "talent.vanillatalents.warrior_crit.name": "Golpe Preciso",
   "talent.vanillatalents.warrior_crit.desc": "+10% de dano em acertos críticos por nível (vanilla: ×1,5)",
   "talent.vanillatalents.warrior_bloodlust.name": "Sede de Batalha",

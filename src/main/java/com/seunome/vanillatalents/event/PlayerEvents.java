@@ -8,6 +8,7 @@ import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.effect.AttributeSync;
 import com.seunome.vanillatalents.effect.FarmerEffects;
 import com.seunome.vanillatalents.effect.MinerEffects;
+import com.seunome.vanillatalents.effect.WarriorEffects;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.network.S2CSyncDefinitions;
 import com.seunome.vanillatalents.server.TalentActions;
@@ -67,6 +68,7 @@ public class PlayerEvents {
         AttributeSync.forget(event.getEntity().getUUID());
         MinerEffects.forget(event.getEntity().getUUID());
         FarmerEffects.forget(event.getEntity().getUUID());
+        WarriorEffects.forget(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
