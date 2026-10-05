@@ -23,6 +23,7 @@ public final class ClientPacketHandlers {
         List<String> errors = new ArrayList<>();
         TalentRegistries.setClient(TalentRegistry.build(msg.nodes(), errors));
         errors.forEach(e -> VanillaTalents.LOGGER.warn("[vanillatalents] Nó descartado no cliente: {}", e));
+        ClientTalentState.notifyScreen();
     }
 
     public static void prospectorHighlight(S2CProspectorHighlight msg) {
