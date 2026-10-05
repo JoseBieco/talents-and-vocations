@@ -1,0 +1,31 @@
+{
+  "id": "common_second_wind",
+  "treeCategory": "common",
+  "name": "talent.vanillatalents.common_second_wind.name",
+  "description": "talent.vanillatalents.common_second_wind.desc",
+  "icon": "minecraft:totem_of_undying",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "common_toughness",
+      "level": 2
+    },
+    {
+      "id": "common_gourmet",
+      "level": 2
+    },
+    {
+      "id": "common_lava",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 4
+  },
+  "values": {
+    "threshold": 4,
+    "duration": 80,
+    "cooldown": 6000
+  }
+}

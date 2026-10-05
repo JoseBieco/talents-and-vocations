@@ -1,0 +1,134 @@
+package com.seunome.vanillatalents.data;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
+import com.seunome.vanillatalents.core.Prerequisite;
+import com.seunome.vanillatalents.core.TalentNode;
+import com.seunome.vanillatalents.core.TalentRegistry;
+import com.seunome.vanillatalents.core.TreeCategory;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/** Confere os JSON de skills contra as tabelas de docs/arvores e as traduções. */
+class DesignDocConsistencyTest {
+
+    static final Path SKILLS = Path.of("src/main/resources/data/vanillatalents/skills");
+    static final Path LANG = Path.of("src/main/resources/assets/vanillatalents/lang");
+    static final Path DOCS = Path.of("docs/arvores");
+
+    static final Map<TreeCategory, Integer> EXPECTED_PT = Map.of(
+            TreeCategory.COMMON, 37, TreeCategory.MINER, 36, TreeCategory.FARMER, 35,
+            TreeCategory.EXPLORER, 34, TreeCategory.WARRIOR, 35, TreeCategory.ARCHER, 37);
+
+    record DocRow(String id, String name, int maxLevel, Set<Prerequisite> prerequisites) {}
+
+    static List<TalentNode> nodes;
+    static TalentRegistry registry;
+    static List<String> errors;
+
+    @BeforeAll
+    static void load() throws IOException {
+        nodes = new ArrayList<>();
+        try (Stream<Path> files = Files.walk(SKILLS)) {
+            for (Path p : files.filter(f -> f.toString().endsWith(".json")).sorted().toList()) {
+                var json = JsonParser.parseString(Files.readString(p, StandardCharsets.UTF_8));
+                TalentNode n = TalentNodeCodec.CODEC.parse(JsonOps.INSTANCE, json)
+                        .getOrThrow(msg -> new AssertionError(p + ": " + msg));
+                assertEquals(n.id() + ".json", p.getFileName().toString(), "nome do arquivo = id");
+                assertEquals(n.tree().id(), p.getParent().getFileName().toString(), "pasta = treeCategory");
+                nodes.add(n);
+            }
+        }
+        errors = new ArrayList<>();
+        registry = TalentRegistry.build(nodes, errors);
+    }
+
+    @Test
+    void allNodesValid() {
+        assertTrue(errors.isEmpty(), errors.toString());
+        assertEquals(72, registry.size());
+    }
+
+    @Test
+    void twelveNodesPerTreeAndExpectedPointTotals() {
+        for (TreeCategory tree : TreeCategory.values()) {
+            List<TalentNode> t = registry.tree(tree);
+            assertEquals(12, t.size(), tree.id());
+            assertEquals(EXPECTED_PT.get(tree), t.stream().mapToInt(TalentNode::maxLevel).sum(), tree.id());
+        }
+    }
+
+    @Test
+    void nodesMatchDesignDocTables() throws IOException {
+        Map<String, DocRow> doc = readDocRows();
+        assertEquals(72, doc.size(), "linhas de tabela em docs/arvores");
+        assertEquals(doc.keySet(), new TreeSet<>(registry.all().stream().map(TalentNode::id).toList()));
+        for (TalentNode n : registry.all()) {
+            DocRow row = doc.get(n.id());
+            assertEquals(row.maxLevel(), n.maxLevel(), n.id() + " maxLevel");
+            assertEquals(row.prerequisites(), new HashSet<>(n.prerequisites()), n.id() + " prerequisites");
+        }
+    }
+
+    @Test
+    void translationKeysExistAndPtBrNamesMatchDocs() throws IOException {
+        Map<String, DocRow> doc = readDocRows();
+        for (String lang : List.of("pt_br", "en_us")) {
+            JsonObject json = JsonParser.parseString(Files.readString(LANG.resolve(lang + ".json"), StandardCharsets.UTF_8))
+                    .getAsJsonObject();
+            for (TalentNode n : registry.all()) {
+                assertEquals("talent.vanillatalents." + n.id() + ".name", n.nameKey());
+                assertEquals("talent.vanillatalents." + n.id() + ".desc", n.descKey());
+                assertTrue(json.has(n.nameKey()), lang + " sem " + n.nameKey());
+                assertTrue(json.has(n.descKey()), lang + " sem " + n.descKey());
+                if (lang.equals("pt_br")) {
+                    assertEquals(doc.get(n.id()).name(), json.get(n.nameKey()).getAsString(), n.id());
+                }
+            }
+        }
+    }
+
+    @Test
+    void capstoneIsBelowEveryOtherNode() {
+        for (TreeCategory tree : TreeCategory.values()) {
+            List<TalentNode> t = registry.tree(tree);
+            TalentNode last = t.getLast();
+            assertEquals(3, last.prerequisites().size(), tree.id() + " capstone exige os três ramos");
+            assertEquals(0, last.position().x(), tree.id() + " capstone x");
+            assertTrue(t.stream().filter(n -> n != last).allMatch(n -> n.position().y() < last.position().y()));
+        }
+    }
+
+    private static final Pattern ROW = Pattern.compile("^\\| `([a-z_]+)` \\| ([^|]+?) \\| [^|]* \\| (\\d+) \\| ([^|]*) \\|$");
+    private static final Pattern PREREQ = Pattern.compile("`([a-z_]+)` (?:≥|=) (\\d+)");
+
+    static Map<String, DocRow> readDocRows() throws IOException {
+        Map<String, DocRow> rows = new TreeMap<>();
+        try (Stream<Path> files = Files.list(DOCS)) {
+            for (Path p : files.filter(f -> f.getFileName().toString().matches("0\\d_.*\\.md")).toList()) {
+                for (String line : Files.readAllLines(p, StandardCharsets.UTF_8)) {
+                    Matcher m = ROW.matcher(line.strip());
+                    if (!m.matches()) continue;
+                    Set<Prerequisite> prereqs = new HashSet<>();
+                    Matcher pm = PREREQ.matcher(m.group(4));
+                    while (pm.find()) prereqs.add(new Prerequisite(pm.group(1), Integer.parseInt(pm.group(2))));
+                    String name = m.group(2).replace("★", "").strip();
+                    rows.put(m.group(1), new DocRow(m.group(1), name, Integer.parseInt(m.group(3)), prereqs));
+                }
+            }
+        }
+        return rows;
+    }
+}
