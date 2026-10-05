@@ -8,14 +8,14 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TalentRegistryTest {
+public class TalentRegistryTest {
 
-    static TalentNode node(String id, TreeCategory tree, int max, int x, int y, Prerequisite... prereqs) {
+    public static TalentNode node(String id, TreeCategory tree, int max, int x, int y, Prerequisite... prereqs) {
         return new TalentNode(id, tree, "talent.vanillatalents." + id + ".name", "talent.vanillatalents." + id + ".desc",
                 "minecraft:stone", max, List.of(prereqs), new GridPos(x, y), Map.of());
     }
 
-    static Prerequisite req(String id, int level) {
+    public static Prerequisite req(String id, int level) {
         return new Prerequisite(id, level);
     }
 
