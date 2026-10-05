@@ -6,6 +6,7 @@ import com.seunome.vanillatalents.capability.SkillAccess;
 import com.seunome.vanillatalents.core.TalentNode;
 import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.effect.AttributeSync;
+import com.seunome.vanillatalents.effect.FarmerEffects;
 import com.seunome.vanillatalents.effect.MinerEffects;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.network.S2CSyncDefinitions;
@@ -65,6 +66,7 @@ public class PlayerEvents {
     public static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         AttributeSync.forget(event.getEntity().getUUID());
         MinerEffects.forget(event.getEntity().getUUID());
+        FarmerEffects.forget(event.getEntity().getUUID());
     }
 
     @SubscribeEvent

@@ -26,6 +26,14 @@ public final class Config {
             .comment("Percent of the old class's spent points returned on respec (rounded down)")
             .defineInRange("respecRefundPercent", 25, 0, 100);
 
+    public static final ForgeConfigSpec.IntValue AURA_MAX_PER_PULSE = BUILDER
+            .comment("Fertile Aura: maximum plants advanced per pulse")
+            .defineInRange("auraMaxPerPulse", 32, 0, 4096);
+
+    public static final ForgeConfigSpec.IntValue AURA_IDLE_TICKS = BUILDER
+            .comment("Fertile Aura stops if the player has not moved for this many ticks")
+            .defineInRange("auraIdleTicks", 1200, 0, 72000);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private Config() {}

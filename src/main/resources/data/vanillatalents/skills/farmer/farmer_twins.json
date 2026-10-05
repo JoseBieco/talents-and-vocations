@@ -16,6 +16,7 @@
     "y": 3
   },
   "values": {
-    "per_level": 0.05
+    "per_level": 0.05,
+    "chunk_limit": 32
   }
 }
