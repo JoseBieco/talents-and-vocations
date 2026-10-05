@@ -36,6 +36,17 @@ public final class Talents {
                 .orElse(0);
     }
 
+    /** Recarga persistida em PlayerSkillData (servidor); livre quando o game time já passou do limite. */
+    public static boolean cooldownReady(Player player, String key) {
+        long now = player.level().getGameTime();
+        return SkillAccess.get(player).map(d -> now >= d.getCooldownUntil(key)).orElse(false);
+    }
+
+    public static void startCooldown(Player player, String key, long ticks) {
+        long now = player.level().getGameTime();
+        SkillAccess.get(player).ifPresent(d -> d.setCooldownUntil(key, now + ticks));
+    }
+
     /** Valor de balanceamento do JSON do lado do jogador; só chamar quando {@link #level} > 0. */
     public static double value(Player player, String nodeId, String key) {
         TalentRegistry registry = player.level().isClientSide() ? TalentRegistries.client() : TalentRegistries.server();
