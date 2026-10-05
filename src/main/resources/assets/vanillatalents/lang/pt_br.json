@@ -9,6 +9,7 @@
   "gui.vanillatalents.points": "PT: %s",
   "gui.vanillatalents.convert.levels": "Converter %s níveis → 1 PT",
   "gui.vanillatalents.convert.points": "Converter %s de XP → 1 PT",
+  "gui.vanillatalents.convert.all": "Converter tudo (%s PT)",
   "gui.vanillatalents.choose_class": "Escolher classe",
   "gui.vanillatalents.change_class": "Trocar classe",
   "gui.vanillatalents.no_class": "Nenhuma classe escolhida.",

@@ -26,6 +26,16 @@ public final class XpCostRules {
         return totalXpForLevel(level) + Math.round(progress * xpNeededForNextLevel(level));
     }
 
+    /** Quantos PT o jogador consegue comprar de uma vez com o XP atual ("Converter tudo"). */
+    public static int maxConversions(CostMode mode, int playerLevel, float progress, int cost) {
+        if (cost <= 0) return 0;
+        int available = switch (mode) {
+            case LEVELS -> playerLevel;
+            case POINTS -> currentTotalXp(playerLevel, progress);
+        };
+        return Math.max(0, available / cost);
+    }
+
     public static boolean canAfford(CostMode mode, int playerLevel, int playerTotalXp, int amount) {
         return switch (mode) {
             case LEVELS -> playerLevel >= amount;

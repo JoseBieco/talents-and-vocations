@@ -26,7 +26,9 @@ public final class DebugCommands {
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("vt").then(Commands.literal("debug")
                 .then(Commands.literal("convert").executes(ctx ->
-                        reply(ctx, "convert -> " + TalentActions.convertXp(ctx.getSource().getPlayerOrException()))))
+                        reply(ctx, "convert -> " + TalentActions.convertXp(ctx.getSource().getPlayerOrException(), false))))
+                .then(Commands.literal("convertall").executes(ctx ->
+                        reply(ctx, "convertall -> " + TalentActions.convertXp(ctx.getSource().getPlayerOrException(), true))))
                 .then(Commands.literal("buy").then(Commands.argument("id", StringArgumentType.word()).executes(ctx ->
                         reply(ctx, "buy -> " + TalentActions.buyNode(ctx.getSource().getPlayerOrException(),
                                 StringArgumentType.getString(ctx, "id"))))))
