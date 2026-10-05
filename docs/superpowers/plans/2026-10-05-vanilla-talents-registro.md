@@ -142,3 +142,11 @@ Decisões tomadas durante a implementação (`Ruling`), pendências e achados da
 - [ ] Confirmação em 2 cliques: primeiro clique arma ("Clique de novo para confirmar"); segundo envia C2SChangeClass
 - [ ] Expiração: confirmação armada expira após ~3 s
 - [ ] Escala máxima com arrastar: em GUI máxima (320×240), arrastar com botão esquerdo move a árvore (se não couber)
+
+### Revisão final da UI vanilla
+
+- Final: fix wave 926ca71..5612d59 — addressed: compra só por duplo clique real (lastClickBought + já selecionado); TwoStepConfirm(10, 60) com atraso mínimo + reset no onSync; totais das 6 árvores no DesignDocConsistencyTest; re-clamp do scroll no init
+- Final: Ruling: arrasto lento (sub-pixel) em escala de GUI alta segue sem funcionar — TreeView.clampScroll sobrescreve o acumulador com o valor inteiro (accX = scrollX); correção de 1 linha (só reescrever o acumulador quando o clamp mudou o valor); levado ao José em vez de 2ª leva de correção (o processo prevê uma leva só) — custo: em escala de GUI 4, arrastar devagar não move a árvore; arrastar rápido funciona
+- Final: minor (deferred): ClassScreen sem estado "Carregando talentos…" com registro vazio
+- Final: minor (deferred): caches de ícone (TreeView/ClassScreen) não limpam após /reload
+- Final: minor (deferred): botões Converter não atualizam ao pegar XP até o próximo sync (já era assim)
