@@ -28,12 +28,12 @@ public final class ExhaustionHooks {
     public static boolean extraRegenTick(ServerPlayer player) {
         int level = Talents.level(player, "common_regen");
         if (level <= 0) return false;
-        return player.getRandom().nextDouble() < HookFormulas.chance(level, Talents.value("common_regen", "per_level"));
+        return player.getRandom().nextDouble() < HookFormulas.chance(level, Talents.value(player, "common_regen", "per_level"));
     }
 
     private static float multiplier(ServerPlayer player, String nodeId) {
         int level = Talents.level(player, nodeId);
         if (level <= 0) return 1f;
-        return (float) HookFormulas.reductionMultiplier(level, Talents.value(nodeId, "per_level"));
+        return (float) HookFormulas.reductionMultiplier(level, Talents.value(player, nodeId, "per_level"));
     }
 }
