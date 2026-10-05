@@ -3,6 +3,7 @@ package com.seunome.vanillatalents.event;
 import com.seunome.vanillatalents.VanillaTalents;
 import com.seunome.vanillatalents.capability.PlayerSkillProvider;
 import com.seunome.vanillatalents.capability.SkillAccess;
+import com.seunome.vanillatalents.core.AttributeBonuses;
 import com.seunome.vanillatalents.core.TalentNode;
 import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.effect.ArcherEffects;
@@ -56,7 +57,9 @@ public class PlayerEvents {
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) refresh(player);
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        refresh(player);
+        player.setHealth(AttributeBonuses.respawnHealth(event.isEndConquered(), player.getHealth(), player.getMaxHealth()));
     }
 
     @SubscribeEvent

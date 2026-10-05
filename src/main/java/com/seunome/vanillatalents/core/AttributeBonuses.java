@@ -72,6 +72,14 @@ public final class AttributeBonuses {
         };
     }
 
+    /**
+     * Vida após renascer e reaplicar os bônus. Na morte a vanilla enche a vida antes dos bônus existirem, então
+     * renasce-se com a vida máxima nova; na saída do End a vida do jogador antigo é mantida.
+     */
+    public static float respawnHealth(boolean endConquered, float currentHealth, float maxHealth) {
+        return endConquered ? Math.min(currentHealth, maxHealth) : maxHealth;
+    }
+
     /** Bônus do nó limitado para que encantamento + nó não passem de {@link #KNOCKBACK_CAP}. */
     public static double knockbackBonus(int level, double perLevel, double weaponKnockbackLevel) {
         return Math.max(0, Math.min(level * perLevel, KNOCKBACK_CAP - weaponKnockbackLevel));
