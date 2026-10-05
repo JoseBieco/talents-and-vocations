@@ -9,6 +9,7 @@
   "gui.vanillatalents.points": "TP: %s",
   "gui.vanillatalents.convert.levels": "Convert %s levels → 1 TP",
   "gui.vanillatalents.convert.points": "Convert %s XP → 1 TP",
+  "gui.vanillatalents.convert.all": "Convert all (%s TP)",
   "gui.vanillatalents.choose_class": "Choose class",
   "gui.vanillatalents.change_class": "Change class",
   "gui.vanillatalents.no_class": "No class chosen.",

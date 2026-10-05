@@ -15,6 +15,10 @@ public record EconomySettings(CostMode mode, int costLevels, int costPoints, int
         return XpCostRules.canAfford(mode, playerLevel, XpCostRules.currentTotalXp(playerLevel, progress), cost());
     }
 
+    public int maxConversions(int playerLevel, float progress) {
+        return XpCostRules.maxConversions(mode, playerLevel, progress, cost());
+    }
+
     public Map<String, Integer> toMap() {
         return Map.of("CostMode", mode.ordinal(), "CostLevels", costLevels, "CostPoints", costPoints,
                 "RespecFee", respecFeeLevels, "RespecRefund", respecRefundPercent);

@@ -50,6 +50,26 @@ class XpCostRulesTest {
     }
 
     @Test
+    void maxConversions_levels() {
+        assertEquals(4, XpCostRules.maxConversions(CostMode.LEVELS, 23, 0.9f, 5));
+        assertEquals(0, XpCostRules.maxConversions(CostMode.LEVELS, 4, 0.9f, 5));
+        assertEquals(1, XpCostRules.maxConversions(CostMode.LEVELS, 5, 0f, 5));
+    }
+
+    @Test
+    void maxConversions_points() {
+        // nível 10 = 160 pontos; + metade da barra do nível 10 (27/2 ≈ 14) = 174 → 1 PT de 100
+        assertEquals(1, XpCostRules.maxConversions(CostMode.POINTS, 10, 0.5f, 100));
+        assertEquals(13, XpCostRules.maxConversions(CostMode.POINTS, 30, 0f, 100)); // 1395 pontos
+        assertEquals(0, XpCostRules.maxConversions(CostMode.POINTS, 0, 0f, 100));
+    }
+
+    @Test
+    void maxConversions_zeroCostIsSafe() {
+        assertEquals(0, XpCostRules.maxConversions(CostMode.LEVELS, 50, 0f, 0));
+    }
+
+    @Test
     void canAfford_levels() {
         assertFalse(XpCostRules.canAfford(CostMode.LEVELS, 4, 1000, 5));
         assertTrue(XpCostRules.canAfford(CostMode.LEVELS, 5, 0, 5));

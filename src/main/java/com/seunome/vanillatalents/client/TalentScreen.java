@@ -62,10 +62,17 @@ public class TalentScreen extends Screen {
                 .bounds(82, 8, 70, 20).build()).active = !classTab;
 
         String convertKey = economy.mode() == CostMode.LEVELS ? "gui.vanillatalents.convert.levels" : "gui.vanillatalents.convert.points";
-        Button convert = Button.builder(Component.translatable(convertKey, economy.cost()), b -> ModNetwork.sendToServer(new C2SConvertXp()))
+        Button convert = Button.builder(Component.translatable(convertKey, economy.cost()), b -> ModNetwork.sendToServer(new C2SConvertXp(false)))
                 .bounds(8, height - 28, 160, 20).build();
         convert.active = player != null && economy.canAffordConversion(player.experienceLevel, player.experienceProgress);
         addRenderableWidget(convert);
+
+        // Prévia; o servidor recalcula a quantidade real ao converter.
+        int affordable = player == null ? 0 : economy.maxConversions(player.experienceLevel, player.experienceProgress);
+        Button convertAll = Button.builder(Component.translatable("gui.vanillatalents.convert.all", affordable),
+                b -> ModNetwork.sendToServer(new C2SConvertXp(true))).bounds(172, height - 28, 120, 20).build();
+        convertAll.active = affordable > 0;
+        addRenderableWidget(convertAll);
 
         if (classTab) {
             boolean noClass = TalentRules.NO_CLASS.equals(data.getCurrentClass());

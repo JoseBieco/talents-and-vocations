@@ -69,6 +69,14 @@ class TalentScreenModelTest {
     }
 
     @Test
+    void economySettings_maxConversions() {
+        var levels = new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25);
+        assertEquals(4, levels.maxConversions(23, 0f));
+        var points = new EconomySettings(CostMode.POINTS, 5, 100, 10, 25);
+        assertEquals(13, points.maxConversions(30, 0f));
+    }
+
+    @Test
     void economySettings_tagRoundTripViaMap() {
         var s = new EconomySettings(CostMode.POINTS, 7, 150, 12, 30);
         assertEquals(s, EconomySettings.fromMap(s.toMap()));

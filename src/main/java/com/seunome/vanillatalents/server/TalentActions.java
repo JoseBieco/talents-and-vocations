@@ -7,7 +7,6 @@ import com.seunome.vanillatalents.core.CostMode;
 import com.seunome.vanillatalents.core.EconomySettings;
 import com.seunome.vanillatalents.core.PurchaseResult;
 import com.seunome.vanillatalents.core.RespecCheck;
-import com.seunome.vanillatalents.core.XpCostRules;
 import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.effect.AttributeSync;
 import com.seunome.vanillatalents.network.ModNetwork;
@@ -25,20 +24,25 @@ public final class TalentActions {
 
     private TalentActions() {}
 
-    public static boolean convertXp(ServerPlayer player) {
-        boolean converted = SkillAccess.get(player).map(data -> {
-            CostMode mode = Config.COST_MODE.get();
-            int cost = mode == CostMode.LEVELS ? Config.COST_LEVELS.get() : Config.COST_POINTS.get();
-            int totalXp = XpCostRules.currentTotalXp(player.experienceLevel, player.experienceProgress);
-            if (!XpCostRules.canAfford(mode, player.experienceLevel, totalXp, cost)) return false;
-            if (mode == CostMode.LEVELS) {
-                player.giveExperienceLevels(-cost);
+    /**
+     * Converte XP em PT: 1, ou todos os possíveis quando {@code all}. A quantidade é sempre recalculada aqui
+     * a partir do XP real do jogador. Devolve quantos PT foram comprados.
+     */
+    public static int convertXp(ServerPlayer player, boolean all) {
+        int converted = SkillAccess.get(player).map(data -> {
+            EconomySettings economy = economy();
+            int affordable = economy.maxConversions(player.experienceLevel, player.experienceProgress);
+            int count = all ? affordable : Math.min(1, affordable);
+            if (count <= 0) return 0;
+            int total = count * economy.cost();
+            if (economy.mode() == CostMode.LEVELS) {
+                player.giveExperienceLevels(-total);
             } else {
-                player.giveExperiencePoints(-cost);
+                player.giveExperiencePoints(-total);
             }
-            data.addPoints(1);
-            return true;
-        }).orElse(false);
+            data.addPoints(count);
+            return count;
+        }).orElse(0);
         sync(player);
         return converted;
     }
