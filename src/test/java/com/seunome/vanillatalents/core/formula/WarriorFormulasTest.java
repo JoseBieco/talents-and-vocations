@@ -20,6 +20,21 @@ class WarriorFormulasTest {
     }
 
     @Test
+    void physicalMultiplier_pvpScalesTheReduction() {
+        assertEquals(0.8, WarriorFormulas.physicalMultiplier(5, .04, 1.0), 1e-9);
+        assertEquals(0.9, WarriorFormulas.physicalMultiplier(5, .04, 0.5), 1e-9);
+        assertEquals(1.0, WarriorFormulas.physicalMultiplier(5, .04, 0.0), 1e-9);
+    }
+
+    @Test
+    void steadfastPvpFactor_restoresPartOfTheKnockback() {
+        // KR total 0,3, dos quais 0,3 vêm de Firme; PvP 0,5 → KR efetiva 0,15 → força × 0,85/0,7
+        assertEquals(0.85 / 0.7, WarriorFormulas.steadfastPvpFactor(0.3, 0.3, 0.5), 1e-9);
+        assertEquals(1.0, WarriorFormulas.steadfastPvpFactor(0.3, 0.3, 1.0), 1e-9);
+        assertEquals(1.0, WarriorFormulas.steadfastPvpFactor(1.0, 0.3, 0.5), 1e-9, "KR total ≥ 1: sem repulsão, nada a compensar");
+    }
+
+    @Test
     void executeBonus_onlyBelowThreshold() {
         assertEquals(1.3, WarriorFormulas.executeBonus(.29, 3, .1, .30), 1e-9);
         assertEquals(1.0, WarriorFormulas.executeBonus(.30, 3, .1, .30), 1e-9);

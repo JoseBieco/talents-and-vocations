@@ -1,5 +1,6 @@
 package com.seunome.vanillatalents.effect;
 
+import com.seunome.vanillatalents.Config;
 import com.seunome.vanillatalents.VanillaTalents;
 import com.seunome.vanillatalents.core.RecursionGuard;
 import com.seunome.vanillatalents.core.formula.BlockGraph;
@@ -103,7 +104,7 @@ public final class MinerEffects {
         }
 
         int veinLevel = Talents.level(player, "miner_vein");
-        if (veinLevel > 0 && player.isShiftKeyDown() && !event.getResult().isDenied()) {
+        if (veinLevel > 0 && (player.isShiftKeyDown() || !Config.VEIN_REQUIRES_SNEAK.get()) && !event.getResult().isDenied()) {
             int limit = MinerFormulas.veinLimit(veinLevel, Talents.value(player, "miner_vein", "per_level"));
             RecursionGuard.SERVER.runGuarded(player.getUUID(), VEIN_GUARD,
                     () -> breakVein(player, player.level(), event.getPos(), state.getBlock(), limit));

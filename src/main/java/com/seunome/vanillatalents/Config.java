@@ -42,6 +42,14 @@ public final class Config {
             .comment("Swift Reload never makes the crossbow load faster than this many ticks")
             .defineInRange("crossbowMinTicks", 8, 1, 100);
 
+    public static final ForgeConfigSpec.BooleanValue VEIN_REQUIRES_SNEAK = BUILDER
+            .comment("Vein only triggers while crouching")
+            .define("veinRequiresSneak", true);
+
+    public static final ForgeConfigSpec.DoubleValue PVP_DAMAGE_MULTIPLIER = BUILDER
+            .comment("Scales Thick Hide and Steadfast when both attacker and victim are players (1.0 = full effect)")
+            .defineInRange("pvpDamageMultiplier", 1.0, 0.0, 1.0);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private Config() {}

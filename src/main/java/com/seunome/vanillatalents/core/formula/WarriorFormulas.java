@@ -20,7 +20,23 @@ public final class WarriorFormulas {
 
     /** warrior_resistance: fator sobre dano físico recebido. */
     public static double physicalMultiplier(int level, double perLevel) {
-        return HookFormulas.reductionMultiplier(level, perLevel);
+        return physicalMultiplier(level, perLevel, 1.0);
+    }
+
+    /** warrior_resistance com a redução escalada por {@code pvpMultiplier} (atacante e vítima jogadores). */
+    public static double physicalMultiplier(int level, double perLevel, double pvpMultiplier) {
+        return 1 - (1 - HookFormulas.reductionMultiplier(level, perLevel)) * pvpMultiplier;
+    }
+
+    /**
+     * warrior_steadfast em PvP: fator sobre a força de repulsão (antes da resistência vanilla) para que a parte de
+     * Firme na resistência total valha só {@code pvpMultiplier}.
+     */
+    public static double steadfastPvpFactor(double totalResistance, double steadfastBonus, double pvpMultiplier) {
+        double current = 1 - totalResistance;
+        if (current <= 0) return 1;
+        double desired = 1 - (totalResistance - steadfastBonus * (1 - pvpMultiplier));
+        return desired / current;
     }
 
     /** warrior_executioner: fator de dano contra alvo com vida abaixo do limite. */
