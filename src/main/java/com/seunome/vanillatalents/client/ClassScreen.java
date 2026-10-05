@@ -46,6 +46,7 @@ public class ClassScreen extends Screen {
     private static final int BUTTON_H = 20;
     private static final int PAD = 4;
     private static final int LINE_H = 10;
+    private static final int CONFIRM_MIN_TICKS = 10;
     private static final int CONFIRM_WINDOW_TICKS = 60;
     private static final int COLOR_TITLE = 0xFF404040;
     private static final int COLOR_TEXT = 0xFFFFFFFF;
@@ -55,7 +56,7 @@ public class ClassScreen extends Screen {
     private static final int COLOR_DANGER = 0xFFFF5555;
 
     private final Screen parent;
-    private final TwoStepConfirm confirm = new TwoStepConfirm(CONFIRM_WINDOW_TICKS);
+    private final TwoStepConfirm confirm = new TwoStepConfirm(CONFIRM_MIN_TICKS, CONFIRM_WINDOW_TICKS);
     private final Map<String, ItemStack> icons = new HashMap<>();
     private final List<TreeCategory> classes = new ArrayList<>();
     private long ticks;
@@ -75,6 +76,7 @@ public class ClassScreen extends Screen {
 
     /** Chamado quando chega estado novo do servidor: lista e painel são reconstruídos. */
     void onSync() {
+        confirm.reset();
         rebuildWidgets();
     }
 

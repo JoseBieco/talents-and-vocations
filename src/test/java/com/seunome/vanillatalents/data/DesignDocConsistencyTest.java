@@ -156,7 +156,13 @@ class DesignDocConsistencyTest {
         assertEquals("miner_vein", miner.capstoneId());
         assertEquals(12, miner.nodeCount());
         assertEquals(36, miner.totalPoints());
-        assertEquals(37, com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, TreeCategory.ARCHER).totalPoints());
+        var totals = java.util.Map.of(TreeCategory.COMMON, 37, TreeCategory.MINER, 36, TreeCategory.FARMER, 35,
+                TreeCategory.EXPLORER, 34, TreeCategory.WARRIOR, 35, TreeCategory.ARCHER, 37);
+        totals.forEach((tree, points) -> {
+            var summary = com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, tree);
+            assertEquals(12, summary.nodeCount(), tree.name());
+            assertEquals(points, summary.totalPoints(), tree.name());
+        });
         assertEquals("common_second_wind",
                 com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, TreeCategory.COMMON).capstoneId());
     }

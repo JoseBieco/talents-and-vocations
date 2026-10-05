@@ -38,6 +38,7 @@ public final class TreeView {
     private final int x, y, w, h;
     private @Nullable TreeCategory tree;
     private int scrollX, scrollY;
+    private double accX, accY;
     private final Map<String, ItemStack> icons = new HashMap<>();
 
     public TreeView(int x, int y, int w, int h) {
@@ -52,6 +53,8 @@ public final class TreeView {
         this.tree = tree;
         scrollX = 0;
         scrollY = 0;
+        accX = 0;
+        accY = 0;
     }
 
     public boolean contains(double mx, double my) {
@@ -61,9 +64,23 @@ public final class TreeView {
     /** Arrasta o conteúdo; o deslocamento é limitado por eixo. */
     public void drag(double dx, double dy) {
         if (tree == null) return;
+        accX += dx;
+        accY += dy;
+        clampScroll();
+    }
+
+    /** Reaplica os limites (o conteúdo pode ter encolhido após um sync/recarga). */
+    public void reclamp() {
+        if (tree == null) return;
+        clampScroll();
+    }
+
+    private void clampScroll() {
         TalentScreenModel.GridBounds b = bounds();
-        scrollX = TalentScreenModel.clampScroll(contentW(b), w, scrollX + (int) Math.round(dx));
-        scrollY = TalentScreenModel.clampScroll(contentH(b), h, scrollY + (int) Math.round(dy));
+        scrollX = TalentScreenModel.clampScroll(contentW(b), w, (int) Math.round(accX));
+        scrollY = TalentScreenModel.clampScroll(contentH(b), h, (int) Math.round(accY));
+        accX = scrollX;
+        accY = scrollY;
     }
 
     private List<TalentNode> nodes() {
