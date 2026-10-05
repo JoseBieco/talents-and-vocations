@@ -19,6 +19,9 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 minecraft {
+    // Applies src/main/resources/META-INF/accesstransformer.cfg (archer_pierce needs AbstractArrow.setPierceLevel)
+    accessTransformer = true
+
     runs {
         configureEach {
             workingDir = layout.projectDirectory.dir('run')
