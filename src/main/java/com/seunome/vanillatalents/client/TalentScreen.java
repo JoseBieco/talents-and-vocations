@@ -161,7 +161,7 @@ public class TalentScreen extends Screen {
     }
 
     private void openClassScreen() {
-        minecraft.gui.setScreen(new ClassSelectScreen(this));
+        minecraft.gui.setScreen(new ClassScreen(this));
     }
 
     private ItemStack rootIcon(TreeCategory tree) {

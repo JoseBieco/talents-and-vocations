@@ -39,6 +39,8 @@ public final class ClientTalentState {
 
     /** Telas do mod se reconstroem quando chega estado novo (sem atualização otimista). */
     static void notifyScreen() {
-        if (Minecraft.getInstance().gui.screen() instanceof TalentScreen screen) screen.onSync();
+        var current = Minecraft.getInstance().gui.screen();
+        if (current instanceof TalentScreen screen) screen.onSync();
+        else if (current instanceof ClassScreen screen) screen.onSync();
     }
 }

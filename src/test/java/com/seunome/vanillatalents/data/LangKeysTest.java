@@ -35,7 +35,10 @@ class LangKeysTest {
         }
         keys.add("key.category.vanillatalents.main");
         for (TreeCategory tree : TreeCategory.values()) {
-            if (tree.isClass()) keys.add("vanillatalents.class." + tree.id());
+            if (tree.isClass()) {
+                keys.add("vanillatalents.class." + tree.id());
+                keys.add("vanillatalents.class." + tree.id() + ".desc");
+            }
         }
         return keys;
     }
