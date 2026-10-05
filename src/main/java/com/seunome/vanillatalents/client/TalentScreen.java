@@ -1,5 +1,6 @@
 package com.seunome.vanillatalents.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.seunome.vanillatalents.capability.PlayerSkillData;
 import com.seunome.vanillatalents.core.*;
 import com.seunome.vanillatalents.data.TalentRegistries;
@@ -138,7 +139,7 @@ public class TalentScreen extends Screen {
         if (tree.isClass()) {
             Component cls = Component.translatable("gui.vanillatalents.current_class",
                     Component.translatable("vanillatalents.class." + tree.id()));
-            g.text(font, cls, width - font.width(cls) - 8, height - 22, 0xFFFFFFFF);
+            g.text(font, cls, width - font.width(cls) - 8, height - 40, 0xFFFFFFFF); // acima do botão "Trocar classe" (height - 28)
         }
 
         List<TalentNode> nodes = registry.tree(tree);
@@ -217,7 +218,7 @@ public class TalentScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
-        if (event.button() == 0) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             TalentNode node = nodeAt(event.x(), event.y());
             if (node != null) {
                 ModNetwork.sendToServer(new C2SBuyNode(node.id()));
