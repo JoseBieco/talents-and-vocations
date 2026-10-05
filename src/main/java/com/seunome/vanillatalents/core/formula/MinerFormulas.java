@@ -1,5 +1,12 @@
 package com.seunome.vanillatalents.core.formula;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /** Fórmulas da árvore do Minerador. */
 public final class MinerFormulas {
 
@@ -23,6 +30,58 @@ public final class MinerFormulas {
 
     static double footingFactor(int footingLvl) {
         return (AIR_PENALTY + 0.4 * footingLvl) / AIR_PENALTY;
+    }
+
+    /** miner_mole: multiplicador de velocidade com pá. */
+    public static double shovelMultiplier(int level, double perLevel) {
+        return 1 + level * perLevel;
+    }
+
+    /** miner_ore_xp: XP do minério com bônus, arredondado. */
+    public static int oreXp(int xp, int level, double perLevel) {
+        return (int) Math.round(xp * (1 + level * perLevel));
+    }
+
+    /** miner_prospector: raio de busca em blocos. */
+    public static int prospectorRadius(int level, double radiusPerLevel) {
+        return (int) Math.round(level * radiusPerLevel);
+    }
+
+    /** miner_lavasense: recarga em ticks conforme o nível (90/60/30 s). */
+    public static int lavasenseCooldownTicks(int level, int l1, int l2, int l3) {
+        return switch (Math.max(1, Math.min(3, level))) {
+            case 1 -> l1;
+            case 2 -> l2;
+            default -> l3;
+        };
+    }
+
+    /** miner_vein: quantos blocos extras o Veio quebra. */
+    public static int veinLimit(int level, double perLevel) {
+        return (int) Math.round(level * perLevel);
+    }
+
+    /**
+     * miner_vein: busca em largura a partir de {@code start} por blocos conectados que casam com o veio.
+     * Devolve até {@code limit} posições, sem incluir {@code start}, na ordem em que foram encontradas.
+     */
+    public static <P> List<P> veinCollect(P start, BlockGraph<P> graph, int limit) {
+        List<P> found = new ArrayList<>();
+        if (limit <= 0) return found;
+        Set<P> visited = new HashSet<>();
+        Deque<P> queue = new ArrayDeque<>();
+        visited.add(start);
+        queue.add(start);
+        while (!queue.isEmpty()) {
+            P current = queue.poll();
+            for (P next : graph.neighbors(current)) {
+                if (!visited.add(next) || !graph.matches(next)) continue;
+                found.add(next);
+                if (found.size() >= limit) return found;
+                queue.add(next);
+            }
+        }
+        return found;
     }
 
     /** Chance de Toque de Midas duplicar o drop do minério. */

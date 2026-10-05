@@ -17,6 +17,8 @@
   },
   "values": {
     "radius_per_level": 2,
-    "cooldown": 200
+    "cooldown": 200,
+    "still_ticks": 40,
+    "particle_ticks": 60
   }
 }

@@ -27,6 +27,6 @@ public final class ClientPacketHandlers {
     }
 
     public static void prospectorHighlight(S2CProspectorHighlight msg) {
-        // As partículas do Faro Mineral são desenhadas pela Task 12 (ClientEffects).
+        ClientEffects.highlight(msg.positions());
     }
 }
