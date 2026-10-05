@@ -101,6 +101,14 @@ class AttributeBonusesTest {
     }
 
     @Test
+    void respawnHealth_deathRespawnsAtFullBonusHealth() {
+        // morte: restoreFrom fez setHealth(20) antes do bônus; após reaplicar, a vida máxima é 30
+        assertEquals(30f, AttributeBonuses.respawnHealth(false, 20f, 30f));
+        // saída do End: a vida atual foi copiada do jogador antigo e deve ser mantida
+        assertEquals(17f, AttributeBonuses.respawnHealth(true, 17f, 30f));
+    }
+
+    @Test
     void axeSpeedOnlyWithAxe() {
         var v = new TalentRulesTest.FakeView().cls("warrior").lvl("warrior_axe_speed", 3);
         assertEquals(0, byNode(v, NEUTRAL).get("warrior_axe_speed").amount());
