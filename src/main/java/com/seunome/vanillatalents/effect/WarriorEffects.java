@@ -66,31 +66,30 @@ public final class WarriorEffects {
     public static void onHurt(LivingHurtEvent event) {
         DamageSource source = event.getSource();
         if (event.getEntity() instanceof ServerPlayer victim) {
-            onPlayerHurt(event, victim, source);
+            event.setAmount(resistedAmount(event.getAmount(), victim, source));
         }
         if (source.getEntity() instanceof ServerPlayer attacker && source.getDirectEntity() == attacker) {
-            onMeleeHit(event, attacker, source);
+            event.setAmount(meleeAmount(event.getAmount(), event.getEntity(), attacker, source));
         }
     }
 
+    // Helpers não recebem o evento: o EventBus 7 exige @SubscribeEvent em todo método estático com evento.
+
     /** warrior_resistance: dano físico (com entidade direta), fora de fogo, explosão e dano que ignora armadura. */
-    private static void onPlayerHurt(LivingHurtEvent event, ServerPlayer victim, DamageSource source) {
+    private static float resistedAmount(float amount, ServerPlayer victim, DamageSource source) {
         if (source.getDirectEntity() == null || source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION)
-                || source.is(DamageTypeTags.BYPASSES_ARMOR)) return;
+                || source.is(DamageTypeTags.BYPASSES_ARMOR)) return amount;
         int level = Talents.level(victim, "warrior_resistance");
-        if (level <= 0) return;
-        double multiplier = WarriorFormulas.physicalMultiplier(level, Talents.value(victim, "warrior_resistance", "per_level"));
-        event.setAmount((float) (event.getAmount() * multiplier));
+        if (level <= 0) return amount;
+        return (float) (amount * WarriorFormulas.physicalMultiplier(level, Talents.value(victim, "warrior_resistance", "per_level")));
     }
 
     /** warrior_strength, warrior_executioner, warrior_armor_break e warrior_cleave. */
-    private static void onMeleeHit(LivingHurtEvent event, ServerPlayer player, DamageSource source) {
-        if (RecursionGuard.SERVER.isActive(player.getUUID(), CLEAVE_GUARD)) return; // dano do Golpe Amplo não encadeia
+    private static float meleeAmount(float amount, LivingEntity target, ServerPlayer player, DamageSource source) {
+        if (RecursionGuard.SERVER.isActive(player.getUUID(), CLEAVE_GUARD)) return amount; // dano do Golpe Amplo não encadeia
         ItemStack weapon = player.getMainHandItem();
         boolean axe = isAxe(weapon);
-        if (!axe && !isSword(weapon)) return;
-        LivingEntity target = event.getEntity();
-        float amount = event.getAmount();
+        if (!axe && !isSword(weapon)) return amount;
 
         int strength = Talents.level(player, "warrior_strength");
         if (strength > 0) amount += (float) WarriorFormulas.meleeBonus(strength, Talents.value(player, "warrior_strength", "per_level"));
@@ -108,10 +107,9 @@ public final class WarriorEffects {
                     Talents.value(player, "warrior_armor_break", "per_level"),
                     (dmg, armor) -> CombatRules.getDamageAfterAbsorb(target, dmg, source, armor, toughness));
         }
-        event.setAmount(amount);
-
         boolean charged = Boolean.TRUE.equals(CHARGED.remove(player.getUUID()));
         if (axe && charged && Talents.level(player, "warrior_cleave") > 0) cleave(player, target, amount);
+        return amount;
     }
 
     /** warrior_cleave: fração do dano a até N hostis perto do alvo; sem jogadores, pets, aldeões e golens. */

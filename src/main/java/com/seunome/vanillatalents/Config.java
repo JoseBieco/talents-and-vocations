@@ -38,6 +38,10 @@ public final class Config {
             .comment("Maximum fall damage reduction from Landing + Roll (0.6 = never below 40% of the damage)")
             .defineInRange("fallReductionCap", 0.6, 0.0, 1.0);
 
+    public static final ForgeConfigSpec.IntValue CROSSBOW_MIN_TICKS = BUILDER
+            .comment("Swift Reload never makes the crossbow load faster than this many ticks")
+            .defineInRange("crossbowMinTicks", 8, 1, 100);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private Config() {}
