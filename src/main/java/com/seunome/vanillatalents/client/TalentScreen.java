@@ -2,44 +2,66 @@ package com.seunome.vanillatalents.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seunome.vanillatalents.capability.PlayerSkillData;
+import com.seunome.vanillatalents.client.ui.NodeDetailPanel;
+import com.seunome.vanillatalents.client.ui.TreeView;
+import com.seunome.vanillatalents.client.ui.VanillaGui;
 import com.seunome.vanillatalents.core.*;
 import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.network.C2SBuyNode;
 import com.seunome.vanillatalents.network.C2SConvertXp;
 import com.seunome.vanillatalents.network.ModNetwork;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-/** Tela principal: abas Comum/Classe, grade de nós, conversão de XP e troca de classe. */
+/** Tela de talentos no estilo Conquistas: abas, árvore arrastável, painel de detalhes e rodapé de conversão. */
 public class TalentScreen extends Screen {
 
-    static final int CELL_W = 30;
-    static final int CELL_H = 34;
-    static final int NODE = 22;
-    static final int TREE_TOP = 52;
+    private static final int MAX_W = 400;
+    private static final int MAX_H = 225;
+    private static final int PANEL_W = 110;
+    private static final int MARGIN = 7;
+    private static final int GAP = 4;
+    private static final int TITLE_H = 18;
+    private static final int BUTTON_H = 20;
+    private static final int XP_BAR_W = 182;
+    private static final int XP_BAR_H = 5;
+    private static final int TAB_W = 28;
+    private static final int TAB_H = 32;
+    private static final int COLOR_TITLE = 0xFF404040;
+    private static final int COLOR_INFO = 0xFFFFFFFF;
+    private static final Identifier XP_BAR_BACKGROUND = Identifier.withDefaultNamespace("hud/experience_bar_background");
+    private static final Identifier XP_BAR_PROGRESS = Identifier.withDefaultNamespace("hud/experience_bar_progress");
 
-    private static final int COLOR_LINE_MET = 0xFFAAAAAA;
-    private static final int COLOR_LINE_UNMET = 0xFF444444;
-    private static final int COLOR_GOLD = 0xFFFFD700;
+    private final ItemStack commonIcon = new ItemStack(Items.SHIELD);
+    private final ItemStack noClassIcon = new ItemStack(Items.COMPASS);
 
     private boolean classTab = false;
-    private final Map<String, ItemStack> icons = new HashMap<>();
+    private @Nullable String selectedId;
+
+    // Layout calculado em init().
+    private int left, top, winW, winH;
+    private int treeX, treeY, treeW, treeH;
+    private @Nullable TreeView treeView;
+    private @Nullable String treeViewBounds;
+    private @Nullable TreeCategory shownTree;
+    private @Nullable NodeDetailPanel panel;
+    private ItemStack classIcon = ItemStack.EMPTY;
+
+    // Estado do arrastar.
+    private boolean draggingTree;
+    private boolean deselectOnRelease;
 
     public TalentScreen() {
         super(Component.translatable("gui.vanillatalents.title"));
@@ -47,47 +69,19 @@ public class TalentScreen extends Screen {
 
     /** Chamado quando chega S2CSyncPlayer ou S2CSyncDefinitions. */
     void onSync() {
-        rebuildWidgets();
-    }
-
-    @Override
-    protected void init() {
-        PlayerSkillData data = ClientTalentState.data();
-        EconomySettings economy = ClientTalentState.economy();
-        LocalPlayer player = minecraft.player;
-
-        addRenderableWidget(Button.builder(Component.translatable("gui.vanillatalents.tab.common"), b -> switchTab(false))
-                .bounds(8, 8, 70, 20).build()).active = classTab;
-        addRenderableWidget(Button.builder(Component.translatable("gui.vanillatalents.tab.class"), b -> switchTab(true))
-                .bounds(82, 8, 70, 20).build()).active = !classTab;
-
-        String convertKey = economy.mode() == CostMode.LEVELS ? "gui.vanillatalents.convert.levels" : "gui.vanillatalents.convert.points";
-        Button convert = Button.builder(Component.translatable(convertKey, economy.cost()), b -> ModNetwork.sendToServer(new C2SConvertXp(false)))
-                .bounds(8, height - 28, 160, 20).build();
-        convert.active = player != null && economy.canAffordConversion(player.experienceLevel, player.experienceProgress);
-        addRenderableWidget(convert);
-
-        // Prévia; o servidor recalcula a quantidade real ao converter.
-        int affordable = player == null ? 0 : economy.maxConversions(player.experienceLevel, player.experienceProgress);
-        Button convertAll = Button.builder(Component.translatable("gui.vanillatalents.convert.all", affordable),
-                b -> ModNetwork.sendToServer(new C2SConvertXp(true))).bounds(172, height - 28, 120, 20).build();
-        convertAll.active = affordable > 0;
-        addRenderableWidget(convertAll);
-
-        if (classTab) {
-            boolean noClass = TalentRules.NO_CLASS.equals(data.getCurrentClass());
-            String key = noClass ? "gui.vanillatalents.choose_class" : "gui.vanillatalents.change_class";
-            int w = 120;
-            int x = noClass ? (width - w) / 2 : width - w - 8;
-            int y = noClass ? height / 2 : height - 28;
-            addRenderableWidget(Button.builder(Component.translatable(key), b -> minecraft.gui.setScreen(new ClassSelectScreen(this)))
-                    .bounds(x, y, w, 20).build());
+        if (selectedId != null) {
+            TreeCategory tree = visibleTree();
+            TalentNode node = TalentRegistries.client().get(selectedId).orElse(null);
+            if (node == null || node.tree() != tree) selectedId = null;
         }
+        rebuildWidgets();
     }
 
-    private void switchTab(boolean toClass) {
-        classTab = toClass;
-        rebuildWidgets();
+    /** Mostra a aba Comum (false) ou Classe (true). */
+    public void openTab(boolean toClassTab) {
+        if (classTab != toClassTab) selectedId = null;
+        classTab = toClassTab;
+        if (width > 0) rebuildWidgets();
     }
 
     private @Nullable TreeCategory visibleTree() {
@@ -95,144 +89,224 @@ public class TalentScreen extends Screen {
         return TreeCategory.byId(ClientTalentState.data().getCurrentClass()).filter(TreeCategory::isClass).orElse(null);
     }
 
-    private int originX(List<TalentNode> nodes) {
-        TalentScreenModel.GridBounds b = TalentScreenModel.gridBounds(nodes);
-        int treeWidth = (b.maxX() - b.minX()) * CELL_W + NODE;
-        return (width - treeWidth) / 2 - b.minX() * CELL_W;
-    }
-
-    private int nodeX(TalentNode n, int originX) {
-        return originX + n.position().x() * CELL_W;
-    }
-
-    private int nodeY(TalentNode n) {
-        return TREE_TOP + n.position().y() * CELL_H;
-    }
-
-    private @Nullable TalentNode nodeAt(double mouseX, double mouseY) {
+    @Override
+    protected void init() {
+        layout();
         TreeCategory tree = visibleTree();
-        if (tree == null) return null;
-        List<TalentNode> nodes = TalentRegistries.client().tree(tree);
-        int ox = originX(nodes);
-        for (TalentNode n : nodes) {
-            int x = nodeX(n, ox), y = nodeY(n);
-            if (mouseX >= x && mouseX < x + NODE && mouseY >= y && mouseY < y + NODE) return n;
+        PlayerSkillData data = ClientTalentState.data();
+        EconomySettings economy = ClientTalentState.economy();
+        LocalPlayer player = minecraft.player;
+
+        // A TreeView sobrevive aos rebuilds do sync (mantém o arrastar); só é recriada se o tamanho mudou.
+        String bounds = treeX + "," + treeY + "," + treeW + "," + treeH;
+        if (treeView == null || !bounds.equals(treeViewBounds)) {
+            treeView = new TreeView(treeX, treeY, treeW, treeH);
+            treeViewBounds = bounds;
+            shownTree = null;
         }
-        return null;
+        if (tree != null && tree != shownTree) treeView.setTree(tree);
+        shownTree = tree;
+
+        panel = new NodeDetailPanel(panelX(), treeY - 1, PANEL_W, treeH + 2);
+        addRenderableWidget(panel.buyButton());
+
+        TreeCategory currentClass = TreeCategory.byId(data.getCurrentClass()).filter(TreeCategory::isClass).orElse(null);
+        classIcon = currentClass == null ? noClassIcon : rootIcon(currentClass);
+
+        boolean changeClass = classTab && tree != null;
+        int buttons = changeClass ? 3 : 2;
+        int rowW = winW - 2 * MARGIN;
+        int bw = (rowW - GAP * (buttons - 1)) / buttons;
+        int by = top + winH - MARGIN - BUTTON_H;
+        int bx = left + MARGIN;
+
+        String convertKey = economy.mode() == CostMode.LEVELS ? "gui.vanillatalents.convert.levels" : "gui.vanillatalents.convert.points";
+        Button convert = Button.builder(Component.translatable(convertKey, economy.cost()), b -> ModNetwork.sendToServer(new C2SConvertXp(false)))
+                .bounds(bx, by, bw, BUTTON_H).build();
+        convert.active = player != null && economy.canAffordConversion(player.experienceLevel, player.experienceProgress);
+        addRenderableWidget(convert);
+
+        // Prévia; o servidor recalcula a quantidade real ao converter.
+        int affordable = player == null ? 0 : economy.maxConversions(player.experienceLevel, player.experienceProgress);
+        Button convertAll = Button.builder(Component.translatable("gui.vanillatalents.convert.all", affordable),
+                b -> ModNetwork.sendToServer(new C2SConvertXp(true))).bounds(bx + bw + GAP, by, bw, BUTTON_H).build();
+        convertAll.active = affordable > 0;
+        addRenderableWidget(convertAll);
+
+        if (changeClass) {
+            addRenderableWidget(Button.builder(Component.translatable("gui.vanillatalents.change_class"), b -> openClassScreen())
+                    .bounds(bx + 2 * (bw + GAP), by, bw, BUTTON_H).build());
+        } else if (classTab) {
+            int w = Math.min(120, treeW - 2 * GAP);
+            addRenderableWidget(Button.builder(Component.translatable("gui.vanillatalents.choose_class"), b -> openClassScreen())
+                    .bounds(treeX + (treeW - w) / 2, treeY + treeH / 2 + 4, w, BUTTON_H).build());
+        }
+    }
+
+    /** Janela de até 400×225 centralizada; encolhe para caber (abas ocupam ~28 px acima). */
+    private void layout() {
+        winW = Math.min(MAX_W, width - 2 * MARGIN);
+        winH = Math.min(MAX_H, height - TAB_H - 4);
+        left = (width - winW) / 2;
+        top = (height - winH + TAB_H - 4) / 2;
+        treeX = left + MARGIN + 1;
+        treeY = top + TITLE_H + 1;
+        treeW = winW - 2 * MARGIN - PANEL_W - GAP - 2;
+        int footerH = BUTTON_H + XP_BAR_H + 2 * GAP;
+        treeH = winH - TITLE_H - MARGIN - footerH - 2;
+    }
+
+    private int panelX() {
+        return treeX + treeW + 1 + GAP;
+    }
+
+    private void openClassScreen() {
+        minecraft.gui.setScreen(new ClassSelectScreen(this));
+    }
+
+    private ItemStack rootIcon(TreeCategory tree) {
+        TalentRegistry registry = TalentRegistries.client();
+        String rootId = TalentScreenModel.classSummary(registry, tree).rootId();
+        TalentNode root = rootId == null ? null : registry.get(rootId).orElse(null);
+        if (root == null) return noClassIcon;
+        Identifier itemId = Identifier.tryParse(root.icon());
+        return new ItemStack(itemId == null ? Items.BARRIER : BuiltInRegistries.ITEM.getValue(itemId));
+    }
+
+    private int tabX(int index) {
+        return left + (TAB_W + 4) * index;
+    }
+
+    private int tabY() {
+        return top - TAB_H + 4;
+    }
+
+    private int tabAt(double mx, double my) {
+        for (int i = 0; i < 2; i++) {
+            int tx = tabX(i);
+            if (mx >= tx && mx < tx + TAB_W && my >= tabY() && my < top) return i;
+        }
+        return -1;
+    }
+
+    private Component treeName(@Nullable TreeCategory tree) {
+        if (tree == null) return Component.translatable("gui.vanillatalents.tab.class");
+        if (tree == TreeCategory.COMMON) return Component.translatable("gui.vanillatalents.tab.common");
+        return Component.translatable("vanillatalents.class." + tree.id());
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float a) {
-        super.extractRenderState(g, mouseX, mouseY, a);
+        int selectedTab = classTab ? 1 : 0;
+        drawTab(g, 1 - selectedTab, false);
+        VanillaGui.raisedPanel(g, left, top, winW, winH);
+        drawTab(g, selectedTab, true);
+
+        TreeCategory tree = visibleTree();
         PlayerSkillData data = ClientTalentState.data();
         TalentRegistry registry = TalentRegistries.client();
-
         LocalPlayer player = minecraft.player;
-        int level = player == null ? 0 : player.experienceLevel;
-        Component info = Component.translatable("gui.vanillatalents.xp_level", level).append("   ")
-                .append(Component.translatable("gui.vanillatalents.points", data.getAvailablePoints()));
-        g.text(font, info, width - font.width(info) - 8, 14, 0xFFFFFFFF);
-        g.centeredText(font, title, width / 2, 36, 0xFFFFFFFF);
 
+        g.text(font, Component.translatable("gui.vanillatalents.title.tree", treeName(tree)), left + MARGIN + 1, top + 6, COLOR_TITLE, false);
+        Component status = Component.translatable("gui.vanillatalents.status", data.getAvailablePoints(), player == null ? 0 : player.experienceLevel);
+        g.text(font, status, left + winW - MARGIN - 1 - font.width(status), top + 6, COLOR_TITLE, false);
+
+        VanillaGui.insetPanel(g, treeX - 1, treeY - 1, treeW + 2, treeH + 2);
+        TalentNode selected = selectedId == null ? null : registry.get(selectedId).orElse(null);
         if (registry.size() == 0) {
-            g.centeredText(font, Component.translatable("gui.vanillatalents.loading"), width / 2, height / 2 - 20, 0xFFAAAAAA);
-            return;
-        }
-        TreeCategory tree = visibleTree();
-        if (tree == null) {
-            g.centeredText(font, Component.translatable("gui.vanillatalents.no_class"), width / 2, height / 2 - 20, 0xFFAAAAAA);
-            return;
-        }
-        if (tree.isClass()) {
-            Component cls = Component.translatable("gui.vanillatalents.current_class",
-                    Component.translatable("vanillatalents.class." + tree.id()));
-            g.text(font, cls, width - font.width(cls) - 8, height - 40, 0xFFFFFFFF); // acima do botão "Trocar classe" (height - 28)
+            g.centeredText(font, Component.translatable("gui.vanillatalents.loading"), treeX + treeW / 2, treeY + treeH / 2 - 4, COLOR_INFO);
+        } else if (tree == null) {
+            g.centeredText(font, Component.translatable("gui.vanillatalents.no_class"), treeX + treeW / 2, treeY + treeH / 2 - 12, COLOR_INFO);
+        } else if (treeView != null) {
+            treeView.render(g, selectedId, mouseX, mouseY);
         }
 
-        List<TalentNode> nodes = registry.tree(tree);
-        int ox = originX(nodes);
-        for (TalentNode n : nodes) drawConnections(g, data, registry, n, ox);
-        for (TalentNode n : nodes) drawNode(g, data, registry, n, ox);
+        if (panel != null) {
+            if (tree != null && registry.size() > 0) {
+                panel.render(g, selected, tree);
+            } else {
+                VanillaGui.insetPanel(g, panelX(), treeY - 1, PANEL_W, treeH + 2);
+                panel.buyButton().visible = false;
+            }
+        }
 
-        TalentNode hovered = nodeAt(mouseX, mouseY);
-        if (hovered != null) g.setTooltipForNextFrame(font, tooltip(data, registry, hovered), mouseX, mouseY);
-    }
+        drawXpBar(g, player);
+        super.extractRenderState(g, mouseX, mouseY, a);
 
-    private void drawConnections(GuiGraphicsExtractor g, PlayerSkillData data, TalentRegistry registry, TalentNode child, int ox) {
-        int cx = nodeX(child, ox) + NODE / 2;
-        int cy = nodeY(child);
-        int midY = cy - (CELL_H - NODE) / 2;
-        for (Prerequisite p : child.prerequisites()) {
-            TalentNode parent = registry.get(p.nodeId()).orElse(null);
-            if (parent == null) continue;
-            int color = TalentRules.effectiveLevel(data, registry, p.nodeId()) >= p.level() ? COLOR_LINE_MET : COLOR_LINE_UNMET;
-            int px = nodeX(parent, ox) + NODE / 2;
-            g.verticalLine(px, nodeY(parent) + NODE, midY, color);
-            g.horizontalLine(px, cx, midY, color);
-            g.verticalLine(cx, midY, cy, color);
+        int hoveredTab = tabAt(mouseX, mouseY);
+        if (hoveredTab >= 0) {
+            Component name = Component.translatable(hoveredTab == 0 ? "gui.vanillatalents.tab.common" : "gui.vanillatalents.tab.class");
+            g.setTooltipForNextFrame(font, List.of(name.getVisualOrderText()), mouseX, mouseY);
+        } else if (tree != null && treeView != null && !draggingTree) {
+            TalentNode hovered = treeView.nodeAt(mouseX, mouseY);
+            if (hovered != null) {
+                g.setTooltipForNextFrame(font, List.of(Component.translatable(hovered.nameKey()).getVisualOrderText()), mouseX, mouseY);
+            }
         }
     }
 
-    private void drawNode(GuiGraphicsExtractor g, PlayerSkillData data, TalentRegistry registry, TalentNode n, int ox) {
-        int x = nodeX(n, ox), y = nodeY(n);
-        NodeState state = TalentRules.nodeState(data, registry, n);
-        int bg = switch (state) {
-            case LOCKED -> 0xFF202020;
-            case AVAILABLE -> 0xFF2E5A2E;
-            case IN_PROGRESS -> 0xFF35356A;
-            case MAXED -> 0xFF5A4A1A;
-        };
-        int border = switch (state) {
-            case LOCKED -> 0xFF555555;
-            case AVAILABLE -> 0xFF55FF55;
-            case IN_PROGRESS -> 0xFF8888FF;
-            case MAXED -> COLOR_GOLD;
-        };
-        g.fill(x, y, x + NODE, y + NODE, bg);
-        g.outline(x, y, NODE, NODE, border);
-        if (state == NodeState.MAXED) g.outline(x - 1, y - 1, NODE + 2, NODE + 2, COLOR_GOLD);
-        g.item(icon(n), x + 3, y + 3);
-        if (state == NodeState.LOCKED) g.fill(x + 1, y + 1, x + NODE - 1, y + NODE - 1, 0xAA000000);
-        if (state == NodeState.IN_PROGRESS || state == NodeState.MAXED) {
-            String counter = TalentRules.effectiveLevel(data, registry, n.id()) + "/" + n.maxLevel();
-            g.text(font, counter, x + NODE - font.width(counter), y + NODE - 6, 0xFFFFFFFF, true);
-        }
+    private void drawTab(GuiGraphicsExtractor g, int index, boolean selected) {
+        Identifier sprite = index == 0
+                ? (selected ? VanillaGui.TAB_ABOVE_LEFT_SELECTED : VanillaGui.TAB_ABOVE_LEFT)
+                : (selected ? VanillaGui.TAB_ABOVE_MIDDLE_SELECTED : VanillaGui.TAB_ABOVE_MIDDLE);
+        int tx = tabX(index), ty = tabY();
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, tx, ty, TAB_W, TAB_H);
+        g.fakeItem(index == 0 ? commonIcon : classIcon, tx + 6, ty + 9);
     }
 
-    private ItemStack icon(TalentNode n) {
-        return icons.computeIfAbsent(n.id(), id -> {
-            Identifier itemId = Identifier.tryParse(n.icon());
-            return new ItemStack(itemId == null ? Items.BARRIER : BuiltInRegistries.ITEM.getValue(itemId));
-        });
-    }
-
-    private List<FormattedCharSequence> tooltip(PlayerSkillData data, TalentRegistry registry, TalentNode n) {
-        List<FormattedCharSequence> lines = new ArrayList<>();
-        lines.add(Component.translatable(n.nameKey()).withStyle(ChatFormatting.YELLOW).getVisualOrderText());
-        lines.addAll(font.split(Component.translatable(n.descKey()).withStyle(ChatFormatting.GRAY), 220));
-        lines.add(Component.translatable("gui.vanillatalents.level",
-                TalentRules.effectiveLevel(data, registry, n.id()), n.maxLevel()).getVisualOrderText());
-        for (Prerequisite p : TalentScreenModel.unmetPrerequisites(data, registry, n)) {
-            Component name = registry.get(p.nodeId()).<Component>map(pre -> Component.translatable(pre.nameKey()))
-                    .orElse(Component.literal(p.nodeId()));
-            lines.add(Component.translatable("gui.vanillatalents.requires", name,
-                    TalentRules.effectiveLevel(data, registry, p.nodeId()), p.level())
-                    .withStyle(ChatFormatting.RED).getVisualOrderText());
+    private void drawXpBar(GuiGraphicsExtractor g, @Nullable LocalPlayer player) {
+        int bx = left + (winW - XP_BAR_W) / 2;
+        int by = top + winH - MARGIN - BUTTON_H - GAP - XP_BAR_H;
+        g.blitSprite(RenderPipelines.GUI_TEXTURED, XP_BAR_BACKGROUND, bx, by, XP_BAR_W, XP_BAR_H);
+        int progress = player == null ? 0 : (int) (player.experienceProgress * (XP_BAR_W + 1));
+        if (progress > 0) {
+            g.blitSprite(RenderPipelines.GUI_TEXTURED, XP_BAR_PROGRESS, XP_BAR_W, XP_BAR_H, 0, 0, bx, by, Math.min(progress, XP_BAR_W), XP_BAR_H);
         }
-        return lines;
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
-        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-            TalentNode node = nodeAt(event.x(), event.y());
-            if (node != null) {
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) return false;
+
+        int tab = tabAt(event.x(), event.y());
+        if (tab >= 0) {
+            openTab(tab == 1);
+            return true;
+        }
+        if (treeView == null || visibleTree() == null || !treeView.contains(event.x(), event.y())) return false;
+
+        draggingTree = true;
+        TalentNode node = treeView.nodeAt(event.x(), event.y());
+        deselectOnRelease = node == null;
+        if (node != null) {
+            selectedId = node.id();
+            if (doubleClick && TalentRules.canPurchase(ClientTalentState.data(), TalentRegistries.client(), node.id()) == PurchaseResult.OK) {
                 ModNetwork.sendToServer(new C2SBuyNode(node.id()));
-                return true;
             }
         }
-        return false;
+        return true;
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double dx, double dy) {
+        if (draggingTree && event.button() == InputConstants.MOUSE_BUTTON_LEFT && treeView != null) {
+            treeView.drag(dx, dy);
+            deselectOnRelease = false;
+            return true;
+        }
+        return super.mouseDragged(event, dx, dy);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (draggingTree && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+            if (deselectOnRelease) selectedId = null;
+            draggingTree = false;
+            deselectOnRelease = false;
+            return true;
+        }
+        return super.mouseReleased(event);
     }
 
     @Override
