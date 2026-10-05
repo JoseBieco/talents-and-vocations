@@ -102,3 +102,43 @@ Decisões tomadas durante a implementação (`Ruling`), pendências e achados da
 
 - **Converter tudo:** botão "Converter tudo (N PT)" ao lado do "Converter". `C2SConvertXp` ganhou o campo `all`; o servidor recalcula N com `XpCostRules.maxConversions` a partir do XP real e cobra `N × custo` de uma vez. Debug: `/vt debug convertall`.
 - **Faro Mineral com contorno através das paredes:** as partículas foram trocadas por BlockDisplays criados só no cliente, sempre brilhando (contorno nativo, visível através das paredes), com cor por tipo de minério via tags `c:ores/*` (branco para minérios de mods), escala 0,98 centrada para não cintilar com o bloco real, máximo de 256 por ativação. `particle_ticks` virou `highlight_ticks` (60). Decisão: subclasse de `Display.BlockDisplay` que força `isCurrentlyGlowing()`, porque no cliente `setGlowingTag` não liga o flag; bloco, cor e escala entram por `load(ValueInput)` (API pública), sem AccessTransformer novo.
+
+## UI vanilla (estilo Conquistas)
+
+**Resumo:** TalentScreen reescrita com abas (Comum/Classe), árvore arrastável no painel esquerdo e painel de detalhes/resumo à direita; ClassScreen substitui ClassSelectScreen + ConfirmRespecScreen; sprites e molduras desenhadas em código (VanillaGui); fundos temáticos por árvore (Comum=pedra, Minerador=deepslate, Produtor=terra, Desbravador=grama lateral, Guerreiro=blackstone polido, Arqueiro=tábuas carvalho).
+
+**Decisões:**
+- Setup: sem worktree, branch feat/vanilla-talents no próprio checkout — OneDrive + cache .gradle local
+- Task 1: textos dos motivos de bloqueio (reason.*) adicionados já na Task 1 (LangKeysTest exige chave literal; refinamento na Task 3)
+- Task 3: 'PT para completar' no resumo = PT que faltam (total − gastos), interpretação natural
+- Task 4: janela de classes até 320×214 px GUI (spec dizia ~300×180, mas descrição + prévia não cabem em 180 px altura)
+
+**Pendências (deferred):**
+- Task 1: FQN de TalentScreenModel repetido 3× em DesignDocConsistencyTest (usar import)
+- Task 1: classSummary com early-return redundante para árvore vazia
+- Task 1: TwoStepConfirm.isArmed não trata tick < armedAt (relógio reiniciado)
+- Task 2: TreeView.drag arredonda cada delta (Math.round); arrasto lento pode "grudar"
+- Task 2: ícone desconhecido vira AIR (getValue devolve default), não BARRIER
+- Task 2: escurecimento só em cima/embaixo (spec: "bordas levemente escurecidas")
+- Task 3: apertar num nó já seleciona; arrastar de um nó muda a seleção
+- Task 3: scroll não é re-limitado após sync que encolhe árvore
+- Task 3: em 320×240 os 3 botões têm ~94 px; texto "Converter 5 níveis → 1 PT" pode cortar
+- Task 3: chaves antigas sem uso (current_class, requires, xp_level, points)
+- Task 4: confirmação armada sobrevive a onSync (taxa pode diferir da cobrada; servidor é autoridade)
+- Task 4: chaves antigas sem uso (select_class.title, respec.title, respec.message)
+- Task 4: em janelas muito pequenas o texto do painel é cortado (scissor), não reflui
+
+**Checklist manual (José):**
+- [ ] Abas: aba Comum com ícone escudo; aba Classe com ícone do nó raiz (ou "Escolher classe" sem classe)
+- [ ] Fundos temáticos: cada árvore com textura própria (pedra, deepslate, terra, grama, blackstone, tábuas), levemente escurecidas nas bordas
+- [ ] Molduras por estado: bloqueado (cinza/unobtained), disponível (contorno verde), progresso (n/max + barrinha), completo (dourada/obtained + n/max), capstone (moldura de desafio)
+- [ ] Seleção: clique seleciona nó; painel mostra nome (amarelo), descrição, requisitos (✔ verde / ✘ vermelho), custo, botão Comprar
+- [ ] Motivo do bloqueio: painel desabilitado com razão (Sem PT, Requisito faltando, Nível máximo, Escolha uma classe, Outra classe)
+- [ ] Clique duplo: compra direto (envia C2SBuyNode), nó fica selecionado
+- [ ] Converter: botão "Converter 5 níveis → 1 PT" no rodapé
+- [ ] Converter tudo: botão "Converter tudo (N PT)" mostra quantidade dinâmica
+- [ ] Tela de classes sem classe: aviso "Nenhuma classe escolhida" + botão "Escolher <classe>" (envia grátis)
+- [ ] Tela de classes com classe: prévia (taxa, PT zerados, PT devolvidos, Comum não afetada)
+- [ ] Confirmação em 2 cliques: primeiro clique arma ("Clique de novo para confirmar"); segundo envia C2SChangeClass
+- [ ] Expiração: confirmação armada expira após ~3 s
+- [ ] Escala máxima com arrastar: em GUI máxima (320×240), arrastar com botão esquerdo move a árvore (se não couber)
