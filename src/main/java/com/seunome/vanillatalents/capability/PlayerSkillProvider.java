@@ -1,6 +1,7 @@
 package com.seunome.vanillatalents.capability;
 
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -34,12 +35,12 @@ public class PlayerSkillProvider implements ICapabilitySerializable<CompoundTag>
     }
 
     @Override
-    public CompoundTag serializeNBT() {
-        return createPlayerSkill().serializeNBT();
+    public CompoundTag serializeNBT(HolderLookup.Provider registryAccess) {
+        return createPlayerSkill().serializeNBT(registryAccess);
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        createPlayerSkill().deserializeNBT(nbt);
+    public void deserializeNBT(HolderLookup.Provider registryAccess, CompoundTag nbt) {
+        createPlayerSkill().deserializeNBT(registryAccess, nbt);
     }
 }

@@ -1,13 +1,14 @@
 package com.seunome.vanillatalents.capability;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@AutoRegisterCapability
 public class PlayerSkillData implements INBTSerializable<CompoundTag> {
 
     private String currentClass = "none";
@@ -56,7 +57,7 @@ public class PlayerSkillData implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public CompoundTag serializeNBT() {
+    public CompoundTag serializeNBT(HolderLookup.Provider registryAccess) {
         CompoundTag nbt = new CompoundTag();
         nbt.putString("CurrentClass", currentClass);
         nbt.putInt("AvailablePoints", availablePoints);
@@ -71,16 +72,14 @@ public class PlayerSkillData implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        currentClass = nbt.getString("CurrentClass");
-        availablePoints = nbt.getInt("AvailablePoints");
+    public void deserializeNBT(HolderLookup.Provider registryAccess, CompoundTag nbt) {
+        currentClass = nbt.getStringOr("CurrentClass", "none");
+        availablePoints = nbt.getIntOr("AvailablePoints", 0);
 
         unlockedNodes.clear();
-        if (nbt.contains("UnlockedNodes")) {
-            CompoundTag nodesTag = nbt.getCompound("UnlockedNodes");
-            for (String key : nodesTag.getAllKeys()) {
-                unlockedNodes.put(key, nodesTag.getInt(key));
-            }
+        CompoundTag nodesTag = nbt.getCompoundOrEmpty("UnlockedNodes");
+        for (String key : nodesTag.keySet()) {
+            unlockedNodes.put(key, nodesTag.getIntOr(key, 0));
         }
     }
 }
