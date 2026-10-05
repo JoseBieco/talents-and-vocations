@@ -92,3 +92,8 @@ Decisões tomadas durante a implementação (`Ruling`), pendências e achados da
 - Task 15: checklist em jogo pendente — manual do José.
 - Task 16: checklist em jogo pendente — manual do José.
 - Task 18: QA estático dos 5 Review Focus feito no código; jar verificado (MixinConfigs no manifest, AT, 72 skills, 4 GLMs, lang). runServer e checklists em jogo pendentes (EULA / manual do José).
+
+## Correções após o teste em jogo do José
+
+- Clique nos nós não comprava: no MC 26.x os botões do mouse seguem o SDL3 (`InputConstants.MOUSE_BUTTON_LEFT = 1`); `TalentScreen` comparava `event.button() == 0`. Evidência: save do mundo com `CurrentClass=archer`, `AvailablePoints=20`, `UnlockedNodes` vazio. Regressão coberta por `InputConstantsUsageTest`.
+- Texto do botão "Trocar classe" sobreposto: o rótulo "Classe: X" ficava no mesmo canto do botão; movido para cima dele.
