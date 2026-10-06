@@ -11,6 +11,7 @@ import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.network.S2CProspectorHighlight;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
@@ -22,12 +23,15 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -53,6 +57,9 @@ public final class MinerEffects {
     public static final TagKey<Block> DENSE_STONE =
             TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VanillaTalents.MODID, "dense_stone"));
 
+    public static final TagKey<Block> HARD_STONE =
+            TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(VanillaTalents.MODID, "hard_stone"));
+
     private static final String VEIN_GUARD = "miner_vein";
 
     /** Faro Mineral: posição em que o jogador está parado agachado e há quantos ticks. */
@@ -68,6 +75,8 @@ public final class MinerEffects {
 
     public static void registerLoot() {
         TalentLootModifier.register(TalentLootModifier.Kind.MINER_FORTUNE, MinerEffects::fortuneLoot);
+        TalentLootModifier.register(TalentLootModifier.Kind.MINER_SMELTER, MinerEffects::smelterLoot);
+        TalentLootModifier.register(TalentLootModifier.Kind.MINER_GEODE, MinerEffects::geodeLoot);
     }
 
     /** miner_haste, miner_deepslate, miner_mole, miner_footing. Roda nos dois lados: o cliente prevê a quebra. */
@@ -80,7 +89,8 @@ public final class MinerEffects {
         int dense = pickaxe ? Talents.level(player, "miner_deepslate") : 0;
         int mole = tool.is(ItemTags.SHOVELS) ? Talents.level(player, "miner_mole") : 0;
         int footing = Talents.level(player, "miner_footing");
-        if (haste == 0 && dense == 0 && mole == 0 && footing == 0) return;
+        int obsidian = pickaxe && event.getState().is(HARD_STONE) ? Talents.level(player, "miner_obsidian") : 0;
+        if (haste == 0 && dense == 0 && mole == 0 && footing == 0 && obsidian == 0) return;
 
         double multiplier = MinerFormulas.breakSpeedMultiplier(
                 haste, haste > 0 ? Talents.value(player, "miner_haste", "per_level") : 0,
@@ -88,6 +98,7 @@ public final class MinerEffects {
                 event.getState().is(DENSE_STONE),
                 footing, player.onGround());
         if (mole > 0) multiplier *= MinerFormulas.shovelMultiplier(mole, Talents.value(player, "miner_mole", "per_level"));
+        if (obsidian > 0) multiplier *= MinerFormulas.hardStoneMultiplier(obsidian, Talents.value(player, "miner_obsidian", "per_level"));
         event.setNewSpeed((float) (event.getNewSpeed() * multiplier));
     }
 
@@ -140,13 +151,19 @@ public final class MinerEffects {
     public static void onHurt(LivingHurtEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         DamageSource source = event.getSource();
+        float amount = event.getAmount();
         boolean applies = source.is(DamageTypeTags.IS_EXPLOSION) || source.is(DamageTypes.FALLING_BLOCK)
                 || source.is(DamageTypes.FALLING_ANVIL) || source.is(DamageTypes.FALLING_STALACTITE);
-        if (!applies) return;
-        int level = Talents.level(player, "miner_stoneskin");
-        if (level <= 0) return;
-        double multiplier = HookFormulas.reductionMultiplier(level, Talents.value(player, "miner_stoneskin", "per_level"));
-        event.setAmount((float) (event.getAmount() * multiplier));
+        int stoneskin = applies ? Talents.level(player, "miner_stoneskin") : 0;
+        if (stoneskin > 0) {
+            amount *= (float) HookFormulas.reductionMultiplier(stoneskin, Talents.value(player, "miner_stoneskin", "per_level"));
+        }
+        int underdweller = source.getEntity() instanceof Mob ? Talents.level(player, "miner_underdweller") : 0;
+        if (underdweller > 0) {
+            amount *= (float) MinerFormulas.underdwellerMultiplier(underdweller,
+                    Talents.value(player, "miner_underdweller", "per_level"), player.getY());
+        }
+        if (amount != event.getAmount()) event.setAmount(amount);
     }
 
     @SubscribeEvent
@@ -231,6 +248,47 @@ public final class MinerEffects {
             doubled.add(stack.copy());
         }
         return doubled;
+    }
+
+    /** miner_smelter: com chance, troca material bruto por lingote (sem Toque Suave). Roda depois de miner_fortune. */
+    static ObjectArrayList<ItemStack> smelterLoot(ObjectArrayList<ItemStack> loot, LootContext context) {
+        if (!(context.getOptional(LootContextParams.THIS_ENTITY) instanceof ServerPlayer player)) return loot;
+        BlockState state = context.getOptional(LootContextParams.BLOCK_STATE);
+        if (state == null || !state.is(Tags.Blocks.ORES)) return loot;
+        if (hasSilkTouch(player, context.getOptional(LootContextParams.TOOL))) return loot;
+
+        int level = Talents.level(player, "miner_smelter");
+        if (level <= 0) return loot;
+        double chance = HookFormulas.chance(level, Talents.value(player, "miner_smelter", "per_level"));
+        if (context.getRandom().nextDouble() >= chance) return loot;
+
+        ObjectArrayList<ItemStack> result = new ObjectArrayList<>(loot.size());
+        for (ItemStack stack : loot) {
+            var target = MinerFormulas.smeltTarget(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())
+                    .map(Identifier::parse)
+                    .flatMap(id -> BuiltInRegistries.ITEM.get(id))
+                    .map(holder -> holder.value());
+            result.add(target.isPresent() ? new ItemStack(target.get(), stack.getCount()) : stack);
+        }
+        return result;
+    }
+
+    /** miner_geode: com chance, +1 fragmento de ametista (aglomerado) ou +1 quartzo (minério de quartzo do Nether). */
+    static ObjectArrayList<ItemStack> geodeLoot(ObjectArrayList<ItemStack> loot, LootContext context) {
+        if (!(context.getOptional(LootContextParams.THIS_ENTITY) instanceof ServerPlayer player)) return loot;
+        BlockState state = context.getOptional(LootContextParams.BLOCK_STATE);
+        if (state == null) return loot;
+        ItemStack bonus;
+        if (state.is(Blocks.AMETHYST_CLUSTER)) bonus = new ItemStack(Items.AMETHYST_SHARD);
+        else if (state.is(Blocks.NETHER_QUARTZ_ORE)) bonus = new ItemStack(Items.QUARTZ);
+        else return loot;
+
+        int level = Talents.level(player, "miner_geode");
+        if (level <= 0) return loot;
+        double chance = HookFormulas.chance(level, Talents.value(player, "miner_geode", "per_level"));
+        if (context.getRandom().nextDouble() >= chance) return loot;
+        loot.add(bonus);
+        return loot;
     }
 
     private static boolean hasSilkTouch(ServerPlayer player, ItemInstance tool) {
