@@ -97,6 +97,11 @@ public final class TalentScreenModel {
         return clampScroll(contentH, viewH, current + (int) Math.round(wheel * WHEEL_STEP));
     }
 
+    /** Nova rolagem (≤ 0) de uma lista de {@code rows} linhas de {@code rowH} px numa vista de {@code viewH} px. */
+    public static int listScroll(int rows, int rowH, int viewH, int current, double wheel) {
+        return wheelScroll(rows * rowH, viewH, current, wheel);
+    }
+
     /** Barra de rolagem do painel, ou null quando o texto cabe. */
     public static ScrollThumb scrollThumb(int contentH, int viewH, int scroll, int trackH) {
         if (contentH <= viewH) return null;
@@ -114,6 +119,7 @@ public final class TalentScreenModel {
             case EXPLORER -> "textures/block/grass_block_side.png";
             case WARRIOR -> "textures/block/polished_blackstone.png";
             case ARCHER -> "textures/block/oak_planks.png";
+            case ANGLER -> "textures/block/sand.png";
         };
     }
 

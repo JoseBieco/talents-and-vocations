@@ -1,0 +1,21 @@
+{
+  "id": "angler_loyalty",
+  "treeCategory": "angler",
+  "name": "talent.vanillatalents.angler_loyalty.name",
+  "description": "talent.vanillatalents.angler_loyalty.desc",
+  "icon": "minecraft:lead",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "angler_trident",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 2,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.3
+  }
+}

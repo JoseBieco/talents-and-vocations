@@ -72,6 +72,8 @@ public class ClassScreen extends Screen {
     private int listX, listY, panelX, panelY, panelW, panelH;
     /** Rolagem do texto do painel (≤ 0) e as medidas do último quadro. */
     private int detailScroll, detailContentH, detailViewH;
+    /** Rolagem da lista de classes (≤ 0) e a altura visível dela (termina acima do botão Voltar). */
+    private int listScroll, listViewH;
 
     public ClassScreen(Screen parent, ClassSlot slot) {
         super(Component.translatable(slot == ClassSlot.PRIMARY
@@ -120,6 +122,8 @@ public class ClassScreen extends Screen {
         panelW = left + winW - MARGIN - 1 - panelX;
         panelY = listY;
         panelH = winH - TITLE_H - MARGIN - 2;
+        listViewH = Math.max(ROW_H, panelY + panelH - BUTTON_H - GAP - listY);
+        listScroll = TalentScreenModel.clampScroll(listContentH(), listViewH, listScroll);
 
         if (selected == null || !selectable(selected)) {
             selected = classes.stream().filter(this::selectable).findFirst().orElse(null);
@@ -222,10 +226,28 @@ public class ClassScreen extends Screen {
         return panelY + panelH - PAD - BUTTON_H - PAD - LINE_H;
     }
 
+    private int listContentH() {
+        return classes.size() * ROW_H;
+    }
+
+    /** Altura da moldura da lista: o conteúdo, limitado à área acima do botão Voltar. */
+    private int listVisibleH() {
+        return Math.min(listContentH(), listViewH);
+    }
+
+    private boolean overList(double mx, double my) {
+        return mx >= listX && mx < listX + LIST_W && my >= listY && my < listY + listVisibleH();
+    }
+
     private int rowAt(double mx, double my) {
-        if (mx < listX || mx >= listX + LIST_W || my < listY) return -1;
-        int i = (int) ((my - listY) / ROW_H);
-        return i < classes.size() ? i : -1;
+        if (!overList(mx, my)) return -1;
+        int i = (int) Math.floor((my - listY - listScroll) / ROW_H);
+        return i >= 0 && i < classes.size() ? i : -1;
+    }
+
+    /** Largura útil das linhas: com barra de rolagem, sobra espaço para ela à direita. */
+    private int rowW() {
+        return listContentH() > listViewH ? LIST_W - 4 : LIST_W;
     }
 
     @Override
@@ -233,8 +255,16 @@ public class ClassScreen extends Screen {
         VanillaGui.raisedPanel(g, left, top, winW, winH);
         g.text(font, title, left + MARGIN + 1, top + 6, COLOR_TITLE, false);
 
-        VanillaGui.insetPanel(g, listX - 1, listY - 1, LIST_W + 2, classes.size() * ROW_H + 2);
-        for (int i = 0; i < classes.size(); i++) drawRow(g, i, mouseX, mouseY);
+        int visibleH = listVisibleH();
+        VanillaGui.insetPanel(g, listX - 1, listY - 1, LIST_W + 2, visibleH + 2);
+        g.enableScissor(listX, listY, listX + LIST_W, listY + visibleH);
+        for (int i = 0; i < classes.size(); i++) {
+            int y = listY + listScroll + i * ROW_H;
+            if (y + ROW_H > listY && y < listY + visibleH) drawRow(g, i, y, mouseX, mouseY);
+        }
+        g.disableScissor();
+        VanillaGui.scrollbar(g, listX + LIST_W - 3, listY, listY + visibleH,
+                TalentScreenModel.scrollThumb(listContentH(), listViewH, listScroll, visibleH));
 
         VanillaGui.insetPanel(g, panelX, panelY - 1, panelW, panelH + 2);
         if (selected != null) {
@@ -256,13 +286,13 @@ public class ClassScreen extends Screen {
         super.extractRenderState(g, mouseX, mouseY, a);
     }
 
-    private void drawRow(GuiGraphicsExtractor g, int index, int mouseX, int mouseY) {
+    private void drawRow(GuiGraphicsExtractor g, int index, int y, int mouseX, int mouseY) {
         TreeCategory tree = classes.get(index);
         TalentScreenModel.ClassChoice choice = choice(tree);
         boolean muted = choice != TalentScreenModel.ClassChoice.AVAILABLE;
-        int y = listY + index * ROW_H;
-        if (tree == selected) g.outline(listX, y, LIST_W, ROW_H, COLOR_SELECTED);
-        else if (!muted && rowAt(mouseX, mouseY) == index) g.fill(listX, y, listX + LIST_W, y + ROW_H, COLOR_ROW_HOVER);
+        int rowW = rowW();
+        if (tree == selected) g.outline(listX, y, rowW, ROW_H, COLOR_SELECTED);
+        else if (!muted && rowAt(mouseX, mouseY) == index) g.fill(listX, y, listX + rowW, y + ROW_H, COLOR_ROW_HOVER);
 
         int fy = y + (ROW_H - FRAME) / 2;
         g.blitSprite(RenderPipelines.GUI_TEXTURED, VanillaGui.frameSprite(false, false), listX + 2, fy, FRAME, FRAME);
@@ -354,9 +384,13 @@ public class ClassScreen extends Screen {
         return true;
     }
 
-    /** Roda do mouse rola o texto do painel de detalhes. */
+    /** Roda do mouse rola a lista de classes ou o texto do painel de detalhes, o que estiver sob o cursor. */
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (scrollY != 0 && overList(mouseX, mouseY)) {
+            listScroll = TalentScreenModel.listScroll(classes.size(), ROW_H, listViewH, listScroll, scrollY);
+            return true;
+        }
         boolean overPanel = mouseX >= panelX && mouseX < panelX + panelW && mouseY >= panelY && mouseY < statusY();
         if (scrollY != 0 && selected != null && overPanel) {
             detailScroll = TalentScreenModel.wheelScroll(detailContentH, detailViewH, detailScroll, scrollY);

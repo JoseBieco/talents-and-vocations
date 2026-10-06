@@ -62,6 +62,10 @@ public final class Config {
             .comment("Maximum combined chance of not spending durability from all talents (before Unbreaking)")
             .defineInRange("durabilitySaveCap", 0.5, 0.0, 1.0);
 
+    public static final ForgeConfigSpec.IntValue ANGLER_IDLE_TICKS = BUILDER
+            .comment("Live Bait and High Tide's fishing bonus stop if the player has not moved or turned the camera for this many ticks")
+            .defineInRange("anglerIdleTicks", 1200, 0, 72000);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private Config() {}

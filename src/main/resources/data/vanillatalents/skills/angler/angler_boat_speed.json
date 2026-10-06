@@ -1,0 +1,21 @@
+{
+  "id": "angler_boat_speed",
+  "treeCategory": "angler",
+  "name": "talent.vanillatalents.angler_boat_speed.name",
+  "description": "talent.vanillatalents.angler_boat_speed.desc",
+  "icon": "minecraft:oak_boat",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "angler_lure",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.05
+  }
+}

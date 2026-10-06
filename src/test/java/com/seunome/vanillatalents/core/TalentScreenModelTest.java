@@ -277,6 +277,15 @@ class TalentScreenModelTest {
     }
 
     @Test
+    void listScroll_scrollsOnlyWhenRowsOverflowTheView() {
+        int scrolled = TalentScreenModel.listScroll(6, 28, 140, 0, -1);
+        assertTrue(scrolled < 0, "seis linhas não cabem em 140 px");
+        assertEquals(140 - 6 * 28, TalentScreenModel.listScroll(6, 28, 140, scrolled, -50), "não passa do fim");
+        assertEquals(0, TalentScreenModel.listScroll(6, 28, 140, scrolled, 50), "não passa do início");
+        assertEquals(0, TalentScreenModel.listScroll(4, 28, 140, 0, -1), "lista que cabe não rola");
+    }
+
+    @Test
     void scrollThumb_sizeAndPositionFollowContent() {
         assertNull(TalentScreenModel.scrollThumb(80, 100, 0, 100), "sem barra quando cabe");
         var top = TalentScreenModel.scrollThumb(400, 100, 0, 100);
@@ -303,6 +312,7 @@ class TalentScreenModelTest {
         assertEquals("textures/block/grass_block_side.png", TalentScreenModel.backgroundTexture(TreeCategory.EXPLORER));
         assertEquals("textures/block/polished_blackstone.png", TalentScreenModel.backgroundTexture(TreeCategory.WARRIOR));
         assertEquals("textures/block/oak_planks.png", TalentScreenModel.backgroundTexture(TreeCategory.ARCHER));
+        assertEquals("textures/block/sand.png", TalentScreenModel.backgroundTexture(TreeCategory.ANGLER));
         for (TreeCategory t : TreeCategory.values()) assertNotNull(TalentScreenModel.backgroundTexture(t));
     }
 }
