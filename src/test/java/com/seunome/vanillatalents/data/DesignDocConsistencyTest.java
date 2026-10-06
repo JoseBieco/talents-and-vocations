@@ -32,7 +32,7 @@ class DesignDocConsistencyTest {
 
     static final Map<TreeCategory, Expected> EXPECTED = Map.of(
             TreeCategory.COMMON, new Expected(16, 46), TreeCategory.MINER, new Expected(16, 47),
-            TreeCategory.FARMER, new Expected(12, 35), TreeCategory.EXPLORER, new Expected(12, 34),
+            TreeCategory.FARMER, new Expected(16, 46), TreeCategory.EXPLORER, new Expected(12, 34),
             TreeCategory.WARRIOR, new Expected(12, 35), TreeCategory.ARCHER, new Expected(12, 37));
 
     static int totalExpectedNodes() {

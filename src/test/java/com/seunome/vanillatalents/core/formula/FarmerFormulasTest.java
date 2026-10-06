@@ -52,4 +52,33 @@ class FarmerFormulasTest {
         // nenhuma rolagem passa
         assertEquals(0, FarmerFormulas.auraPickCount(100, 0.05, () -> 0.99, 32));
     }
+
+    @Test
+    void coopExtraTicks() {
+        assertEquals(9, FarmerFormulas.coopExtraTicks(20, 3, .15));
+        assertEquals(3, FarmerFormulas.coopExtraTicks(20, 1, .15));
+        assertEquals(0, FarmerFormulas.coopExtraTicks(20, 0, .15));
+    }
+
+    @Test
+    void compostNextLevel_vanillaAlreadyRose() {
+        assertEquals(-1, FarmerFormulas.compostNextLevel(2, 3, true));
+    }
+
+    @Test
+    void compostNextLevel_full() {
+        assertEquals(-1, FarmerFormulas.compostNextLevel(7, 7, true));
+        assertEquals(-1, FarmerFormulas.compostNextLevel(8, 8, true));
+    }
+
+    @Test
+    void compostNextLevel_rollFailed() {
+        assertEquals(-1, FarmerFormulas.compostNextLevel(3, 3, false));
+    }
+
+    @Test
+    void compostNextLevel_adds() {
+        assertEquals(7, FarmerFormulas.compostNextLevel(6, 6, true));
+        assertEquals(1, FarmerFormulas.compostNextLevel(0, 0, true));
+    }
 }

@@ -27,7 +27,7 @@ import java.util.Map;
 public class TalentLootModifier extends LootModifier {
 
     public enum Kind {
-        MINER_FORTUNE, MINER_SMELTER, MINER_GEODE, FARMER_HARVEST, FARMER_FORESTER, FARMER_REPLANT;
+        MINER_FORTUNE, MINER_SMELTER, MINER_GEODE, FARMER_HARVEST, FARMER_FORESTER, FARMER_REPLANT, FARMER_GATHERER;
 
         static final Codec<Kind> CODEC = Codec.STRING.xmap(s -> Kind.valueOf(s.toUpperCase(Locale.ROOT)),
                 k -> k.name().toLowerCase(Locale.ROOT));

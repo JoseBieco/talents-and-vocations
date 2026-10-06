@@ -8,6 +8,7 @@ import com.seunome.vanillatalents.core.formula.HookFormulas;
 import com.seunome.vanillatalents.effect.loot.TalentLootModifier;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -20,22 +21,30 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.bee.Bee;
+import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.CaveVines;
+import net.minecraft.world.level.block.CocoaBlock;
+import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
@@ -47,8 +56,10 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /** Efeitos da árvore do Produtor (farmer_hoe_care fica em DurabilityHooks). */
@@ -61,6 +72,13 @@ public final class FarmerEffects {
     /** Espera vanilla após reproduzir (Animal.spawnChildFromBreeding). */
     private static final int VANILLA_BREED_COOLDOWN = 6000;
     private static final String AREA_GUARD = "farmer_area_harvest";
+    /** Espera vanilla entre a composteira chegar a 7 e ficar pronta (ComposterBlock.addLayer). */
+    private static final int VANILLA_COMPOST_READY_DELAY = 20;
+
+    /** Interações já agendadas para o próximo tick (evita rolar duas vezes quando as duas mãos disparam o evento). */
+    private record Pending(UUID player, BlockPos pos, String node) {}
+
+    private static final Set<Pending> PENDING = new HashSet<>();
 
     private record Movement(Vec3 pos, long lastMoveTick) {}
 
@@ -72,6 +90,7 @@ public final class FarmerEffects {
         TalentLootModifier.register(TalentLootModifier.Kind.FARMER_HARVEST, FarmerEffects::harvestLoot);
         TalentLootModifier.register(TalentLootModifier.Kind.FARMER_FORESTER, FarmerEffects::foresterLoot);
         TalentLootModifier.register(TalentLootModifier.Kind.FARMER_REPLANT, FarmerEffects::replantLoot);
+        TalentLootModifier.register(TalentLootModifier.Kind.FARMER_GATHERER, FarmerEffects::gathererLoot);
     }
 
     public static void forget(UUID player) {
@@ -265,7 +284,7 @@ public final class FarmerEffects {
         return loot;
     }
 
-    /** farmer_growth_aura: a cada pulso, plantas no raio (Y±1) têm chance de receber um tick aleatório. */
+    /** Rastreia movimento (Aura Fértil) e roda farmer_coop e farmer_growth_aura. */
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent.Post event) {
         if (!(event.player() instanceof ServerPlayer player)) return;
@@ -275,6 +294,27 @@ public final class FarmerEffects {
         boolean moved = previous == null || previous.pos().distanceToSqr(pos) > 1.0E-4;
         MOVEMENT.put(player.getUUID(), new Movement(pos, moved ? now : previous.lastMoveTick()));
 
+        coopTick(player);
+        growthAuraTick(player, now);
+    }
+
+    /** farmer_coop: a cada {@code interval} ticks, galinhas adultas no raio botam ovo mais cedo. */
+    private static void coopTick(ServerPlayer player) {
+        int level = Talents.level(player, "farmer_coop");
+        if (level <= 0) return;
+        int interval = Math.max(1, (int) Talents.value(player, "farmer_coop", "interval"));
+        if (player.tickCount % interval != 0) return;
+        int extra = FarmerFormulas.coopExtraTicks(interval, level, Talents.value(player, "farmer_coop", "per_level"));
+        if (extra <= 0) return;
+        double radius = Talents.value(player, "farmer_coop", "radius");
+        for (Chicken chicken : player.level().getEntitiesOfClass(Chicken.class, player.getBoundingBox().inflate(radius))) {
+            if (!chicken.isAlive() || chicken.isBaby() || chicken.distanceToSqr(player) > radius * radius) continue;
+            chicken.eggTime = Math.max(1, chicken.eggTime - extra);
+        }
+    }
+
+    /** farmer_growth_aura: a cada pulso, plantas no raio (Y±1) têm chance de receber um tick aleatório. */
+    private static void growthAuraTick(ServerPlayer player, long now) {
         int level = Talents.level(player, "farmer_growth_aura");
         if (level <= 0) return;
         int interval = (int) Talents.value(player, "farmer_growth_aura", "interval");
@@ -301,5 +341,115 @@ public final class FarmerEffects {
         if (state.is(BlockTags.CROPS) || state.getBlock() instanceof NetherWartBlock) return !isMatureCrop(state);
         return forester && (state.is(BlockTags.SAPLINGS) || state.is(Blocks.SUGAR_CANE) || state.is(Blocks.CACTUS)
                 || state.is(Blocks.BAMBOO) || state.is(Blocks.BAMBOO_SAPLING));
+    }
+
+    // ---- Expansão v2 -------------------------------------------------------------------------------------------
+
+    /** farmer_gatherer (frutas doces e brilhantes), farmer_apiarist e farmer_compost: conferidos no tick seguinte. */
+    @SubscribeEvent
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        BlockPos pos = event.getPos().immutable();
+        BlockState state = player.level().getBlockState(pos);
+        ItemStack stack = event.getItemStack();
+        if (state.getBlock() instanceof SweetBerryBushBlock || state.getBlock() instanceof CaveVines) {
+            scheduleGatherer(player, pos, state);
+        } else if (state.getBlock() instanceof BeehiveBlock) {
+            scheduleApiarist(player, pos, state, stack);
+        } else if (state.getBlock() instanceof ComposterBlock) {
+            scheduleCompost(player, pos, state, stack);
+        }
+    }
+
+    /** Agenda {@code task} uma única vez por jogador, bloco e nó neste tick. */
+    private static void scheduleOnce(ServerPlayer player, BlockPos pos, String node, Runnable task) {
+        Pending key = new Pending(player.getUUID(), pos, node);
+        if (!PENDING.add(key)) return;
+        NextTick.schedule(() -> {
+            PENDING.remove(key);
+            task.run();
+        });
+    }
+
+    /** farmer_gatherer: se a fruta foi colhida (idade caiu ou a fruta sumiu), chance de +1 fruta. */
+    private static void scheduleGatherer(ServerPlayer player, BlockPos pos, BlockState before) {
+        boolean bush = before.getBlock() instanceof SweetBerryBushBlock;
+        if (bush ? before.getValue(SweetBerryBushBlock.AGE) < 2 : !CaveVines.hasGlowBerries(before)) return;
+        int level = Talents.level(player, "farmer_gatherer");
+        if (level <= 0) return;
+        double chance = HookFormulas.chance(level, Talents.value(player, "farmer_gatherer", "per_level"));
+        ServerLevel world = player.level();
+        scheduleOnce(player, pos, "farmer_gatherer", () -> {
+            BlockState now = world.getBlockState(pos);
+            boolean harvested = bush
+                    ? now.getBlock() instanceof SweetBerryBushBlock
+                            && now.getValue(SweetBerryBushBlock.AGE) < before.getValue(SweetBerryBushBlock.AGE)
+                    : now.getBlock() instanceof CaveVines && !CaveVines.hasGlowBerries(now);
+            if (!harvested || player.getRandom().nextDouble() >= chance) return;
+            Block.popResource(world, pos, new ItemStack(bush ? Items.SWEET_BERRIES : Items.GLOW_BERRIES));
+        });
+    }
+
+    /** farmer_gatherer: cacau maduro quebrado pelo jogador. */
+    static ObjectArrayList<ItemStack> gathererLoot(ObjectArrayList<ItemStack> loot, LootContext context) {
+        if (!(context.getOptional(LootContextParams.THIS_ENTITY) instanceof ServerPlayer player)) return loot;
+        BlockState state = context.getOptional(LootContextParams.BLOCK_STATE);
+        if (state == null || !(state.getBlock() instanceof CocoaBlock)) return loot;
+        if (state.getValue(CocoaBlock.AGE) < CocoaBlock.MAX_AGE) return loot;
+        int level = Talents.level(player, "farmer_gatherer");
+        if (level <= 0) return loot;
+        if (context.getRandom().nextDouble() >= HookFormulas.chance(level, Talents.value(player, "farmer_gatherer", "per_level"))) return loot;
+        loot.add(new ItemStack(Items.COCOA_BEANS));
+        return loot;
+    }
+
+    /**
+     * farmer_apiarist: depois de o jogador colher mel/favo (o nível de mel volta a 0), acalma as abelhas cujo alvo
+     * de raiva é ele. Abelhas irritadas com outra entidade não são tocadas. Nível 2 com tesoura: chance de +1 favo.
+     */
+    private static void scheduleApiarist(ServerPlayer player, BlockPos pos, BlockState before, ItemStack stack) {
+        if (before.getValue(BeehiveBlock.HONEY_LEVEL) < BeehiveBlock.MAX_HONEY_LEVELS) return;
+        boolean shears = stack.canPerformAction(ToolActions.SHEARS_HARVEST);
+        if (!shears && !stack.is(Items.GLASS_BOTTLE)) return;
+        int level = Talents.level(player, "farmer_apiarist");
+        if (level <= 0) return;
+        double calmRadius = Talents.value(player, "farmer_apiarist", "calm_radius");
+        double combChance = level >= 2 && shears ? Talents.value(player, "farmer_apiarist", "comb_chance") : 0;
+        ServerLevel world = player.level();
+        scheduleOnce(player, pos, "farmer_apiarist", () -> {
+            BlockState now = world.getBlockState(pos);
+            if (!(now.getBlock() instanceof BeehiveBlock) || now.getValue(BeehiveBlock.HONEY_LEVEL) != 0) return;
+            for (Bee bee : world.getEntitiesOfClass(Bee.class, new AABB(pos).inflate(calmRadius))) {
+                if (isAngryAt(bee, player)) bee.stopBeingAngry();
+            }
+            if (combChance > 0 && player.getRandom().nextDouble() < combChance) {
+                Block.popResource(world, pos, new ItemStack(Items.HONEYCOMB));
+            }
+        });
+    }
+
+    /** O alvo atual ou o alvo de raiva persistente da abelha é este jogador. */
+    private static boolean isAngryAt(Bee bee, ServerPlayer player) {
+        var persistent = bee.getPersistentAngerTarget();
+        return bee.getTarget() == player || (persistent != null && persistent.matches(player));
+    }
+
+    /** farmer_compost: se a vanilla não subiu o nível, rola a chance extra; ao chegar a 7, agenda o tick como a vanilla. */
+    private static void scheduleCompost(ServerPlayer player, BlockPos pos, BlockState before, ItemStack stack) {
+        int beforeLevel = before.getValue(ComposterBlock.LEVEL);
+        if (beforeLevel >= ComposterBlock.MAX_LEVEL || stack.get(DataComponents.COMPOSTABLE) == null) return;
+        int level = Talents.level(player, "farmer_compost");
+        if (level <= 0) return;
+        double chance = HookFormulas.chance(level, Talents.value(player, "farmer_compost", "per_level"));
+        ServerLevel world = player.level();
+        scheduleOnce(player, pos, "farmer_compost", () -> {
+            BlockState now = world.getBlockState(pos);
+            if (!(now.getBlock() instanceof ComposterBlock)) return;
+            boolean roll = player.getRandom().nextDouble() < chance;
+            int next = FarmerFormulas.compostNextLevel(beforeLevel, now.getValue(ComposterBlock.LEVEL), roll);
+            if (next < 0) return;
+            world.setBlockAndUpdate(pos, now.setValue(ComposterBlock.LEVEL, next));
+            if (next == ComposterBlock.MAX_LEVEL) world.scheduleTick(pos, now.getBlock(), VANILLA_COMPOST_READY_DELAY);
+        });
     }
 }

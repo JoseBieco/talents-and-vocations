@@ -50,4 +50,23 @@ public final class FarmerFormulas {
         }
         return picked;
     }
+
+    /** farmer_coop: ticks a descontar do {@code eggTime} de cada galinha a cada {@code intervalTicks}. */
+    public static int coopExtraTicks(int intervalTicks, int level, double perLevel) {
+        return (int) Math.round(intervalTicks * level * perLevel);
+    }
+
+    /** Nível máximo da composteira antes de ficar pronta (ComposterBlock.MAX_LEVEL). */
+    public static final int COMPOSTER_MAX_LEVEL = 7;
+
+    /**
+     * farmer_compost: novo nível da composteira depois de um item, ou {@code -1} para não mexer.
+     * Não mexe se a vanilla já subiu, se já está em 7 (ou pronta) ou se a rolagem falhou.
+     */
+    public static int compostNextLevel(int before, int after, boolean rollPassed) {
+        if (after != before) return -1;
+        if (before >= COMPOSTER_MAX_LEVEL) return -1;
+        if (!rollPassed) return -1;
+        return before + 1;
+    }
 }
