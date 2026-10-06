@@ -3,6 +3,9 @@ package com.seunome.vanillatalents.mixin;
 import com.seunome.vanillatalents.effect.hooks.DurabilityHooks;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +16,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Consumer;
 
-/** miner_durability, farmer_hoe_care, explorer_glider: poupa pontos de durabilidade. */
+/**
+ * Durabilidade (R4): poupa pontos em hurtAndBreak. Itens de jogador (miner_durability, farmer_hoe_care, explorer_glider,
+ * common_armor_care, angler_rod_care) pela sobrecarga com ServerPlayer; itens usados por outras entidades
+ * (tamer_wolf_armor) pela sobrecarga com LivingEntity, que repassa {@code null} como jogador.
+ */
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
@@ -32,6 +39,28 @@ public abstract class ItemStackMixin {
             vanillatalents$reentry.set(true);
             try {
                 self.hurtAndBreak(kept, level, player, onBreak);
+            } finally {
+                vanillatalents$reentry.set(false);
+            }
+        }
+    }
+
+    /**
+     * Sobrecarga usada pela armadura de lobo (Wolf.actuallyHurt / hurtArmor). Para jogadores ela repassa o jogador à
+     * sobrecarga acima, que já trata o item; aqui só entram as demais entidades, sem dupla aplicação.
+     */
+    @Inject(method = "hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;)V",
+            at = @At("HEAD"), cancellable = true)
+    private void vanillatalents$reduceWornDamage(int amount, LivingEntity owner, EquipmentSlot slot, CallbackInfo ci) {
+        if (owner instanceof Player || vanillatalents$reentry.get()) return;
+        ItemStack self = (ItemStack) (Object) this;
+        int kept = DurabilityHooks.adjustWornDamage(owner, self, slot, amount);
+        if (kept == amount) return;
+        ci.cancel();
+        if (kept > 0) {
+            vanillatalents$reentry.set(true);
+            try {
+                self.hurtAndBreak(kept, owner, slot);
             } finally {
                 vanillatalents$reentry.set(false);
             }

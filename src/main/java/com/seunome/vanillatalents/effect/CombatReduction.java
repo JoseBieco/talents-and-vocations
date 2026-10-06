@@ -5,7 +5,9 @@ import com.seunome.vanillatalents.VanillaTalents;
 import com.seunome.vanillatalents.core.formula.HookFormulas;
 import com.seunome.vanillatalents.core.formula.MinerFormulas;
 import com.seunome.vanillatalents.core.formula.StackingFormulas;
+import com.seunome.vanillatalents.core.formula.TamerFormulas;
 import com.seunome.vanillatalents.core.formula.WarriorFormulas;
+import com.seunome.vanillatalents.effect.pet.PetScan;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -24,7 +26,7 @@ import java.util.List;
 /**
  * R2 (spec 9.5): reduções de dano de combate do jogador atingido, de todas as classes, combinadas
  * multiplicativamente e limitadas por {@code combatReductionCap}. Cada nó mantém a própria condição; este é o único
- * lugar onde eles são aplicados. Classes futuras (tamer_pack) entram em {@link #multipliers}.
+ * lugar onde eles são aplicados. Classes novas entram em {@link #multipliers}.
  *
  * <p>Prioridade HIGH: roda antes dos bônus de ataque (warrior_strength é plano), preservando a ordem de antes
  * (a resistência do Guerreiro era aplicada antes do bônus do atacante no mesmo handler).
@@ -52,6 +54,7 @@ public final class CombatReduction {
         minerStoneskin(list, victim, source);
         minerUnderdweller(list, victim, source);
         anglerDepths(list, victim, source);
+        tamerPack(list, victim);
         return list;
     }
 
@@ -64,6 +67,16 @@ public final class CombatReduction {
         int level = Talents.level(victim, "angler_depths");
         if (level <= 0) return;
         list.add(HookFormulas.reductionMultiplier(level, Talents.value(victim, "angler_depths", "per_level")));
+    }
+
+    /** tamer_pack: lobos seus no raio (contados pela varredura de PetScan, até max_wolves), qualquer dano de combate. */
+    private static void tamerPack(List<Double> list, ServerPlayer victim) {
+        int level = Talents.level(victim, "tamer_pack");
+        if (level <= 0) return;
+        int wolves = PetScan.nearbyWolves(victim);
+        if (wolves <= 0) return;
+        list.add(TamerFormulas.packMultiplier(level, Talents.value(victim, "tamer_pack", "per_level"), wolves,
+                (int) Talents.value(victim, "tamer_pack", "max_wolves")));
     }
 
     /** warrior_resistance: dano físico (com entidade direta), fora de fogo, explosão e dano que ignora armadura. */

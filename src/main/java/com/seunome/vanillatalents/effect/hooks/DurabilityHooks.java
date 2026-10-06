@@ -4,9 +4,13 @@ import com.seunome.vanillatalents.Config;
 import com.seunome.vanillatalents.core.formula.HookFormulas;
 import com.seunome.vanillatalents.core.formula.StackingFormulas;
 import com.seunome.vanillatalents.effect.Talents;
+import com.seunome.vanillatalents.effect.pet.PetOwnership;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.equipment.Equippable;
@@ -40,8 +44,25 @@ public final class DurabilityHooks {
     /** Pontos de dano que de fato serão aplicados (cada ponto pode ser poupado, como Inquebrável). */
     public static int adjustDamage(ServerPlayer player, ItemStack stack, int amount) {
         if (amount <= 0) return amount;
+        return adjust(player, nodesFor(player, stack), amount);
+    }
+
+    /**
+     * Item gasto por uma entidade que não é jogador (sobrecarga {@code hurtAndBreak(int, LivingEntity, EquipmentSlot)},
+     * que chega à sobrecarga com jogador passando {@code null}). Hoje só a armadura de lobo no corpo de um lobo seu,
+     * com o dono online: tamer_wolf_armor do dono (R4).
+     */
+    public static int adjustWornDamage(LivingEntity wearer, ItemStack stack, EquipmentSlot slot, int amount) {
+        if (amount <= 0 || slot != EquipmentSlot.BODY || !(wearer instanceof Wolf) || !stack.is(Items.WOLF_ARMOR)) return amount;
+        ServerPlayer owner = PetOwnership.onlineOwner(wearer).orElse(null);
+        if (owner == null) return amount;
+        return adjust(owner, List.of("tamer_wolf_armor"), amount);
+    }
+
+    /** R4: cada nó com nível rola de forma independente, combinado e limitado por durabilitySaveCap. */
+    private static int adjust(ServerPlayer player, List<String> nodes, int amount) {
         List<Double> chances = new ArrayList<>(2);
-        for (String nodeId : nodesFor(player, stack)) {
+        for (String nodeId : nodes) {
             int level = Talents.level(player, nodeId);
             if (level > 0) chances.add(HookFormulas.chance(level, Talents.value(player, nodeId, "per_level")));
         }
