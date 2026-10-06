@@ -9,7 +9,7 @@ import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.effect.ArcherEffects;
 import com.seunome.vanillatalents.effect.AttributeSync;
 import com.seunome.vanillatalents.effect.FarmerEffects;
-import com.seunome.vanillatalents.effect.MinerEffects;
+import com.seunome.vanillatalents.effect.StillTracker;
 import com.seunome.vanillatalents.effect.WarriorEffects;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.network.S2CSyncDefinitions;
@@ -70,7 +70,7 @@ public class PlayerEvents {
     @SubscribeEvent
     public static void onLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         AttributeSync.forget(event.getEntity().getUUID());
-        MinerEffects.forget(event.getEntity().getUUID());
+        StillTracker.forget(event.getEntity().getUUID());
         FarmerEffects.forget(event.getEntity().getUUID());
         WarriorEffects.forget(event.getEntity().getUUID());
         ArcherEffects.forget(event.getEntity().getUUID());

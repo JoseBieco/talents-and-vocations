@@ -35,7 +35,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -45,10 +44,7 @@ import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /** Efeitos da árvore do Minerador (durabilidade e footing ficam em hooks/fórmula de quebra). */
 @Mod.EventBusSubscriber(modid = VanillaTalents.MODID)
@@ -62,16 +58,7 @@ public final class MinerEffects {
 
     private static final String VEIN_GUARD = "miner_vein";
 
-    /** Faro Mineral: posição em que o jogador está parado agachado e há quantos ticks. */
-    private record Stillness(Vec3 pos, int ticks) {}
-
-    private static final Map<UUID, Stillness> STILL = new HashMap<>();
-
     private MinerEffects() {}
-
-    public static void forget(UUID player) {
-        STILL.remove(player);
-    }
 
     public static void registerLoot() {
         TalentLootModifier.register(TalentLootModifier.Kind.MINER_FORTUNE, MinerEffects::fortuneLoot);
@@ -209,14 +196,8 @@ public final class MinerEffects {
     /** miner_prospector: agachado e parado → envia ao cliente as posições de minérios no raio. */
     private static void prospector(ServerPlayer player) {
         int level = Talents.level(player, "miner_prospector");
-        if (level <= 0 || !player.isShiftKeyDown()) {
-            STILL.remove(player.getUUID());
-            return;
-        }
-        Stillness previous = STILL.get(player.getUUID());
-        Vec3 pos = player.position();
-        int ticks = previous != null && previous.pos().distanceToSqr(pos) < 1.0E-4 ? previous.ticks() + 1 : 0;
-        STILL.put(player.getUUID(), new Stillness(pos, ticks));
+        if (level <= 0 || !player.isShiftKeyDown()) return;
+        int ticks = StillTracker.stillTicks(player);
         if (ticks != (int) Talents.value(player, "miner_prospector", "still_ticks")) return;
         if (!Talents.cooldownReady(player, "miner_prospector")) return;
 

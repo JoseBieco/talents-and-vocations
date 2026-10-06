@@ -14,10 +14,27 @@ public final class ArcherFormulas {
      */
     public static double damageMultiplier(int aimLvl, double aimPer, int boltLvl, double boltPer, boolean isCrossbow,
                                           int longLvl, double longPer, double distance, double minDistance) {
+        return damageMultiplier(aimLvl, aimPer, boltLvl, boltPer, isCrossbow, longLvl, longPer, distance, minDistance,
+                0, 0, false);
+    }
+
+    /** Como acima, mais archer_antiair (só com o alvo fora do chão), no mesmo pool aditivo. */
+    public static double damageMultiplier(int aimLvl, double aimPer, int boltLvl, double boltPer, boolean isCrossbow,
+                                          int longLvl, double longPer, double distance, double minDistance,
+                                          int antiAirLvl, double antiAirPer, boolean targetAirborne) {
         double bonus = aimLvl * aimPer;
         if (isCrossbow) bonus += boltLvl * boltPer;
         if (distance > minDistance) bonus += longLvl * longPer;
+        if (targetAirborne) bonus += antiAirLvl * antiAirPer;
         return 1 + bonus;
+    }
+
+    /**
+     * archer_alchemy: nova duração de um efeito vindo de flecha. Se o alvo já tem o efeito por mais tempo que a flecha
+     * dá, nada muda; senão, a duração atual cresce {@code level · perLevel}.
+     */
+    public static int alchemyDuration(int current, int arrowDuration, int level, double perLevel) {
+        return current > arrowDuration ? current : (int) Math.round(current * (1 + level * perLevel));
     }
 
     /** archer_draw: progresso de carga do arco por tick (1 = vanilla). */

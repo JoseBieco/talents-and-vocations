@@ -46,4 +46,20 @@ class ArcherFormulasTest {
         assertEquals(3.0, ArcherFormulas.mobileInputFactor(2, .25, 0.2), 1e-9);
         assertEquals(1.0, ArcherFormulas.mobileInputFactor(0, .25, 0.2), 1e-9);
     }
+
+    @Test
+    void damageMultiplier_antiAirJoinsAdditivePool() {
+        assertEquals(2.04, ArcherFormulas.damageMultiplier(5, .04, 3, .08, true, 3, .1, 25, 20, 3, .1, true), 1e-9);
+        assertEquals(1.74, ArcherFormulas.damageMultiplier(5, .04, 3, .08, true, 3, .1, 25, 20, 3, .1, false), 1e-9);
+    }
+
+    @Test
+    void alchemyDuration_extendsArrowEffect() {
+        assertEquals(140, ArcherFormulas.alchemyDuration(100, 100, 2, .2));
+    }
+
+    @Test
+    void alchemyDuration_keepsLongerExisting() {
+        assertEquals(300, ArcherFormulas.alchemyDuration(300, 100, 2, .2));
+    }
 }
