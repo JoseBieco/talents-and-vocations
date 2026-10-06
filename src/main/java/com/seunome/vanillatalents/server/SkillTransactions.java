@@ -35,23 +35,24 @@ public final class SkillTransactions {
                                           int playerLevel, int feeLevels, int refundPercent) {
         if (!isValidId(newClass) || slot == null) return new ClassChange(RespecCheck.INVALID_CLASS, 0, 0);
         boolean primary = slot == ClassSlot.PRIMARY;
-        if (primary && data.maxClasses() < 2 && newClass.equals(data.getSecondaryClass())) {
-            // Secundaria oculta (maxClasses=1): libera o espaco para a classe virar principal.
-            // Os nos salvos compartilham o prefixo da classe e passam a ser da nova principal (aceitavel).
-            data.setSecondaryClass(TalentRules.NO_CLASS);
-        }
+        // Com maxClasses = 1 a secundária fica oculta; a classe dela pode virar a principal, e o espaço secundário
+        // é liberado só se a troca for aprovada. Os nós salvos têm o prefixo da classe e passam a ser da principal.
+        boolean takeHiddenSecondary = primary && data.maxClasses() < 2 && newClass.equals(data.getSecondaryClass());
         String current = primary ? data.getPrimaryClass() : data.getSecondaryClass();
-        String other = primary ? data.getSecondaryClass() : data.getPrimaryClass();
+        String other = takeHiddenSecondary ? TalentRules.NO_CLASS
+                : primary ? data.getSecondaryClass() : data.getPrimaryClass();
         int spent = RespecRules.spentClassPoints(data.getUnlockedNodes(), registry, current);
         int fee = RespecRules.feeFor(spent, feeLevels);
         RespecCheck check = RespecRules.validateChange(slot, current, other, newClass,
                 RespecRules.slotUnlocked(slot, data), playerLevel, fee);
         return switch (check) {
             case OK_FIRST_CHOICE -> {
+                if (takeHiddenSecondary) data.setSecondaryClass(TalentRules.NO_CLASS);
                 setClass(data, slot, newClass);
                 yield new ClassChange(check, 0, 0);
             }
             case OK_PAID -> {
+                if (takeHiddenSecondary) data.setSecondaryClass(TalentRules.NO_CLASS);
                 int refund = RespecRules.refund(spent, refundPercent);
                 data.removeClassNodes(current);
                 setClass(data, slot, newClass);

@@ -244,4 +244,13 @@ class SkillTransactionsTest {
         assertEquals("archer", d.getPrimaryClass());
         assertEquals(TalentRules.NO_CLASS, d.getSecondaryClass());
     }
+
+    @Test
+    void maxClassesOne_refusedChangeKeepsHiddenSecondary() {
+        PlayerSkillData d = multiclass();
+        d.setMaxClasses(1);
+        var result = SkillTransactions.changeClass(d, TalentRulesTest.MC_REG, ClassSlot.PRIMARY, "archer", 0, 10, 25);
+        assertEquals(RespecCheck.NOT_ENOUGH_LEVELS, result.check());
+        assertEquals("archer", d.getSecondaryClass());
+    }
 }
