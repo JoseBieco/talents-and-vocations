@@ -10,6 +10,7 @@ import com.seunome.vanillatalents.core.PurchaseResult;
 import com.seunome.vanillatalents.core.RespecCheck;
 import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.effect.AttributeSync;
+import com.seunome.vanillatalents.effect.pet.PetSync;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.network.S2CSyncPlayer;
 import net.minecraft.nbt.CompoundTag;
@@ -52,7 +53,10 @@ public final class TalentActions {
         PurchaseResult result = SkillAccess.get(player)
                 .map(data -> SkillTransactions.buy(data, TalentRegistries.server(), nodeId))
                 .orElse(PurchaseResult.UNKNOWN_NODE);
-        if (result == PurchaseResult.OK) AttributeSync.apply(player);
+        if (result == PurchaseResult.OK) {
+            AttributeSync.apply(player);
+            PetSync.applyAll(player);
+        }
         sync(player);
         return result;
     }
@@ -65,7 +69,10 @@ public final class TalentActions {
             if (change.feeLevels() > 0) player.giveExperienceLevels(-change.feeLevels());
             return change.check();
         }).orElse(RespecCheck.INVALID_CLASS);
-        if (check == RespecCheck.OK_FIRST_CHOICE || check == RespecCheck.OK_PAID) AttributeSync.apply(player);
+        if (check == RespecCheck.OK_FIRST_CHOICE || check == RespecCheck.OK_PAID) {
+            AttributeSync.apply(player);
+            PetSync.applyAll(player);
+        }
         sync(player);
         return check;
     }

@@ -12,6 +12,8 @@ import com.seunome.vanillatalents.effect.AttributeSync;
 import com.seunome.vanillatalents.effect.FarmerEffects;
 import com.seunome.vanillatalents.effect.StillTracker;
 import com.seunome.vanillatalents.effect.WarriorEffects;
+import com.seunome.vanillatalents.effect.pet.GolemBuilders;
+import com.seunome.vanillatalents.effect.pet.PetSync;
 import com.seunome.vanillatalents.network.ModNetwork;
 import com.seunome.vanillatalents.network.S2CSyncDefinitions;
 import com.seunome.vanillatalents.server.TalentActions;
@@ -53,7 +55,9 @@ public class PlayerEvents {
 
     @SubscribeEvent
     public static void onLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) refresh(player);
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        refresh(player);
+        PetSync.applyAll(player);
     }
 
     @SubscribeEvent
@@ -76,6 +80,7 @@ public class PlayerEvents {
         WarriorEffects.forget(event.getEntity().getUUID());
         ArcherEffects.forget(event.getEntity().getUUID());
         ActivityTracker.forget(event.getEntity().getUUID());
+        GolemBuilders.forget(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
@@ -90,6 +95,7 @@ public class PlayerEvents {
         for (ServerPlayer player : event.getPlayers()) {
             ModNetwork.sendTo(player, new S2CSyncDefinitions(nodes));
             AttributeSync.apply(player);
+            if (event.getPlayer() == null) PetSync.applyAll(player);
         }
     }
 
