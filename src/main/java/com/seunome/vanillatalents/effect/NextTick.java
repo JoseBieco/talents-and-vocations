@@ -2,6 +2,7 @@ package com.seunome.vanillatalents.effect;
 
 import com.seunome.vanillatalents.VanillaTalents;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -26,6 +27,18 @@ public final class NextTick {
         if (TASKS.isEmpty()) return;
         List<Runnable> tasks = new ArrayList<>(TASKS);
         TASKS.clear();
-        tasks.forEach(Runnable::run);
+        for (Runnable task : tasks) {
+            try {
+                task.run();
+            } catch (RuntimeException e) {
+                VanillaTalents.LOGGER.error("Falha numa tarefa agendada para o próximo tick", e);
+            }
+        }
+    }
+
+    /** Descarta tarefas pendentes: elas guardam o mundo antigo e não podem rodar no próximo mundo aberto na mesma JVM. */
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        TASKS.clear();
     }
 }

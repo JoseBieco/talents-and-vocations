@@ -51,6 +51,7 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.BonemealEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -359,6 +360,13 @@ public final class FarmerEffects {
         } else if (state.getBlock() instanceof ComposterBlock) {
             scheduleCompost(player, pos, state, stack);
         }
+    }
+
+    /** Limpa o estado em memória ao fechar o servidor (as tarefas pendentes do NextTick são descartadas). */
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        PENDING.clear();
+        MOVEMENT.clear();
     }
 
     /** Agenda {@code task} uma única vez por jogador, bloco e nó neste tick. */
