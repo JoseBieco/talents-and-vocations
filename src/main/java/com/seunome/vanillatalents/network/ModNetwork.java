@@ -12,7 +12,7 @@ public final class ModNetwork {
 
     public static final SimpleChannel CHANNEL = ChannelBuilder
             .named(Identifier.fromNamespaceAndPath(VanillaTalents.MODID, "main"))
-            .networkProtocolVersion(1)
+            .networkProtocolVersion(2)
             .simpleChannel();
 
     private ModNetwork() {}

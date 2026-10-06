@@ -35,6 +35,11 @@ public final class SkillTransactions {
                                           int playerLevel, int feeLevels, int refundPercent) {
         if (!isValidId(newClass) || slot == null) return new ClassChange(RespecCheck.INVALID_CLASS, 0, 0);
         boolean primary = slot == ClassSlot.PRIMARY;
+        if (primary && data.maxClasses() < 2 && newClass.equals(data.getSecondaryClass())) {
+            // Secundaria oculta (maxClasses=1): libera o espaco para a classe virar principal.
+            // Os nos salvos compartilham o prefixo da classe e passam a ser da nova principal (aceitavel).
+            data.setSecondaryClass(TalentRules.NO_CLASS);
+        }
         String current = primary ? data.getPrimaryClass() : data.getSecondaryClass();
         String other = primary ? data.getSecondaryClass() : data.getPrimaryClass();
         int spent = RespecRules.spentClassPoints(data.getUnlockedNodes(), registry, current);

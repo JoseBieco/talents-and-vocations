@@ -233,4 +233,15 @@ class SkillTransactionsTest {
                 SkillTransactions.changeClass(noVocation, reg, ClassSlot.SECONDARY, "archer", 50, 10, 25).check());
         assertEquals(TalentRules.NO_CLASS, noVocation.getSecondaryClass());
     }
+
+    @Test
+    void maxClassesOne_secondaryClassCanBecomePrimary() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        PlayerSkillData d = multiclass();
+        d.setMaxClasses(1);
+        var result = SkillTransactions.changeClass(d, reg, ClassSlot.PRIMARY, "archer", 50, 0, 25);
+        assertNotEquals(RespecCheck.SAME_CLASS, result.check());
+        assertEquals("archer", d.getPrimaryClass());
+        assertEquals(TalentRules.NO_CLASS, d.getSecondaryClass());
+    }
 }
