@@ -73,12 +73,10 @@ public final class WarriorEffects {
         }
     }
 
+    /** Bônus de ataque. A resistência (warrior_resistance) fica em CombatReduction (R2), que roda antes (HIGH). */
     @SubscribeEvent
     public static void onHurt(LivingHurtEvent event) {
         DamageSource source = event.getSource();
-        if (event.getEntity() instanceof ServerPlayer victim) {
-            event.setAmount(resistedAmount(event.getAmount(), victim, source));
-        }
         if (source.getEntity() instanceof ServerPlayer attacker && source.getDirectEntity() == attacker) {
             float amount = meleeAmount(event.getAmount(), event.getEntity(), attacker, source);
             amount = smashAmount(amount, attacker);
@@ -142,16 +140,6 @@ public final class WarriorEffects {
     }
 
     // Helpers não recebem o evento: o EventBus 7 exige @SubscribeEvent em todo método estático com evento.
-
-    /** warrior_resistance: dano físico (com entidade direta), fora de fogo, explosão e dano que ignora armadura. */
-    private static float resistedAmount(float amount, ServerPlayer victim, DamageSource source) {
-        if (source.getDirectEntity() == null || source.is(DamageTypeTags.IS_FIRE) || source.is(DamageTypeTags.IS_EXPLOSION)
-                || source.is(DamageTypeTags.BYPASSES_ARMOR)) return amount;
-        int level = Talents.level(victim, "warrior_resistance");
-        if (level <= 0) return amount;
-        double pvp = source.getEntity() instanceof Player ? Config.PVP_DAMAGE_MULTIPLIER.get() : 1.0;
-        return (float) (amount * WarriorFormulas.physicalMultiplier(level, Talents.value(victim, "warrior_resistance", "per_level"), pvp));
-    }
 
     /** warrior_steadfast em PvP: o golpe deste tick veio de um jogador → Firme vale só pvpDamageMultiplier. */
     @SubscribeEvent

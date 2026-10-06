@@ -23,7 +23,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
@@ -133,24 +132,22 @@ public final class MinerEffects {
         }
     }
 
-    /** miner_stoneskin: explosões e blocos caindo. */
+    /**
+     * miner_stoneskin, parte ambiental (sem teto): blocos caindo e explosões sem entidade responsável (cama, TNT sem
+     * quem acendeu). A parte de explosão com entidade e miner_underdweller ficam em CombatReduction (R2).
+     */
     @SubscribeEvent
     public static void onHurt(LivingHurtEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         DamageSource source = event.getSource();
-        float amount = event.getAmount();
-        boolean applies = source.is(DamageTypeTags.IS_EXPLOSION) || source.is(DamageTypes.FALLING_BLOCK)
-                || source.is(DamageTypes.FALLING_ANVIL) || source.is(DamageTypes.FALLING_STALACTITE);
-        int stoneskin = applies ? Talents.level(player, "miner_stoneskin") : 0;
-        if (stoneskin > 0) {
-            amount *= (float) HookFormulas.reductionMultiplier(stoneskin, Talents.value(player, "miner_stoneskin", "per_level"));
-        }
-        int underdweller = source.getEntity() instanceof Mob ? Talents.level(player, "miner_underdweller") : 0;
-        if (underdweller > 0) {
-            amount *= (float) MinerFormulas.underdwellerMultiplier(underdweller,
-                    Talents.value(player, "miner_underdweller", "per_level"), player.getY());
-        }
-        if (amount != event.getAmount()) event.setAmount(amount);
+        boolean fallingBlock = source.is(DamageTypes.FALLING_BLOCK) || source.is(DamageTypes.FALLING_ANVIL)
+                || source.is(DamageTypes.FALLING_STALACTITE);
+        boolean environmentalExplosion = source.is(DamageTypeTags.IS_EXPLOSION) && !CombatReduction.isCombatExplosion(source);
+        if (!fallingBlock && !environmentalExplosion) return;
+        int stoneskin = Talents.level(player, "miner_stoneskin");
+        if (stoneskin <= 0) return;
+        event.setAmount((float) (event.getAmount()
+                * HookFormulas.reductionMultiplier(stoneskin, Talents.value(player, "miner_stoneskin", "per_level"))));
     }
 
     @SubscribeEvent

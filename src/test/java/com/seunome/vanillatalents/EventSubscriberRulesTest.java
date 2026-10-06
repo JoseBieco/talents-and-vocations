@@ -22,7 +22,7 @@ class EventSubscriberRulesTest {
 
     static final Path SOURCES = Path.of("src/main/java");
     static final Pattern STATIC_METHOD = Pattern.compile(
-            "(@SubscribeEvent\\s+)?(?:public|private|protected)?\\s*static\\s+[\\w<>\\[\\]?, ]+\\s+(\\w+)\\s*\\(\\s*([\\w.]+)\\s+\\w+");
+            "(@SubscribeEvent(?:\\([^)]*\\))?\\s+)?(?:public|private|protected)?\\s*static\\s+[\\w<>\\[\\]?, ]+\\s+(\\w+)\\s*\\(\\s*([\\w.]+)\\s+\\w+");
 
     @Test
     void staticMethodsTakingEventsAreAnnotated() throws IOException {
