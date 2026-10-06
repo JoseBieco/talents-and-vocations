@@ -27,4 +27,19 @@ public final class ExplorerFormulas {
     public static double mountBonus(int level, double perLevel) {
         return level * perLevel;
     }
+
+    /** explorer_climb: multiplicador da velocidade vertical subindo escada de mão ou trepadeira. */
+    public static double climbFactor(int level, double perLevel) {
+        return 1 + level * perLevel;
+    }
+
+    /** explorer_tailwind: duração do foguete (ticks) usado durante o voo de élitra. */
+    public static int tailwindLifetime(int lifetime, int level, double perLevel) {
+        return (int) Math.round(lifetime * (1 + level * perLevel));
+    }
+
+    /** explorer_nightwatch: ticks mínimos sem dormir antes de phantoms poderem aparecer. */
+    public static int phantomMinRestTicks(int level, int baseTicks, int perLevelTicks) {
+        return baseTicks + level * perLevelTicks;
+    }
 }

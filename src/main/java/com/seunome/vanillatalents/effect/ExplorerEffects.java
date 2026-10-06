@@ -5,12 +5,17 @@ import com.seunome.vanillatalents.VanillaTalents;
 import com.seunome.vanillatalents.core.formula.ExplorerFormulas;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraftforge.common.util.Result;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.minecraftforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -59,5 +64,35 @@ public final class ExplorerEffects {
         if (level <= 0) return;
         double bonus = ExplorerFormulas.mountBonus(level, Talents.value(player, "explorer_mounts", "per_level"));
         speed.addTransientModifier(new AttributeModifier(MOUNT_MODIFIER, bonus, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    }
+
+    /**
+     * explorer_tailwind: o foguete usado planando nasce preso ao jogador (construtor com {@code stuckTo}, que também
+     * define o dono). Foguetes de besta saem com {@code shotAtAngle} e, planando, a vanilla não deixa usar o foguete
+     * num bloco, então dono jogador + planando + sem ângulo identifica o foguete preso. O {@code lifetime} já foi
+     * sorteado no construtor, antes de a entidade entrar no mundo.
+     */
+    @SubscribeEvent
+    public static void onRocketJoin(EntityJoinLevelEvent event) {
+        if (event.loadedFromDisk() || event.getLevel().isClientSide()) return;
+        if (!(event.getEntity() instanceof FireworkRocketEntity rocket) || rocket.isShotAtAngle()) return;
+        if (!(rocket.getOwner() instanceof ServerPlayer player) || !player.isFallFlying()) return;
+        int level = Talents.level(player, "explorer_tailwind");
+        if (level <= 0) return;
+        rocket.lifetime = ExplorerFormulas.tailwindLifetime(rocket.lifetime, level,
+                Talents.value(player, "explorer_tailwind", "per_level"));
+    }
+
+    /** explorer_nightwatch: nega phantoms enquanto o jogador não passou do mínimo de tempo sem dormir. */
+    @SubscribeEvent
+    public static void onSpawnPhantoms(PlayerSpawnPhantomsEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        int level = Talents.level(player, "explorer_nightwatch");
+        if (level <= 0) return;
+        int minRest = ExplorerFormulas.phantomMinRestTicks(level,
+                (int) Talents.value(player, "explorer_nightwatch", "base_ticks"),
+                (int) Talents.value(player, "explorer_nightwatch", "per_level_ticks"));
+        int sinceRest = player.getStats().getValue(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
+        if (sinceRest < minRest) event.setResult(Result.DENY);
     }
 }

@@ -31,4 +31,22 @@ class ExplorerFormulasTest {
     void mountBonus() {
         assertEquals(0.15, ExplorerFormulas.mountBonus(3, .05), 1e-9);
     }
+
+    @Test
+    void climbFactor() {
+        assertEquals(1.5, ExplorerFormulas.climbFactor(2, .25), 1e-9);
+        assertEquals(1.0, ExplorerFormulas.climbFactor(0, .25), 1e-9);
+    }
+
+    @Test
+    void tailwindLifetime() {
+        assertEquals(29, ExplorerFormulas.tailwindLifetime(20, 3, .15));
+        assertEquals(20, ExplorerFormulas.tailwindLifetime(20, 0, .15));
+    }
+
+    @Test
+    void phantomMinRestTicks() {
+        assertEquals(96000, ExplorerFormulas.phantomMinRestTicks(1, 72000, 24000));
+        assertEquals(120000, ExplorerFormulas.phantomMinRestTicks(2, 72000, 24000));
+    }
 }
