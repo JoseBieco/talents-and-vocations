@@ -3,6 +3,7 @@ package com.seunome.vanillatalents.server;
 import com.seunome.vanillatalents.Config;
 import com.seunome.vanillatalents.capability.PlayerSkillData;
 import com.seunome.vanillatalents.capability.SkillAccess;
+import com.seunome.vanillatalents.core.ClassSlot;
 import com.seunome.vanillatalents.core.CostMode;
 import com.seunome.vanillatalents.core.EconomySettings;
 import com.seunome.vanillatalents.core.PurchaseResult;
@@ -56,9 +57,10 @@ public final class TalentActions {
         return result;
     }
 
-    public static RespecCheck changeClass(ServerPlayer player, String classId) {
+    /** Troca a classe do espaço {@code slot}; aprovada, reaplica os atributos (as duas classes podem ter mudado de efeito). */
+    public static RespecCheck changeClass(ServerPlayer player, ClassSlot slot, String classId) {
         RespecCheck check = SkillAccess.get(player).map(data -> {
-            var change = SkillTransactions.changeClass(data, classId, player.experienceLevel,
+            var change = SkillTransactions.changeClass(data, TalentRegistries.server(), slot, classId, player.experienceLevel,
                     Config.RESPEC_FEE_LEVELS.get(), Config.RESPEC_REFUND_PERCENT.get());
             if (change.feeLevels() > 0) player.giveExperienceLevels(-change.feeLevels());
             return change.check();
@@ -70,7 +72,7 @@ public final class TalentActions {
 
     public static EconomySettings economy() {
         return new EconomySettings(Config.COST_MODE.get(), Config.COST_LEVELS.get(), Config.COST_POINTS.get(),
-                Config.RESPEC_FEE_LEVELS.get(), Config.RESPEC_REFUND_PERCENT.get());
+                Config.RESPEC_FEE_LEVELS.get(), Config.RESPEC_REFUND_PERCENT.get(), Config.MAX_CLASSES.get());
     }
 
     /** Envia o PlayerSkillData e, em "Settings", os custos vigentes (o cliente não confia na própria config). */

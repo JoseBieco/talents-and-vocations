@@ -2,10 +2,11 @@ package com.seunome.vanillatalents.core;
 
 import java.util.Map;
 
-/** Custos vigentes no servidor; o cliente os recebe no sync para rótulos e prévias. */
-public record EconomySettings(CostMode mode, int costLevels, int costPoints, int respecFeeLevels, int respecRefundPercent) {
+/** Custos e limites vigentes no servidor; o cliente os recebe no sync para rótulos e prévias. */
+public record EconomySettings(CostMode mode, int costLevels, int costPoints, int respecFeeLevels, int respecRefundPercent,
+                              int maxClasses) {
 
-    public static final EconomySettings DEFAULTS = new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25);
+    public static final EconomySettings DEFAULTS = new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25, 2);
 
     public int cost() {
         return mode == CostMode.LEVELS ? costLevels : costPoints;
@@ -21,7 +22,7 @@ public record EconomySettings(CostMode mode, int costLevels, int costPoints, int
 
     public Map<String, Integer> toMap() {
         return Map.of("CostMode", mode.ordinal(), "CostLevels", costLevels, "CostPoints", costPoints,
-                "RespecFee", respecFeeLevels, "RespecRefund", respecRefundPercent);
+                "RespecFee", respecFeeLevels, "RespecRefund", respecRefundPercent, "maxClasses", maxClasses);
     }
 
     public static EconomySettings fromMap(Map<String, Integer> map) {
@@ -31,6 +32,7 @@ public record EconomySettings(CostMode mode, int costLevels, int costPoints, int
                 map.getOrDefault("CostLevels", DEFAULTS.costLevels),
                 map.getOrDefault("CostPoints", DEFAULTS.costPoints),
                 map.getOrDefault("RespecFee", DEFAULTS.respecFeeLevels),
-                map.getOrDefault("RespecRefund", DEFAULTS.respecRefundPercent));
+                map.getOrDefault("RespecRefund", DEFAULTS.respecRefundPercent),
+                map.getOrDefault("maxClasses", DEFAULTS.maxClasses));
     }
 }

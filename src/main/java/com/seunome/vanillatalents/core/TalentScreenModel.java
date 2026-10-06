@@ -7,7 +7,8 @@ import java.util.Map;
 /** Cálculos da GUI que não dependem do Minecraft. */
 public final class TalentScreenModel {
 
-    public record RespecPreview(int feeLevels, int spent, int refund) {}
+    /** {@code freezesSecondary}: trocar a principal congela a secundária até o capstone da nova principal. */
+    public record RespecPreview(int feeLevels, int spent, int refund, boolean freezesSecondary) {}
 
     public record GridBounds(int minX, int maxX, int minY, int maxY) {}
 
@@ -107,11 +108,17 @@ public final class TalentScreenModel {
         return unmet;
     }
 
-    public static RespecPreview respecPreview(Map<String, Integer> levels, String currentClass, EconomySettings settings) {
-        if (TalentRules.NO_CLASS.equals(currentClass)) return new RespecPreview(0, 0, 0);
-        int spent = RespecRules.spentClassPoints(levels, currentClass);
+    /**
+     * Prévia de trocar a classe do espaço {@code slot}, hoje {@code current}. {@code secondary} é a classe do espaço
+     * secundário (para saber se trocar a principal a congela).
+     */
+    public static RespecPreview respecPreview(Map<String, Integer> levels, TalentRegistry registry, ClassSlot slot,
+                                              String current, String secondary, EconomySettings settings) {
+        boolean freezes = slot == ClassSlot.PRIMARY && !TalentRules.NO_CLASS.equals(secondary);
+        if (TalentRules.NO_CLASS.equals(current)) return new RespecPreview(0, 0, 0, freezes);
+        int spent = RespecRules.spentClassPoints(levels, registry, current);
         return new RespecPreview(RespecRules.feeFor(spent, settings.respecFeeLevels()), spent,
-                RespecRules.refund(spent, settings.respecRefundPercent()));
+                RespecRules.refund(spent, settings.respecRefundPercent()), freezes);
     }
 
     public static GridBounds gridBounds(List<TalentNode> nodes) {

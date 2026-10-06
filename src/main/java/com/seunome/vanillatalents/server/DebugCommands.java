@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.seunome.vanillatalents.capability.SkillAccess;
+import com.seunome.vanillatalents.core.ClassSlot;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -34,7 +35,10 @@ public final class DebugCommands {
                                 StringArgumentType.getString(ctx, "id"))))))
                 .then(Commands.literal("class").then(Commands.argument("id", StringArgumentType.word()).executes(ctx ->
                         reply(ctx, "class -> " + TalentActions.changeClass(ctx.getSource().getPlayerOrException(),
-                                StringArgumentType.getString(ctx, "id"))))))
+                                ClassSlot.PRIMARY, StringArgumentType.getString(ctx, "id"))))))
+                .then(Commands.literal("secondary").then(Commands.argument("id", StringArgumentType.word()).executes(ctx ->
+                        reply(ctx, "secondary -> " + TalentActions.changeClass(ctx.getSource().getPlayerOrException(),
+                                ClassSlot.SECONDARY, StringArgumentType.getString(ctx, "id"))))))
                 .then(Commands.literal("info").executes(ctx -> reply(ctx, "ok")))));
     }
 

@@ -50,6 +50,18 @@ public final class Config {
             .comment("Scales Thick Hide and Steadfast when both attacker and victim are players (1.0 = full effect)")
             .defineInRange("pvpDamageMultiplier", 1.0, 0.0, 1.0);
 
+    public static final ForgeConfigSpec.IntValue MAX_CLASSES = BUILDER
+            .comment("Class slots per player: 2 enables a secondary class (after Second Vocation), 1 disables multiclass")
+            .defineInRange("maxClasses", 2, 1, 2);
+
+    public static final ForgeConfigSpec.DoubleValue COMBAT_REDUCTION_CAP = BUILDER
+            .comment("Maximum combined reduction of combat damage (source is an entity) from all talents")
+            .defineInRange("combatReductionCap", 0.5, 0.0, 1.0);
+
+    public static final ForgeConfigSpec.DoubleValue DURABILITY_SAVE_CAP = BUILDER
+            .comment("Maximum combined chance of not spending durability from all talents (before Unbreaking)")
+            .defineInRange("durabilitySaveCap", 0.5, 0.0, 1.0);
+
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
     private Config() {}

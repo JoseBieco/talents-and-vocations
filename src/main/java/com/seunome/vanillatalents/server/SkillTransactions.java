@@ -26,26 +26,39 @@ public final class SkillTransactions {
         return result;
     }
 
-    /** Aplica a troca de classe; a taxa em níveis devolvida em {@code feeLevels} é cobrada por quem chamou. */
-    public static ClassChange changeClass(PlayerSkillData data, String newClass, int playerLevel, int feeLevels, int refundPercent) {
-        if (!isValidId(newClass)) return new ClassChange(RespecCheck.INVALID_CLASS, 0, 0);
-        String oldPrimary = data.getPrimaryClass();
-        int spent = RespecRules.spentClassPoints(data.getUnlockedNodes(), oldPrimary);
+    /**
+     * Aplica a troca de classe do espaço {@code slot}; a taxa em níveis devolvida em {@code feeLevels} é cobrada por
+     * quem chamou. A troca paga remove só os nós da classe trocada e devolve {@code refundPercent}% do que foi gasto
+     * nela; trocar a principal mantém a secundária (congelada até o capstone da nova principal).
+     */
+    public static ClassChange changeClass(PlayerSkillData data, TalentRegistry registry, ClassSlot slot, String newClass,
+                                          int playerLevel, int feeLevels, int refundPercent) {
+        if (!isValidId(newClass) || slot == null) return new ClassChange(RespecCheck.INVALID_CLASS, 0, 0);
+        boolean primary = slot == ClassSlot.PRIMARY;
+        String current = primary ? data.getPrimaryClass() : data.getSecondaryClass();
+        String other = primary ? data.getSecondaryClass() : data.getPrimaryClass();
+        int spent = RespecRules.spentClassPoints(data.getUnlockedNodes(), registry, current);
         int fee = RespecRules.feeFor(spent, feeLevels);
-        RespecCheck check = RespecRules.validateChange(oldPrimary, newClass, playerLevel, fee);
+        RespecCheck check = RespecRules.validateChange(slot, current, other, newClass,
+                RespecRules.slotUnlocked(slot, data), playerLevel, fee);
         return switch (check) {
             case OK_FIRST_CHOICE -> {
-                data.setPrimaryClass(newClass);
+                setClass(data, slot, newClass);
                 yield new ClassChange(check, 0, 0);
             }
             case OK_PAID -> {
                 int refund = RespecRules.refund(spent, refundPercent);
-                data.removeClassNodes(oldPrimary);
-                data.setPrimaryClass(newClass);
+                data.removeClassNodes(current);
+                setClass(data, slot, newClass);
                 data.addPoints(refund);
                 yield new ClassChange(check, fee, refund);
             }
             default -> new ClassChange(check, 0, 0);
         };
+    }
+
+    private static void setClass(PlayerSkillData data, ClassSlot slot, String classId) {
+        if (slot == ClassSlot.PRIMARY) data.setPrimaryClass(classId);
+        else data.setSecondaryClass(classId);
     }
 }

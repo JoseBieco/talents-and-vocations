@@ -3,6 +3,7 @@ package com.seunome.vanillatalents.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seunome.vanillatalents.capability.PlayerSkillData;
 import com.seunome.vanillatalents.client.ui.VanillaGui;
+import com.seunome.vanillatalents.core.ClassSlot;
 import com.seunome.vanillatalents.core.TalentNode;
 import com.seunome.vanillatalents.core.TalentRules;
 import com.seunome.vanillatalents.core.TalentScreenModel;
@@ -131,7 +132,8 @@ public class ClassScreen extends Screen {
 
     private TalentScreenModel.RespecPreview preview() {
         PlayerSkillData data = ClientTalentState.data();
-        return TalentScreenModel.respecPreview(data.getUnlockedNodes(), data.getPrimaryClass(), ClientTalentState.economy());
+        return TalentScreenModel.respecPreview(data.getUnlockedNodes(), TalentRegistries.client(), ClassSlot.PRIMARY,
+                data.getPrimaryClass(), data.getSecondaryClass(), ClientTalentState.economy());
     }
 
     private boolean enoughLevels() {
@@ -162,7 +164,7 @@ public class ClassScreen extends Screen {
         TreeCategory tree = selected;
         if (tree == null || !canAct()) return;
         if (!hasClass() || confirm.click(ticks)) {
-            ModNetwork.sendToServer(new C2SChangeClass(tree.id()));
+            ModNetwork.sendToServer(new C2SChangeClass(ClassSlot.PRIMARY, tree.id()));
             goBack(true);
         } else if (action != null) {
             action.setMessage(actionLabel());

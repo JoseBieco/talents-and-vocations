@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TalentScreenModelTest {
 
     static final TalentRegistry REG = TalentRulesTest.REG;
+    static final TalentRegistry EMPTY_REG = TalentRegistry.build(List.of(), new ArrayList<>());
 
     @Test
     void unmetPrerequisites_listsOnlyMissing() {
@@ -25,7 +26,7 @@ class TalentScreenModelTest {
     @Test
     void respecPreview_usesSpentPointsOfCurrentClass() {
         var preview = TalentScreenModel.respecPreview(Map.of("miner_haste", 5, "miner_fortune", 4, "miner_vein", 3,
-                "common_health", 5), "miner", new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25));
+                "common_health", 5), EMPTY_REG, ClassSlot.PRIMARY, "miner", TalentRules.NO_CLASS, new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25, 2));
         assertEquals(10, preview.feeLevels());
         assertEquals(12, preview.spent());
         assertEquals(3, preview.refund());
@@ -33,16 +34,54 @@ class TalentScreenModelTest {
 
     @Test
     void respecPreview_nothingSpentHasNoFee() {
-        var preview = TalentScreenModel.respecPreview(Map.of("common_health", 5), "miner", EconomySettings.DEFAULTS);
+        var preview = TalentScreenModel.respecPreview(Map.of("common_health", 5), EMPTY_REG, ClassSlot.PRIMARY, "miner", TalentRules.NO_CLASS, EconomySettings.DEFAULTS);
         assertEquals(0, preview.feeLevels());
         assertEquals(0, preview.spent());
     }
 
     @Test
     void respecPreview_firstChoiceIsFree() {
-        var preview = TalentScreenModel.respecPreview(Map.of(), TalentRules.NO_CLASS, EconomySettings.DEFAULTS);
+        var preview = TalentScreenModel.respecPreview(Map.of(), EMPTY_REG, ClassSlot.PRIMARY, TalentRules.NO_CLASS, TalentRules.NO_CLASS, EconomySettings.DEFAULTS);
         assertEquals(0, preview.feeLevels());
         assertEquals(0, preview.refund());
+        assertFalse(preview.freezesSecondary());
+    }
+
+    @Test
+    void respecPreview_primaryWithSecondary_flagsFreeze() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        Map<String, Integer> levels = Map.of("miner_haste", 5, "miner_vein", 1, "archer_aim", 4,
+                "common_health", 5, TalentRules.SECOND_VOCATION, 1);
+        var primary = TalentScreenModel.respecPreview(levels, reg, ClassSlot.PRIMARY, "miner", "archer", EconomySettings.DEFAULTS);
+        assertTrue(primary.freezesSecondary());
+        assertEquals(6, primary.spent());
+        assertEquals(10, primary.feeLevels());
+        assertEquals(1, primary.refund());
+
+        var secondary = TalentScreenModel.respecPreview(levels, reg, ClassSlot.SECONDARY, "archer", "archer", EconomySettings.DEFAULTS);
+        assertFalse(secondary.freezesSecondary());
+        assertEquals(4, secondary.spent());
+        assertEquals(1, secondary.refund());
+
+        var noSecondary = TalentScreenModel.respecPreview(levels, reg, ClassSlot.PRIMARY, "miner", TalentRules.NO_CLASS, EconomySettings.DEFAULTS);
+        assertFalse(noSecondary.freezesSecondary());
+    }
+
+    @Test
+    void respecPreview_spentWeightsByCost() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        // a Segunda Vocação (cost 10) é Comum e não entra; miner_vein cost 1
+        var preview = TalentScreenModel.respecPreview(Map.of("miner_haste", 2, TalentRules.SECOND_VOCATION, 1), reg,
+                ClassSlot.PRIMARY, "miner", TalentRules.NO_CLASS, EconomySettings.DEFAULTS);
+        assertEquals(2, preview.spent());
+    }
+
+    @Test
+    void economySettings_maxClassesDefaultsToTwo() {
+        assertEquals(2, EconomySettings.DEFAULTS.maxClasses());
+        assertEquals(2, EconomySettings.fromMap(Map.of()).maxClasses());
+        assertEquals(1, EconomySettings.fromMap(Map.of("maxClasses", 1)).maxClasses());
+        assertEquals(1, new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25, 1).toMap().get("maxClasses"));
     }
 
     @Test
@@ -58,11 +97,11 @@ class TalentScreenModelTest {
 
     @Test
     void economySettings_costAndAffordability() {
-        var levels = new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25);
+        var levels = new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25, 2);
         assertEquals(5, levels.cost());
         assertFalse(levels.canAffordConversion(4, 0f));
         assertTrue(levels.canAffordConversion(5, 0f));
-        var points = new EconomySettings(CostMode.POINTS, 5, 100, 10, 25);
+        var points = new EconomySettings(CostMode.POINTS, 5, 100, 10, 25, 2);
         assertEquals(100, points.cost());
         assertFalse(points.canAffordConversion(7, 0f)); // nível 7 = 91 pontos
         assertTrue(points.canAffordConversion(8, 0f)); // nível 8 = 112 pontos
@@ -70,15 +109,15 @@ class TalentScreenModelTest {
 
     @Test
     void economySettings_maxConversions() {
-        var levels = new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25);
+        var levels = new EconomySettings(CostMode.LEVELS, 5, 100, 10, 25, 2);
         assertEquals(4, levels.maxConversions(23, 0f));
-        var points = new EconomySettings(CostMode.POINTS, 5, 100, 10, 25);
+        var points = new EconomySettings(CostMode.POINTS, 5, 100, 10, 25, 2);
         assertEquals(13, points.maxConversions(30, 0f));
     }
 
     @Test
     void economySettings_tagRoundTripViaMap() {
-        var s = new EconomySettings(CostMode.POINTS, 7, 150, 12, 30);
+        var s = new EconomySettings(CostMode.POINTS, 7, 150, 12, 30, 1);
         assertEquals(s, EconomySettings.fromMap(s.toMap()));
         assertEquals(EconomySettings.DEFAULTS, EconomySettings.fromMap(Map.of()));
     }

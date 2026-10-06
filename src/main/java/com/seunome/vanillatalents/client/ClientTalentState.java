@@ -28,12 +28,12 @@ public final class ClientTalentState {
     static void update(CompoundTag tag) {
         PlayerSkillData fresh = new PlayerSkillData();
         fresh.deserializeNBT(null, tag);
-        data = fresh;
-
         CompoundTag settings = tag.getCompoundOrEmpty(S2CSyncPlayer.SETTINGS_KEY);
         Map<String, Integer> values = new HashMap<>();
         for (String key : settings.keySet()) values.put(key, settings.getIntOr(key, 0));
         economy = EconomySettings.fromMap(values);
+        fresh.setMaxClasses(economy.maxClasses());
+        data = fresh;
         notifyScreen();
     }
 
