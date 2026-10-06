@@ -50,6 +50,8 @@
   "talent.vanillatalents.common_lava.desc": "Additional −8% lava damage per level",
   "talent.vanillatalents.common_second_wind.name": "Second Wind",
   "talent.vanillatalents.common_second_wind.desc": "When dropping to ≤ 4 health (2 hearts), gain Regeneration II for 4 s. 5 min cooldown.",
+  "talent.vanillatalents.common_second_vocation.name": "Second Vocation",
+  "talent.vanillatalents.common_second_vocation.desc": "Unlocks the secondary class slot. Costs 10 TP.",
   "talent.vanillatalents.common_armor_care.name": "Armor Care",
   "talent.vanillatalents.common_armor_care.desc": "6% chance per level for each armor piece to lose no durability when taking damage",
   "talent.vanillatalents.common_iron_gut.name": "Strong Stomach",

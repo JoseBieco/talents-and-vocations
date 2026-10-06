@@ -50,6 +50,8 @@
   "talent.vanillatalents.common_lava.desc": "−8% adicional de dano de lava por nível",
   "talent.vanillatalents.common_second_wind.name": "Segundo Fôlego",
   "talent.vanillatalents.common_second_wind.desc": "Ao ficar com ≤ 4 de vida (2 corações), recebe Regeneração II por 4 s. Recarga de 5 min.",
+  "talent.vanillatalents.common_second_vocation.name": "Segunda Vocação",
+  "talent.vanillatalents.common_second_vocation.desc": "Libera o espaço de classe secundária. Custa 10 PT.",
   "talent.vanillatalents.common_armor_care.name": "Armadura Bem Cuidada",
   "talent.vanillatalents.common_armor_care.desc": "6% de chance de cada peça de armadura não perder durabilidade ao receber dano",
   "talent.vanillatalents.common_iron_gut.name": "Estômago Forte",
