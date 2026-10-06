@@ -93,16 +93,18 @@ public final class PetScan {
         int lickInterval = lick > 0 ? TamerFormulas.lickInterval(lick,
                 (int) Talents.value(player, "tamer_lick", "interval_base"),
                 (int) Talents.value(player, "tamer_lick", "interval_per_level")) : 0;
+        int lickQuiet = lick > 0 ? (int) Talents.value(player, "tamer_lick", "quiet_ticks") : 0;
+        float lickHeal = lick > 0 ? (float) Talents.value(player, "tamer_lick", "heal") : 0;
+        int golemInterval = golem > 0 ? (int) Talents.value(player, "tamer_golem", "interval_ticks") : 0;
+        float golemHeal = golem > 0 ? (float) Talents.value(player, "tamer_golem", "heal") : 0;
         for (LivingEntity pet : pets) {
             double distSq = pet.distanceToSqr(player);
             if (pack > 0 && pet instanceof Wolf && distSq <= packRadius * packRadius) wolves++;
             if (lick > 0 && distSq <= lickRadius * lickRadius) {
-                heal(pet, now, LAST_LICK_KEY, (int) Talents.value(player, "tamer_lick", "quiet_ticks"), lickInterval,
-                        (float) Talents.value(player, "tamer_lick", "heal"));
+                heal(pet, now, LAST_LICK_KEY, lickQuiet, lickInterval, lickHeal);
             }
             if (golem > 0 && pet instanceof IronGolem && distSq <= golemRadius * golemRadius) {
-                heal(pet, now, LAST_GOLEM_HEAL_KEY, 0, (int) Talents.value(player, "tamer_golem", "interval_ticks"),
-                        (float) Talents.value(player, "tamer_golem", "heal"));
+                heal(pet, now, LAST_GOLEM_HEAL_KEY, 0, golemInterval, golemHeal);
             }
         }
         if (pack > 0) WOLVES.put(player.getUUID(), wolves);

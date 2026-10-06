@@ -54,7 +54,7 @@ public final class CombatReduction {
         minerStoneskin(list, victim, source);
         minerUnderdweller(list, victim, source);
         anglerDepths(list, victim, source);
-        tamerPack(list, victim);
+        tamerPack(list, victim, source);
         return list;
     }
 
@@ -69,8 +69,9 @@ public final class CombatReduction {
         list.add(HookFormulas.reductionMultiplier(level, Talents.value(victim, "angler_depths", "per_level")));
     }
 
-    /** tamer_pack: lobos seus no raio (contados pela varredura de PetScan, até max_wolves), qualquer dano de combate. */
-    private static void tamerPack(List<Double> list, ServerPlayer victim) {
+    /** tamer_pack: lobos seus no raio (contados pela varredura de PetScan, até max_wolves); só dano de combate (com entidade). */
+    private static void tamerPack(List<Double> list, ServerPlayer victim, DamageSource source) {
+        if (source.getEntity() == null || source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) return;
         int level = Talents.level(victim, "tamer_pack");
         if (level <= 0) return;
         int wolves = PetScan.nearbyWolves(victim);
