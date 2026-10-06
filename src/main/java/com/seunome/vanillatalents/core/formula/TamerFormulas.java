@@ -21,6 +21,15 @@ public final class TamerFormulas {
         return now - lastHurt >= quietTicks && now - lastHeal >= interval;
     }
 
+    /**
+     * tamer_cat_gift: segunda rolagem quando a primeira falha, {@code vanilla + (1 − vanilla)·lvl·per}, limitada a
+     * [vanilla, 1]. Com 0,7 vanilla: 0,775 (nível 1) e 0,85 (nível 2).
+     */
+    public static double catGiftChance(double vanilla, int level, double perLevel) {
+        double reroll = Math.max(0, Math.min(1, level * perLevel));
+        return vanilla + (1 - vanilla) * reroll;
+    }
+
     /** tamer_eternal: recarga do pet pronta quando o game time alcança o limite gravado. */
     public static boolean eternalReady(long now, long until) {
         return now >= until;

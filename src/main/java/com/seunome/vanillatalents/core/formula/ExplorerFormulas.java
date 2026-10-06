@@ -10,8 +10,18 @@ public final class ExplorerFormulas {
      * {@code cap} (ex.: 0,6 → o fator nunca fica abaixo de 0,4).
      */
     public static double fallMultiplier(int fallLvl, double fallPer, boolean rollActive, double rollValue, double cap) {
+        return fallMultiplier(fallLvl, fallPer, rollActive, rollValue, 0, 0, cap);
+    }
+
+    /**
+     * Igual ao anterior com tamer_saddle (Sela Firme, montado) multiplicando junto: o produto de todos os fatores
+     * nunca fica abaixo de {@code 1 − cap} (R3: a Sela Firme entra no mesmo teto).
+     */
+    public static double fallMultiplier(int fallLvl, double fallPer, boolean rollActive, double rollValue,
+                                        int saddleLvl, double saddlePer, double cap) {
         double multiplier = HookFormulas.reductionMultiplier(fallLvl, fallPer);
         if (rollActive) multiplier *= 1 - rollValue;
+        multiplier *= HookFormulas.reductionMultiplier(saddleLvl, saddlePer);
         return Math.max(multiplier, 1 - cap);
     }
 

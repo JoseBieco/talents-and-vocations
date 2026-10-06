@@ -43,12 +43,22 @@ public final class ExplorerEffects {
 
         int fall = Talents.level(player, "explorer_fall");
         boolean roll = player.isShiftKeyDown() && Talents.level(player, "explorer_roll") > 0;
-        if (fall == 0 && !roll) return;
+        int saddle = player.isPassenger() ? Talents.level(player, "tamer_saddle") : 0;
+        // Montado, a queda chega aqui pela propagação da montaria, com o multiplicador que a montaria usou. Se a Sela
+        // Firme já reduziu a montaria (TamerEffects.onMountFall), tira-se esse fator para não somar duas vezes.
+        double incoming = event.getDamageMultiplier();
+        double mountFactor = player.isPassenger() ? TamerEffects.saddleMountFactor(player.getVehicle()) : 1;
+        if (mountFactor > 0 && mountFactor < 1) incoming /= mountFactor;
+        if (fall == 0 && !roll && saddle == 0) {
+            if (incoming != event.getDamageMultiplier()) event.setDamageMultiplier((float) incoming);
+            return;
+        }
         double multiplier = ExplorerFormulas.fallMultiplier(
                 fall, fall > 0 ? Talents.value(player, "explorer_fall", "per_level") : 0,
                 roll, roll ? Talents.value(player, "explorer_roll", "value") : 0,
+                saddle, saddle > 0 ? Talents.value(player, "tamer_saddle", "per_level") : 0,
                 Config.FALL_REDUCTION_CAP.get());
-        event.setDamageMultiplier((float) (event.getDamageMultiplier() * multiplier));
+        event.setDamageMultiplier((float) (incoming * multiplier));
     }
 
     /** explorer_mounts: modificador temporário na velocidade da montaria, removido ao desmontar. */

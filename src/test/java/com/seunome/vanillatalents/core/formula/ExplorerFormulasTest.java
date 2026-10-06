@@ -21,6 +21,14 @@ class ExplorerFormulasTest {
     }
 
     @Test
+    void fallMultiplier_withSaddle() {
+        assertEquals(0.5, ExplorerFormulas.fallMultiplier(0, 0, false, 0, 2, .25, .6), 1e-9);
+        // −50% × −20% × −50% daria 0,2; o teto de 60% segura em 0,4
+        assertEquals(0.4, ExplorerFormulas.fallMultiplier(5, .1, true, .2, 2, .25, .6), 1e-9);
+        assertEquals(0.7, ExplorerFormulas.fallMultiplier(3, .1, false, .2, 0, .25, .6), 1e-9);
+    }
+
+    @Test
     void featherfootDistance_shiftsByTwelveBlocks() {
         assertEquals(31.0, ExplorerFormulas.featherfootDistance(40.0, 12, 3), 1e-9);
         assertEquals(1.0, ExplorerFormulas.featherfootDistance(10.0, 12, 3), 1e-9);

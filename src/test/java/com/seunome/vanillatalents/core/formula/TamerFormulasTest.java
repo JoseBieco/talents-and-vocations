@@ -14,6 +14,13 @@ class TamerFormulasTest {
     }
 
     @Test
+    void catGiftChance_rerollsTheMiss() {
+        assertEquals(0.775, TamerFormulas.catGiftChance(.7, 1, .25), 1e-9);
+        assertEquals(0.85, TamerFormulas.catGiftChance(.7, 2, .25), 1e-9);
+        assertEquals(0.7, TamerFormulas.catGiftChance(.7, 0, .25), 1e-9);
+    }
+
+    @Test
     void lickInterval_shrinksPerLevel() {
         assertEquals(100, TamerFormulas.lickInterval(1, 100, 40));
         assertEquals(60, TamerFormulas.lickInterval(2, 100, 40));
