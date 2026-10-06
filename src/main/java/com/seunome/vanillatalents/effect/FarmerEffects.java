@@ -62,9 +62,6 @@ public final class FarmerEffects {
     private static final int VANILLA_BREED_COOLDOWN = 6000;
     private static final String AREA_GUARD = "farmer_area_harvest";
 
-    /** Ações para o próximo tick do servidor (replantio, espera de reprodução). */
-    private static final List<Runnable> NEXT_TICK = new ArrayList<>();
-
     private record Movement(Vec3 pos, long lastMoveTick) {}
 
     private static final Map<UUID, Movement> MOVEMENT = new HashMap<>();
@@ -79,14 +76,6 @@ public final class FarmerEffects {
 
     public static void forget(UUID player) {
         MOVEMENT.remove(player);
-    }
-
-    @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent.Post event) {
-        if (NEXT_TICK.isEmpty()) return;
-        List<Runnable> tasks = new ArrayList<>(NEXT_TICK);
-        NEXT_TICK.clear();
-        tasks.forEach(Runnable::run);
     }
 
     static boolean isMatureCrop(BlockState state) {
@@ -162,7 +151,7 @@ public final class FarmerEffects {
                 ServerLevel level = context.getLevel();
                 BlockPos pos = BlockPos.containing(origin);
                 Block block = state.getBlock();
-                NEXT_TICK.add(() -> replant(level, pos, block));
+                NextTick.schedule(() -> replant(level, pos, block));
                 return loot;
             }
         }
@@ -219,7 +208,7 @@ public final class FarmerEffects {
         if (breeding > 0) {
             int cooldown = FarmerFormulas.breedingCooldown(VANILLA_BREED_COOLDOWN, breeding,
                     Talents.value(player, "farmer_breeding", "per_level"));
-            NEXT_TICK.add(() -> {
+            NextTick.schedule(() -> {
                 if (a.isAlive() && a.getAge() > cooldown) a.setAge(cooldown);
                 if (b.isAlive() && b.getAge() > cooldown) b.setAge(cooldown);
             });

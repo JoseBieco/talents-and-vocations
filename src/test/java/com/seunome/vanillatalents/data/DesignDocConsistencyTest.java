@@ -28,9 +28,16 @@ class DesignDocConsistencyTest {
     static final Path LANG = Path.of("src/main/resources/assets/vanillatalents/lang");
     static final Path DOCS = Path.of("docs/arvores");
 
-    static final Map<TreeCategory, Integer> EXPECTED_PT = Map.of(
-            TreeCategory.COMMON, 37, TreeCategory.MINER, 36, TreeCategory.FARMER, 35,
-            TreeCategory.EXPLORER, 34, TreeCategory.WARRIOR, 35, TreeCategory.ARCHER, 37);
+    record Expected(int nodes, int points) {}
+
+    static final Map<TreeCategory, Expected> EXPECTED = Map.of(
+            TreeCategory.COMMON, new Expected(12, 37), TreeCategory.MINER, new Expected(12, 36),
+            TreeCategory.FARMER, new Expected(12, 35), TreeCategory.EXPLORER, new Expected(12, 34),
+            TreeCategory.WARRIOR, new Expected(12, 35), TreeCategory.ARCHER, new Expected(12, 37));
+
+    static int totalExpectedNodes() {
+        return EXPECTED.values().stream().mapToInt(Expected::nodes).sum();
+    }
 
     record DocRow(String id, String name, int maxLevel, Set<Prerequisite> prerequisites) {}
 
@@ -58,22 +65,22 @@ class DesignDocConsistencyTest {
     @Test
     void allNodesValid() {
         assertTrue(errors.isEmpty(), errors.toString());
-        assertEquals(72, registry.size());
+        assertEquals(totalExpectedNodes(), registry.size());
     }
 
     @Test
-    void twelveNodesPerTreeAndExpectedPointTotals() {
+    void expectedNodesPerTreeAndPointTotals() {
         for (TreeCategory tree : TreeCategory.values()) {
             List<TalentNode> t = registry.tree(tree);
-            assertEquals(12, t.size(), tree.id());
-            assertEquals(EXPECTED_PT.get(tree), t.stream().mapToInt(TalentNode::maxLevel).sum(), tree.id());
+            assertEquals(EXPECTED.get(tree).nodes(), t.size(), tree.id());
+            assertEquals(EXPECTED.get(tree).points(), t.stream().mapToInt(TalentNode::maxLevel).sum(), tree.id());
         }
     }
 
     @Test
     void nodesMatchDesignDocTables() throws IOException {
         Map<String, DocRow> doc = readDocRows();
-        assertEquals(72, doc.size(), "linhas de tabela em docs/arvores");
+        assertEquals(totalExpectedNodes(), doc.size(), "linhas de tabela em docs/arvores");
         assertEquals(doc.keySet(), new TreeSet<>(registry.all().stream().map(TalentNode::id).toList()));
         for (TalentNode n : registry.all()) {
             DocRow row = doc.get(n.id());
@@ -154,14 +161,12 @@ class DesignDocConsistencyTest {
         var miner = com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, TreeCategory.MINER);
         assertEquals("miner_haste", miner.rootId());
         assertEquals("miner_vein", miner.capstoneId());
-        assertEquals(12, miner.nodeCount());
-        assertEquals(36, miner.totalPoints());
-        var totals = java.util.Map.of(TreeCategory.COMMON, 37, TreeCategory.MINER, 36, TreeCategory.FARMER, 35,
-                TreeCategory.EXPLORER, 34, TreeCategory.WARRIOR, 35, TreeCategory.ARCHER, 37);
-        totals.forEach((tree, points) -> {
+        assertEquals(EXPECTED.get(TreeCategory.MINER).nodes(), miner.nodeCount());
+        assertEquals(EXPECTED.get(TreeCategory.MINER).points(), miner.totalPoints());
+        EXPECTED.forEach((tree, expected) -> {
             var summary = com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, tree);
-            assertEquals(12, summary.nodeCount(), tree.name());
-            assertEquals(points, summary.totalPoints(), tree.name());
+            assertEquals(expected.nodes(), summary.nodeCount(), tree.name());
+            assertEquals(expected.points(), summary.totalPoints(), tree.name());
         });
         assertEquals("common_second_wind",
                 com.seunome.vanillatalents.core.TalentScreenModel.classSummary(registry, TreeCategory.COMMON).capstoneId());
