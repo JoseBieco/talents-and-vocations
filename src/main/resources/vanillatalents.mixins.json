@@ -4,6 +4,7 @@
   "package": "com.seunome.vanillatalents.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "FishingHookMixin",
     "FoodDataMixin",
     "ItemStackMixin",
     "PlayerMixin",

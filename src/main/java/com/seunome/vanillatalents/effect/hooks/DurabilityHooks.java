@@ -8,7 +8,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraftforge.common.ToolActions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ public final class DurabilityHooks {
         List<String> nodes = new ArrayList<>(2);
         if (stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.SHOVELS)) nodes.add("miner_durability");
         else if (stack.is(ItemTags.HOES)) nodes.add("farmer_hoe_care");
+        else if (stack.is(Items.FISHING_ROD) || stack.canPerformAction(ToolActions.FISHING_ROD_CAST)) nodes.add("angler_rod_care");
         else if (stack.has(DataComponents.GLIDER) && player.isFallFlying()) nodes.add("explorer_glider");
         else {
             Equippable equippable = stack.get(DataComponents.EQUIPPABLE);

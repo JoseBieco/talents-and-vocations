@@ -6,6 +6,7 @@ import com.seunome.vanillatalents.capability.SkillAccess;
 import com.seunome.vanillatalents.core.AttributeBonuses;
 import com.seunome.vanillatalents.core.TalentNode;
 import com.seunome.vanillatalents.data.TalentRegistries;
+import com.seunome.vanillatalents.effect.ActivityTracker;
 import com.seunome.vanillatalents.effect.ArcherEffects;
 import com.seunome.vanillatalents.effect.AttributeSync;
 import com.seunome.vanillatalents.effect.FarmerEffects;
@@ -74,6 +75,7 @@ public class PlayerEvents {
         FarmerEffects.forget(event.getEntity().getUUID());
         WarriorEffects.forget(event.getEntity().getUUID());
         ArcherEffects.forget(event.getEntity().getUUID());
+        ActivityTracker.forget(event.getEntity().getUUID());
     }
 
     @SubscribeEvent

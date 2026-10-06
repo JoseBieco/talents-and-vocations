@@ -26,7 +26,8 @@ class AttributeBonusesTest {
             n("explorer_featherfoot", TreeCategory.EXPLORER, 1, 2, Map.of("safe_blocks", 12.0)),
             n("explorer_swiftness", TreeCategory.EXPLORER, 5, 3, Map.of("per_level", 0.03)),
             n("warrior_knockback", TreeCategory.WARRIOR, 2, 0, Map.of("per_level", 0.5)),
-            n("warrior_axe_speed", TreeCategory.WARRIOR, 3, 1, Map.of("per_level", 0.05))
+            n("warrior_axe_speed", TreeCategory.WARRIOR, 3, 1, Map.of("per_level", 0.05)),
+            n("angler_treasure", TreeCategory.ANGLER, 3, 0, Map.of("per_level", 0.5))
     ), new ArrayList<>());
 
     static final AttributeBonuses.Context NEUTRAL = new AttributeBonuses.Context(false, false, false, 0);
@@ -113,5 +114,13 @@ class AttributeBonusesTest {
         var v = new TalentRulesTest.FakeView().cls("warrior").lvl("warrior_axe_speed", 3);
         assertEquals(0, byNode(v, NEUTRAL).get("warrior_axe_speed").amount());
         assertEquals(0.15, byNode(v, new AttributeBonuses.Context(false, false, true, 0)).get("warrior_axe_speed").amount(), 1e-9);
+    }
+
+    @Test
+    void anglerTreasureIsLuckAddValue() {
+        var b = byNode(new TalentRulesTest.FakeView().cls("angler").lvl("angler_treasure", 3), NEUTRAL).get("angler_treasure");
+        assertEquals(AttributeBonuses.Attr.LUCK, b.attribute());
+        assertEquals(AttributeBonuses.Op.ADD_VALUE, b.op());
+        assertEquals(1.5, b.amount(), 1e-9);
     }
 }
