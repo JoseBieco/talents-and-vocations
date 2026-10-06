@@ -39,7 +39,7 @@ public final class NodeDetailPanel {
         this.y = y;
         this.w = w;
         this.h = h;
-        this.buy = Button.builder(Component.translatable("gui.vanillatalents.buy"), b -> buyShown())
+        this.buy = Button.builder(Component.translatable("gui.vanillatalents.buy", 1), b -> buyShown())
                 .bounds(x + PAD, y + h - PAD - BUTTON_H, w - 2 * PAD, BUTTON_H).build();
         this.buy.visible = false;
     }
@@ -94,8 +94,12 @@ public final class NodeDetailPanel {
 
         PurchaseResult result = TalentRules.canPurchase(data, registry, selected.id());
         buy.active = result == PurchaseResult.OK;
+        buy.setMessage(Component.translatable("gui.vanillatalents.buy", selected.cost()));
         String reasonKey = TalentScreenModel.blockReasonKey(result);
-        int reasonLines = reasonKey == null ? 0 : font.split(Component.translatable(reasonKey), w - 2 * PAD).size();
+        Component capstoneName = primaryCapstoneName(data, registry);
+        // Só reason.primary_capstone usa o argumento; os demais motivos o ignoram.
+        Component reason = reasonKey == null ? null : Component.translatable(reasonKey, capstoneName);
+        int reasonLines = reason == null ? 0 : font.split(reason, w - 2 * PAD).size();
         int textBottom = buy.getY() - 2 - reasonLines * font.lineHeight;
 
         int top = y + PAD;
@@ -105,7 +109,8 @@ public final class NodeDetailPanel {
         ty = wrapped(g, font, Component.translatable(selected.descKey()), ty + 2, COLOR_MUTED);
         ty = wrapped(g, font, Component.translatable("gui.vanillatalents.level",
                 TalentRules.effectiveLevel(data, registry, selected.id()), selected.maxLevel()), ty + 3, COLOR_TEXT);
-        if (!selected.prerequisites().isEmpty()) {
+        boolean needsPrimaryCapstone = selected.conditions().contains(TalentNode.CONDITION_PRIMARY_CAPSTONE);
+        if (!selected.prerequisites().isEmpty() || needsPrimaryCapstone) {
             ty = wrapped(g, font, Component.translatable("gui.vanillatalents.detail.requirements"), ty + 3, COLOR_TEXT);
             for (Prerequisite p : selected.prerequisites()) {
                 int current = TalentRules.effectiveLevel(data, registry, p.nodeId());
@@ -115,13 +120,27 @@ public final class NodeDetailPanel {
                 String key = met ? "gui.vanillatalents.detail.met" : "gui.vanillatalents.detail.unmet";
                 ty = wrapped(g, font, Component.translatable(key, name, current, p.level()), ty, met ? COLOR_MET : COLOR_UNMET);
             }
+            if (needsPrimaryCapstone) {
+                boolean met = TalentRules.primaryCapstoneOwned(data, registry);
+                String key = met ? "gui.vanillatalents.detail.primary_capstone_met" : "gui.vanillatalents.detail.primary_capstone_unmet";
+                ty = wrapped(g, font, Component.translatable(key, capstoneName), ty, met ? COLOR_MET : COLOR_UNMET);
+            }
         }
-        ty = wrapped(g, font, Component.translatable("gui.vanillatalents.detail.cost"), ty + 3, COLOR_TEXT);
+        if (selected.cost() > 1) {
+            ty = wrapped(g, font, Component.translatable("gui.vanillatalents.detail.cost", selected.cost()), ty + 3, COLOR_TEXT);
+        }
         g.disableScissor();
         measure(ty - scroll - top, textBottom - top);
         scrollbar(g, top, textBottom);
 
-        if (reasonKey != null) wrapped(g, font, Component.translatable(reasonKey), textBottom, COLOR_UNMET);
+        if (reason != null) wrapped(g, font, reason, textBottom, COLOR_UNMET);
+    }
+
+    /** Nome traduzido do capstone da classe principal, ou "—" sem principal. */
+    private static Component primaryCapstoneName(PlayerSkillData data, TalentRegistry registry) {
+        String id = TalentScreenModel.primaryCapstoneId(data, registry);
+        TalentNode node = id == null ? null : registry.get(id).orElse(null);
+        return node == null ? Component.literal("—") : Component.translatable(node.nameKey());
     }
 
     private void renderSummary(GuiGraphicsExtractor g, Font font, PlayerSkillData data, TalentRegistry registry, TreeCategory tree) {

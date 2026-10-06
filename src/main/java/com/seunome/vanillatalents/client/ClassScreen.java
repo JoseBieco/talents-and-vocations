@@ -32,7 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Escolha e troca de classe: lista à esquerda, detalhes à direita e confirmação em dois cliques. */
+/**
+ * Escolha e troca da classe de um espaço (principal ou secundária): lista à esquerda, detalhes à direita e
+ * confirmação em dois cliques. A classe do outro espaço aparece apagada e não pode ser escolhida.
+ */
 public class ClassScreen extends Screen {
 
     private static final int MAX_W = 320;
@@ -57,6 +60,7 @@ public class ClassScreen extends Screen {
     private static final int COLOR_DANGER = 0xFFFF5555;
 
     private final Screen parent;
+    private final ClassSlot slot;
     private final TwoStepConfirm confirm = new TwoStepConfirm(CONFIRM_MIN_TICKS, CONFIRM_WINDOW_TICKS);
     private final Map<String, ItemStack> icons = new HashMap<>();
     private final List<TreeCategory> classes = new ArrayList<>();
@@ -69,9 +73,11 @@ public class ClassScreen extends Screen {
     /** Rolagem do texto do painel (≤ 0) e as medidas do último quadro. */
     private int detailScroll, detailContentH, detailViewH;
 
-    public ClassScreen(Screen parent) {
-        super(Component.translatable("gui.vanillatalents.classes.title"));
+    public ClassScreen(Screen parent, ClassSlot slot) {
+        super(Component.translatable(slot == ClassSlot.PRIMARY
+                ? "gui.vanillatalents.classes.title.primary" : "gui.vanillatalents.classes.title.secondary"));
         this.parent = parent;
+        this.slot = slot;
         for (TreeCategory tree : TreeCategory.values()) {
             if (tree.isClass()) classes.add(tree);
         }
@@ -83,16 +89,23 @@ public class ClassScreen extends Screen {
         rebuildWidgets();
     }
 
-    private String currentClass() {
-        return ClientTalentState.data().getPrimaryClass();
+    /** Classe hoje no espaço que esta tela edita. */
+    private String classInSlot() {
+        PlayerSkillData data = ClientTalentState.data();
+        return TalentScreenModel.classInSlot(slot, data.getPrimaryClass(), data.getSecondaryClass());
     }
 
-    private boolean isCurrent(TreeCategory tree) {
-        return tree.id().equals(currentClass());
+    private TalentScreenModel.ClassChoice choice(TreeCategory tree) {
+        PlayerSkillData data = ClientTalentState.data();
+        return TalentScreenModel.classChoice(slot, tree.id(), data.getPrimaryClass(), data.getSecondaryClass());
+    }
+
+    private boolean selectable(TreeCategory tree) {
+        return choice(tree) == TalentScreenModel.ClassChoice.AVAILABLE;
     }
 
     private boolean hasClass() {
-        return !TalentRules.NO_CLASS.equals(currentClass());
+        return !TalentRules.NO_CLASS.equals(classInSlot());
     }
 
     @Override
@@ -108,8 +121,8 @@ public class ClassScreen extends Screen {
         panelY = listY;
         panelH = winH - TITLE_H - MARGIN - 2;
 
-        if (selected == null || isCurrent(selected)) {
-            selected = classes.stream().filter(t -> !isCurrent(t)).findFirst().orElse(null);
+        if (selected == null || !selectable(selected)) {
+            selected = classes.stream().filter(this::selectable).findFirst().orElse(null);
             confirm.reset();
         }
 
@@ -132,7 +145,7 @@ public class ClassScreen extends Screen {
 
     private TalentScreenModel.RespecPreview preview() {
         PlayerSkillData data = ClientTalentState.data();
-        return TalentScreenModel.respecPreview(data.getUnlockedNodes(), TalentRegistries.client(), ClassSlot.PRIMARY,
+        return TalentScreenModel.respecPreview(data.getUnlockedNodes(), TalentRegistries.client(), slot,
                 data.getPrimaryClass(), data.getSecondaryClass(), ClientTalentState.economy());
     }
 
@@ -164,16 +177,19 @@ public class ClassScreen extends Screen {
         TreeCategory tree = selected;
         if (tree == null || !canAct()) return;
         if (!hasClass() || confirm.click(ticks)) {
-            ModNetwork.sendToServer(new C2SChangeClass(ClassSlot.PRIMARY, tree.id()));
+            ModNetwork.sendToServer(new C2SChangeClass(slot, tree.id()));
             goBack(true);
         } else if (action != null) {
             action.setMessage(actionLabel());
         }
     }
 
-    private void goBack(boolean toClassTab) {
+    /** Volta à tela anterior; depois de agir, abre a aba do espaço alterado. */
+    private void goBack(boolean toSlotTab) {
         minecraft.gui.setScreen(parent);
-        if (toClassTab && parent instanceof TalentScreen talent) talent.openTab(true);
+        if (toSlotTab && parent instanceof TalentScreen talent) {
+            talent.openTab(slot == ClassSlot.PRIMARY ? TalentScreen.Tab.PRIMARY : TalentScreen.Tab.SECONDARY);
+        }
     }
 
     @Override
@@ -242,24 +258,27 @@ public class ClassScreen extends Screen {
 
     private void drawRow(GuiGraphicsExtractor g, int index, int mouseX, int mouseY) {
         TreeCategory tree = classes.get(index);
-        boolean current = isCurrent(tree);
+        TalentScreenModel.ClassChoice choice = choice(tree);
+        boolean muted = choice != TalentScreenModel.ClassChoice.AVAILABLE;
         int y = listY + index * ROW_H;
         if (tree == selected) g.outline(listX, y, LIST_W, ROW_H, COLOR_SELECTED);
-        else if (!current && rowAt(mouseX, mouseY) == index) g.fill(listX, y, listX + LIST_W, y + ROW_H, COLOR_ROW_HOVER);
+        else if (!muted && rowAt(mouseX, mouseY) == index) g.fill(listX, y, listX + LIST_W, y + ROW_H, COLOR_ROW_HOVER);
 
         int fy = y + (ROW_H - FRAME) / 2;
         g.blitSprite(RenderPipelines.GUI_TEXTURED, VanillaGui.frameSprite(false, false), listX + 2, fy, FRAME, FRAME);
         TalentNode root = node(summary(tree).rootId());
         if (root != null) g.item(icon(root), listX + 2 + 5, fy + 5);
 
-        Component label = current
-                ? Component.translatable("gui.vanillatalents.classes.current", className(tree))
-                : className(tree);
+        Component label = switch (choice) {
+            case CURRENT -> Component.translatable("gui.vanillatalents.classes.current", className(tree));
+            case OTHER_SLOT -> Component.translatable("gui.vanillatalents.classes.other_slot", className(tree));
+            case AVAILABLE -> className(tree);
+        };
         List<FormattedCharSequence> lines = font.split(label, LIST_W - FRAME - 8);
         int shown = Math.min(lines.size(), 2);
         int ty = y + (ROW_H - shown * 9) / 2;
         for (int i = 0; i < shown; i++) {
-            g.text(font, lines.get(i), listX + FRAME + 6, ty + i * 9, current ? COLOR_MUTED : COLOR_TEXT, true);
+            g.text(font, lines.get(i), listX + FRAME + 6, ty + i * 9, muted ? COLOR_MUTED : COLOR_TEXT, true);
         }
     }
 
@@ -282,11 +301,18 @@ public class ClassScreen extends Screen {
         g.text(font, Component.translatable("gui.vanillatalents.classes.size", summary.nodeCount(), summary.totalPoints()), x, y + 1, COLOR_MUTED, false);
         y += LINE_H + 5;
 
+        TalentScreenModel.RespecPreview preview = preview();
+        if (preview.freezesSecondary()) {
+            for (FormattedCharSequence line : font.split(Component.translatable("gui.vanillatalents.classes.freezes_secondary"), textW)) {
+                g.text(font, line, x, y, COLOR_DANGER, true);
+                y += 9;
+            }
+            y += 4;
+        }
         if (!hasClass()) {
             g.text(font, Component.translatable("gui.vanillatalents.select_class.first_free"), x, y, COLOR_TEXT, true);
             return y + LINE_H;
         }
-        TalentScreenModel.RespecPreview preview = preview();
         if (preview.feeLevels() > 0) {
             g.text(font, Component.translatable("gui.vanillatalents.classes.fee", preview.feeLevels()), x, y, COLOR_TEXT, true);
             y += LINE_H;
@@ -317,7 +343,7 @@ public class ClassScreen extends Screen {
         int row = rowAt(event.x(), event.y());
         if (row < 0) return false;
         TreeCategory tree = classes.get(row);
-        if (isCurrent(tree)) return true;
+        if (!selectable(tree)) return true;
         if (tree != selected) {
             selected = tree;
             detailScroll = 0;

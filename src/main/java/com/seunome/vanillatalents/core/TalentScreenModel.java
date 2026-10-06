@@ -109,16 +109,65 @@ public final class TalentScreenModel {
     }
 
     /**
-     * Prévia de trocar a classe do espaço {@code slot}, hoje {@code current}. {@code secondary} é a classe do espaço
-     * secundário (para saber se trocar a principal a congela).
+     * Prévia de trocar a classe do espaço {@code slot}. {@code primary}/{@code secondary} são as classes hoje nos dois
+     * espaços; a trocada é a do espaço {@code slot} (espaço vazio = primeira escolha, grátis). {@code freezesSecondary}
+     * só vale ao trocar a principal tendo secundária escolhida.
      */
     public static RespecPreview respecPreview(Map<String, Integer> levels, TalentRegistry registry, ClassSlot slot,
-                                              String current, String secondary, EconomySettings settings) {
+                                              String primary, String secondary, EconomySettings settings) {
+        String current = classInSlot(slot, primary, secondary);
         boolean freezes = slot == ClassSlot.PRIMARY && !TalentRules.NO_CLASS.equals(secondary);
         if (TalentRules.NO_CLASS.equals(current)) return new RespecPreview(0, 0, 0, freezes);
         int spent = RespecRules.spentClassPoints(levels, registry, current);
         return new RespecPreview(RespecRules.feeFor(spent, settings.respecFeeLevels()), spent,
                 RespecRules.refund(spent, settings.respecRefundPercent()), freezes);
+    }
+
+    /** Estado da aba Secundária. */
+    public enum SecondaryTab {
+        /** Multiclasse desligado no servidor ({@code maxClasses} = 1). */
+        DISABLED,
+        /** Segunda Vocação não comprada. */
+        LOCKED,
+        /** Espaço liberado, sem classe escolhida. */
+        CHOOSE,
+        /** Classe escolhida, mas sem efeito (falta o capstone da principal). */
+        FROZEN,
+        ACTIVE
+    }
+
+    public static SecondaryTab secondaryTab(SkillView v, TalentRegistry r) {
+        if (v.maxClasses() < 2) return SecondaryTab.DISABLED;
+        if (!RespecRules.slotUnlocked(ClassSlot.SECONDARY, v)) return SecondaryTab.LOCKED;
+        boolean chosen = TreeCategory.byId(v.secondaryClass()).map(TreeCategory::isClass).orElse(false);
+        if (!chosen) return SecondaryTab.CHOOSE;
+        return TalentRules.secondaryActive(v, r) ? SecondaryTab.ACTIVE : SecondaryTab.FROZEN;
+    }
+
+    /** Id do capstone da árvore principal, ou null sem principal ou sem capstone marcado. */
+    public static String primaryCapstoneId(SkillView v, TalentRegistry r) {
+        return TreeCategory.byId(v.primaryClass()).filter(TreeCategory::isClass)
+                .flatMap(r::capstone).map(TalentNode::id).orElse(null);
+    }
+
+    /** Como uma classe aparece na lista de escolha de um espaço. */
+    public enum ClassChoice {
+        /** Já é a classe deste espaço. */
+        CURRENT,
+        /** Está no outro espaço: não pode ser escolhida aqui. */
+        OTHER_SLOT,
+        AVAILABLE
+    }
+
+    public static String classInSlot(ClassSlot slot, String primary, String secondary) {
+        return slot == ClassSlot.PRIMARY ? primary : secondary;
+    }
+
+    public static ClassChoice classChoice(ClassSlot slot, String classId, String primary, String secondary) {
+        if (classId.equals(classInSlot(slot, primary, secondary))) return ClassChoice.CURRENT;
+        String other = slot == ClassSlot.PRIMARY ? secondary : primary;
+        if (classId.equals(other)) return ClassChoice.OTHER_SLOT;
+        return ClassChoice.AVAILABLE;
     }
 
     public static GridBounds gridBounds(List<TalentNode> nodes) {

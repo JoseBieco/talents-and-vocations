@@ -58,13 +58,69 @@ class TalentScreenModelTest {
         assertEquals(10, primary.feeLevels());
         assertEquals(1, primary.refund());
 
-        var secondary = TalentScreenModel.respecPreview(levels, reg, ClassSlot.SECONDARY, "archer", "archer", EconomySettings.DEFAULTS);
+        var secondary = TalentScreenModel.respecPreview(levels, reg, ClassSlot.SECONDARY, "miner", "archer", EconomySettings.DEFAULTS);
         assertFalse(secondary.freezesSecondary());
         assertEquals(4, secondary.spent());
         assertEquals(1, secondary.refund());
 
         var noSecondary = TalentScreenModel.respecPreview(levels, reg, ClassSlot.PRIMARY, "miner", TalentRules.NO_CLASS, EconomySettings.DEFAULTS);
         assertFalse(noSecondary.freezesSecondary());
+    }
+
+    @Test
+    void respecPreview_secondaryUsesSecondarySlotClass() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        Map<String, Integer> levels = Map.of("miner_haste", 5, "miner_vein", 1, TalentRules.SECOND_VOCATION, 1);
+        // primeira secundária: espaço vazio → grátis, mesmo com PT gastos na principal
+        var first = TalentScreenModel.respecPreview(levels, reg, ClassSlot.SECONDARY, "miner", TalentRules.NO_CLASS, EconomySettings.DEFAULTS);
+        assertEquals(0, first.feeLevels());
+        assertEquals(0, first.spent());
+        assertFalse(first.freezesSecondary());
+        // secundária escolhida sem nada gasto nela → taxa 0
+        var empty = TalentScreenModel.respecPreview(levels, reg, ClassSlot.SECONDARY, "miner", "archer", EconomySettings.DEFAULTS);
+        assertEquals(0, empty.feeLevels());
+        assertEquals(0, empty.spent());
+    }
+
+    @Test
+    void secondaryTab_states() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        assertEquals(TalentScreenModel.SecondaryTab.ACTIVE,
+                TalentScreenModel.secondaryTab(TalentRulesTest.activeMulticlass(), reg));
+        assertEquals(TalentScreenModel.SecondaryTab.DISABLED,
+                TalentScreenModel.secondaryTab(TalentRulesTest.activeMulticlass().maxClasses(1), reg));
+        assertEquals(TalentScreenModel.SecondaryTab.LOCKED,
+                TalentScreenModel.secondaryTab(TalentRulesTest.activeMulticlass().lvl(TalentRules.SECOND_VOCATION, 0), reg));
+        assertEquals(TalentScreenModel.SecondaryTab.CHOOSE,
+                TalentScreenModel.secondaryTab(TalentRulesTest.activeMulticlass().sec(TalentRules.NO_CLASS), reg));
+        assertEquals(TalentScreenModel.SecondaryTab.FROZEN,
+                TalentScreenModel.secondaryTab(TalentRulesTest.activeMulticlass().lvl("miner_vein", 0), reg));
+        assertEquals(TalentScreenModel.SecondaryTab.FROZEN,
+                TalentScreenModel.secondaryTab(TalentRulesTest.activeMulticlass().cls("farmer"), reg),
+                "principal trocada sem capstone");
+        assertEquals(TalentScreenModel.SecondaryTab.LOCKED,
+                TalentScreenModel.secondaryTab(new TalentRulesTest.FakeView(), reg));
+    }
+
+    @Test
+    void primaryCapstoneId_followsPrimaryClass() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        assertEquals("miner_vein", TalentScreenModel.primaryCapstoneId(new TalentRulesTest.FakeView().cls("miner"), reg));
+        assertEquals("archer_pierce", TalentScreenModel.primaryCapstoneId(new TalentRulesTest.FakeView().cls("archer").sec("miner"), reg));
+        assertNull(TalentScreenModel.primaryCapstoneId(new TalentRulesTest.FakeView(), reg));
+        assertNull(TalentScreenModel.primaryCapstoneId(new TalentRulesTest.FakeView().cls("farmer"), reg), "árvore sem capstone");
+    }
+
+    @Test
+    void classChoice_bySlot() {
+        assertEquals(TalentScreenModel.ClassChoice.CURRENT, TalentScreenModel.classChoice(ClassSlot.PRIMARY, "miner", "miner", "archer"));
+        assertEquals(TalentScreenModel.ClassChoice.OTHER_SLOT, TalentScreenModel.classChoice(ClassSlot.PRIMARY, "archer", "miner", "archer"));
+        assertEquals(TalentScreenModel.ClassChoice.AVAILABLE, TalentScreenModel.classChoice(ClassSlot.PRIMARY, "farmer", "miner", "archer"));
+        assertEquals(TalentScreenModel.ClassChoice.CURRENT, TalentScreenModel.classChoice(ClassSlot.SECONDARY, "archer", "miner", "archer"));
+        assertEquals(TalentScreenModel.ClassChoice.OTHER_SLOT, TalentScreenModel.classChoice(ClassSlot.SECONDARY, "miner", "miner", "archer"));
+        assertEquals(TalentScreenModel.ClassChoice.AVAILABLE, TalentScreenModel.classChoice(ClassSlot.SECONDARY, "farmer", "miner", TalentRules.NO_CLASS));
+        assertEquals("miner", TalentScreenModel.classInSlot(ClassSlot.PRIMARY, "miner", "archer"));
+        assertEquals("archer", TalentScreenModel.classInSlot(ClassSlot.SECONDARY, "miner", "archer"));
     }
 
     @Test

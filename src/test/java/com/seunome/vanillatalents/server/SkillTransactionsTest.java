@@ -192,6 +192,22 @@ class SkillTransactionsTest {
     }
 
     @Test
+    void changeSecondary_nothingSpentIsPaidButFree() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        PlayerSkillData d = multiclass();
+        d.removeClassNodes("archer");
+        int points = d.getAvailablePoints();
+        var result = SkillTransactions.changeClass(d, reg, ClassSlot.SECONDARY, "farmer", 0, 10, 25);
+        assertEquals(RespecCheck.OK_PAID, result.check());
+        assertEquals(0, result.feeLevels());
+        assertEquals(0, result.refund());
+        assertEquals("farmer", d.getSecondaryClass());
+        assertEquals("miner", d.getPrimaryClass());
+        assertEquals(points, d.getAvailablePoints());
+        assertEquals(5, d.getNodeLevel("miner_haste"));
+    }
+
+    @Test
     void secondarySameAsPrimary_refused() {
         PlayerSkillData d = multiclass();
         var result = SkillTransactions.changeClass(d, TalentRulesTest.MC_REG, ClassSlot.SECONDARY, "miner", 50, 10, 25);
