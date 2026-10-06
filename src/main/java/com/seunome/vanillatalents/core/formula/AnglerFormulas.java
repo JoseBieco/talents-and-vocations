@@ -26,6 +26,14 @@ public final class AnglerFormulas {
         return base * (1 + level * perLevel);
     }
 
+    /**
+     * angler_trident (+ angler_high_tide na chuva/submerso): parte aditiva do bônus de dano do tridente, sem o 1.
+     * Arremessado soma no pool aditivo do Arqueiro (R1); corpo a corpo multiplica por {@code 1 + bônus}.
+     */
+    public static double tridentBonus(int level, double perLevel, boolean highTide, double highTideBonus) {
+        return level * perLevel + (highTide ? highTideBonus : 0);
+    }
+
     /** Anti-AFK: o jogador se moveu ou girou a câmera nos últimos {@code idleTicks}. */
     public static boolean active(long lastActiveTick, long now, int idleTicks) {
         return now - lastActiveTick <= idleTicks;

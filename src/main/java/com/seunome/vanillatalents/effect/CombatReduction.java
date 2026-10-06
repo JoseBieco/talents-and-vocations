@@ -10,6 +10,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.monster.Guardian;
+import net.minecraft.world.entity.monster.zombie.Drowned;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.listener.Priority;
@@ -22,7 +24,7 @@ import java.util.List;
 /**
  * R2 (spec 9.5): reduções de dano de combate do jogador atingido, de todas as classes, combinadas
  * multiplicativamente e limitadas por {@code combatReductionCap}. Cada nó mantém a própria condição; este é o único
- * lugar onde eles são aplicados. Classes futuras (tamer_pack, angler_depths) entram em {@link #multipliers}.
+ * lugar onde eles são aplicados. Classes futuras (tamer_pack) entram em {@link #multipliers}.
  *
  * <p>Prioridade HIGH: roda antes dos bônus de ataque (warrior_strength é plano), preservando a ordem de antes
  * (a resistência do Guerreiro era aplicada antes do bônus do atacante no mesmo handler).
@@ -45,11 +47,23 @@ public final class CombatReduction {
 
     /** Fatores (< 1) dos nós de redução de combate que se aplicam a este dano. */
     private static List<Double> multipliers(ServerPlayer victim, DamageSource source) {
-        List<Double> list = new ArrayList<>(3);
+        List<Double> list = new ArrayList<>(4);
         warriorResistance(list, victim, source);
         minerStoneskin(list, victim, source);
         minerUnderdweller(list, victim, source);
+        anglerDepths(list, victim, source);
         return list;
+    }
+
+    /**
+     * angler_depths: dano causado por Afogado ou Guardião (o Ancião estende Guardian). Usa a entidade responsável, então
+     * cobre o raio (indirectMagic(guardião, guardião)), o tridente arremessado pelo afogado e os espinhos do guardião.
+     */
+    private static void anglerDepths(List<Double> list, ServerPlayer victim, DamageSource source) {
+        if (!(source.getEntity() instanceof Drowned) && !(source.getEntity() instanceof Guardian)) return;
+        int level = Talents.level(victim, "angler_depths");
+        if (level <= 0) return;
+        list.add(HookFormulas.reductionMultiplier(level, Talents.value(victim, "angler_depths", "per_level")));
     }
 
     /** warrior_resistance: dano físico (com entidade direta), fora de fogo, explosão e dano que ignora armadura. */

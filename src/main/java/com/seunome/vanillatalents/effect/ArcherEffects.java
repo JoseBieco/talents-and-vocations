@@ -198,7 +198,10 @@ public final class ArcherEffects {
 
     // ---- Acerto ----------------------------------------------------------------------------------------------------
 
-    /** archer_aim/bolt/longshot (aditivos), archer_pierce (2º alvo), archer_marker, archer_firework. */
+    /**
+     * archer_aim/bolt/longshot/antiair + angler_trident/high_tide no tridente arremessado (aditivos, um pool só),
+     * archer_pierce (2º alvo), archer_marker, archer_firework.
+     */
     @SubscribeEvent
     public static void onHurt(LivingHurtEvent event) {
         LivingEntity target = event.getEntity();
@@ -228,6 +231,8 @@ public final class ArcherEffects {
                     antiAir, antiAir > 0 ? Talents.value(player, "archer_antiair", "per_level") : 0,
                     !target.onGround() && !target.isInWater());
         }
+        // R1: angler_trident / angler_high_tide entram no mesmo pool aditivo (valem também sem nenhum nível do Arqueiro).
+        if (trident) multiplier += AnglerEffects.tridentBonus(player);
 
         if (data.getBooleanOr(PIERCE, false)) {
             int hits = data.getIntOr(PIERCE_HITS, 0);

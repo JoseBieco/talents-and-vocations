@@ -88,4 +88,21 @@ class AnglerFormulasTest {
     void scaled_seaEyesFog() {
         assertEquals(144, AnglerFormulas.scaled(96, 2, 0.25), 1e-9);
     }
+
+    @Test
+    void tridentBonus_noHighTide() {
+        assertEquals(0.24, AnglerFormulas.tridentBonus(3, 0.08, false, 0.15), 1e-9);
+    }
+
+    @Test
+    void tridentBonus_highTide() {
+        assertEquals(0.39, AnglerFormulas.tridentBonus(3, 0.08, true, 0.15), 1e-9);
+    }
+
+    @Test
+    void tridentBonus_sharesArcherPool_R1() {
+        double pool = ArcherFormulas.damageMultiplier(3, 0.1, 0, 0, false, 0, 0, 0, 0)
+                + AnglerFormulas.tridentBonus(3, 0.08, false, 0.15);
+        assertEquals(1.54, pool, 1e-9);
+    }
 }

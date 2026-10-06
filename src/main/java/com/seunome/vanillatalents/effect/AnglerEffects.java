@@ -15,10 +15,12 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -29,7 +31,8 @@ import java.util.UUID;
 
 /**
  * Efeitos do Pescador. A fisgada (angler_lure / Maré Alta) fica em FishingHooks e o barco em BoatHooks; aqui ficam o
- * loot, as condições e o Amigo dos Golfinhos.
+ * loot, as condições, o Amigo dos Golfinhos e o tridente corpo a corpo (o arremessado soma no pool do Arqueiro, em
+ * ArcherEffects; a Lealdade fica em TridentHooks).
  */
 @Mod.EventBusSubscriber(modid = VanillaTalents.MODID)
 public final class AnglerEffects {
@@ -71,6 +74,33 @@ public final class AnglerEffects {
             player.removeEffect(MobEffects.DOLPHINS_GRACE);
             player.addEffect(extended, null);
         });
+    }
+
+    /**
+     * angler_trident + angler_high_tide, corpo a corpo: o jogador bate direto (entidade direta = ele) com tridente na
+     * mão principal. O tridente arremessado tem entidade direta ThrownTrident e é tratado em ArcherEffects (R1), então
+     * os dois caminhos nunca se somam no mesmo golpe.
+     */
+    @SubscribeEvent
+    public static void onHurt(LivingHurtEvent event) {
+        if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
+        if (event.getSource().getDirectEntity() != player || !player.getMainHandItem().is(Items.TRIDENT)) return;
+        double bonus = tridentBonus(player);
+        if (bonus <= 0) return;
+        event.setAmount((float) (event.getAmount() * (1 + bonus)));
+    }
+
+    /**
+     * Parte aditiva do bônus do tridente (sem o 1): Arpão por nível + Maré Alta na chuva/submerso. Combate não tem
+     * exigência anti-AFK.
+     */
+    public static double tridentBonus(ServerPlayer player) {
+        int level = Talents.level(player, "angler_trident");
+        boolean highTide = highTideActive(player);
+        if (level <= 0 && !highTide) return 0;
+        double perLevel = level > 0 ? Talents.value(player, "angler_trident", "per_level") : 0;
+        double highTideBonus = highTide ? Talents.value(player, "angler_high_tide", "trident_bonus") : 0;
+        return AnglerFormulas.tridentBonus(level, perLevel, highTide, highTideBonus);
     }
 
     public static void registerLoot() {

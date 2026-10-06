@@ -9,7 +9,8 @@
     "FoodDataMixin",
     "ItemStackMixin",
     "PlayerMixin",
-    "ServerPlayerMixin"
+    "ServerPlayerMixin",
+    "ThrownTridentMixin"
   ],
   "injectors": {
     "defaultRequire": 1
