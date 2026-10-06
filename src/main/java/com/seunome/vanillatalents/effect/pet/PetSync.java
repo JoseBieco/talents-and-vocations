@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.AnimalTameEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -46,9 +48,12 @@ public final class PetSync {
                 AttributeInstance instance = pet.getAttribute(holder(bonus.attribute()));
                 if (instance == null) continue;
                 Identifier id = Identifier.fromNamespaceAndPath(VanillaTalents.MODID, bonus.nodeId());
-                instance.removeModifier(id);
+                AttributeModifier.Operation op = operation(bonus.op());
+                AttributeModifier existing = instance.getModifier(id);
+                if (existing != null && existing.amount() == bonus.amount() && existing.operation() == op) continue;
+                if (existing != null) instance.removeModifier(id);
                 if (bonus.amount() != 0) {
-                    instance.addPermanentModifier(new AttributeModifier(id, bonus.amount(), operation(bonus.op())));
+                    instance.addPermanentModifier(new AttributeModifier(id, bonus.amount(), op));
                 }
             }
         });
@@ -81,6 +86,19 @@ public final class PetSync {
         if (animal.level().isClientSide() || !(event.getTamer() instanceof ServerPlayer tamer)) return;
         NextTick.schedule(() -> {
             if (animal.isAlive() && !tamer.hasDisconnected()) apply(animal, tamer);
+        });
+    }
+
+    /**
+     * Nautilus (AbstractNautilus.tryToTame chama tame() direto) não dispara AnimalTameEvent: depois de interagir com
+     * um TamableAnimal ainda não domado, confere no tick seguinte se virou pet do jogador.
+     */
+    @SubscribeEvent
+    public static void onInteract(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!(event.getTarget() instanceof TamableAnimal animal) || animal.isTame()) return;
+        NextTick.schedule(() -> {
+            if (animal.isAlive() && !player.hasDisconnected() && PetOwnership.isPetOf(animal, player)) apply(animal, player);
         });
     }
 

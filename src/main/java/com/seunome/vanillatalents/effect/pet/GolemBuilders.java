@@ -28,6 +28,8 @@ import java.util.UUID;
  * Dono dos golems construídos (Global Constraints): o clique com abóbora esculpida ou lanterna de abóbora é gravado;
  * um golem de ferro {@code isPlayerCreated()} ou de neve que entra no mundo (não do disco) no mesmo tick ou no
  * seguinte, a até 8 blocos do bloco clicado, recebe o dono. Dispensador não dá dono (não há clique).
+ * <p>Desvio intencional: a distância de 8 blocos é medida a partir do BLOCO CLICADO, não do jogador
+ * (o golem nasce junto à abóbora, que fica ao lado do bloco clicado).
  */
 @Mod.EventBusSubscriber(modid = VanillaTalents.MODID)
 public final class GolemBuilders {
@@ -61,7 +63,10 @@ public final class GolemBuilders {
         builder(entity, now).ifPresent(owner -> {
             PetOwnership.setGolemOwner(entity, owner);
             if (entity instanceof LivingEntity golem) {
-                PetOwnership.onlineOwner(golem).ifPresent(player -> PetSync.apply(golem, player));
+                PetOwnership.onlineOwner(golem).ifPresent(player -> {
+                    PetSync.apply(golem, player);
+                    golem.setHealth(golem.getMaxHealth()); // golem recém-construído nasce com a vida cheia
+                });
             }
         });
     }
