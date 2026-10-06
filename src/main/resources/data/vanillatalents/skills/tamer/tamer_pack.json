@@ -3,7 +3,7 @@
   "treeCategory": "tamer",
   "name": "talent.vanillatalents.tamer_pack.name",
   "description": "talent.vanillatalents.tamer_pack.desc",
-  "icon": "minecraft:wolf_armor",
+  "icon": "minecraft:bone_block",
   "maxLevel": 2,
   "prerequisites": [
     {

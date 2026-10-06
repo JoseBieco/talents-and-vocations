@@ -3,7 +3,7 @@
   "treeCategory": "tamer",
   "name": "talent.vanillatalents.tamer_wolf_armor.name",
   "description": "talent.vanillatalents.tamer_wolf_armor.desc",
-  "icon": "minecraft:iron_ingot",
+  "icon": "minecraft:wolf_armor",
   "maxLevel": 3,
   "prerequisites": [
     {
