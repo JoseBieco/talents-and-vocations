@@ -20,6 +20,8 @@ public abstract class FishingHookMixin {
      * PUTFIELD timeUntilLured em catchingFish, na ordem do bytecode: 0 = "= 0" (fim da mordida), 1 = "-= fishingSpeed",
      * 2 = "= nextInt(100, 600)", 3 = "= timeUntilLured - lureSpeed" (ramo else). Ordinal 3 + AFTER = valor sorteado
      * já com a Isca vanilla aplicada.
+     * ATENÇÃO: reconferir este ordinal a cada atualização do MC (javap -c em FishingHook.catchingFish): hoje há 4
+     * PUTFIELD de timeUntilLured e o 4º é o que vem depois de "- lureSpeed".
      */
     @Inject(method = "catchingFish",
             at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD,

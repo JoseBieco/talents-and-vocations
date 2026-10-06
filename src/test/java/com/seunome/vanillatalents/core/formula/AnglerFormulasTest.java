@@ -38,6 +38,28 @@ class AnglerFormulasTest {
     }
 
     @Test
+    void isActivity_rotationInBoatCounts() {
+        assertTrue(AnglerFormulas.isActivity(0, 0, 5f, 0f, true));
+        assertTrue(AnglerFormulas.isActivity(0, 0, 0f, 3f, true));
+    }
+
+    @Test
+    void isActivity_driftingAsPassengerDoesNotCount() {
+        assertFalse(AnglerFormulas.isActivity(0.3, 0, 0f, 0f, true));
+    }
+
+    @Test
+    void isActivity_noHorizontalMoveNorRotationDoesNotCount() {
+        // só dy (boiar/correnteza vertical): o helper nem recebe Y
+        assertFalse(AnglerFormulas.isActivity(0, 0, 0f, 0f, false));
+    }
+
+    @Test
+    void isActivity_walkingCounts() {
+        assertTrue(AnglerFormulas.isActivity(0.3, 0, 0f, 0f, false));
+    }
+
+    @Test
     void catchResult_nonFishIsNeverDoubledNorCooked() {
         assertEquals(new AnglerFormulas.Catch(1, false), AnglerFormulas.catchResult(false, true, true));
     }

@@ -50,14 +50,16 @@ public final class AnglerEffects {
         RandomSource random = context.getRandom();
         ObjectArrayList<ItemStack> result = new ObjectArrayList<>(loot.size() + 1);
         for (ItemStack stack : loot) {
-            boolean fish = stack.is(ItemTags.FISHES);
-            AnglerFormulas.Catch first = AnglerFormulas.catchResult(fish,
+            if (!stack.is(ItemTags.FISHES)) {
+                result.add(stack);
+                continue;
+            }
+            AnglerFormulas.Catch first = AnglerFormulas.catchResult(true,
                     random.nextDouble() < doubleChance, random.nextDouble() < cookChance);
             result.add(first.cooked() ? cooked(level, stack) : stack);
             for (int i = 1; i < first.copies(); i++) {
-                boolean cook = AnglerFormulas.catchResult(fish, false, random.nextDouble() < cookChance).cooked();
                 ItemStack copy = stack.copy();
-                result.add(cook ? cooked(level, copy) : copy);
+                result.add(random.nextDouble() < cookChance ? cooked(level, copy) : copy);
             }
         }
         return result;

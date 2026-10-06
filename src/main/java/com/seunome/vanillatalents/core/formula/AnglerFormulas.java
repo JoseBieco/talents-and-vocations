@@ -23,6 +23,18 @@ public final class AnglerFormulas {
         return now - lastActiveTick <= idleTicks;
     }
 
+    /**
+     * Anti-AFK: conta como atividade girar a câmera ou andar na horizontal sem estar montado. Y é ignorado (boiar na
+     * superfície, correnteza), e o deslocamento de barco/montaria não conta.
+     */
+    public static boolean isActivity(double dx, double dz, float dYaw, float dPitch, boolean passenger) {
+        if (Math.abs(dYaw) > LOOK_EPSILON || Math.abs(dPitch) > LOOK_EPSILON) return true;
+        return !passenger && dx * dx + dz * dz > MOVE_EPSILON_SQR;
+    }
+
+    private static final double MOVE_EPSILON_SQR = 1.0E-4;
+    private static final float LOOK_EPSILON = 0.01F;
+
     /** angler_bountiful e angler_cook: só peixes dobram ou cozinham; tesouro e lixo saem como vieram. */
     public static Catch catchResult(boolean isFish, boolean doubleRoll, boolean cookRoll) {
         if (!isFish) return new Catch(1, false);
