@@ -73,7 +73,7 @@ class DesignDocConsistencyTest {
         for (TreeCategory tree : TreeCategory.values()) {
             List<TalentNode> t = registry.tree(tree);
             assertEquals(EXPECTED.get(tree).nodes(), t.size(), tree.id());
-            assertEquals(EXPECTED.get(tree).points(), t.stream().mapToInt(TalentNode::maxLevel).sum(), tree.id());
+            assertEquals(EXPECTED.get(tree).points(), t.stream().mapToInt(n -> n.maxLevel() * n.cost()).sum(), tree.id());
         }
     }
 
@@ -111,10 +111,10 @@ class DesignDocConsistencyTest {
     void capstoneIsBelowEveryOtherNode() {
         for (TreeCategory tree : TreeCategory.values()) {
             List<TalentNode> t = registry.tree(tree);
-            TalentNode last = t.getLast();
+            TalentNode last = registry.capstone(tree).orElseThrow();
             assertEquals(3, last.prerequisites().size(), tree.id() + " capstone exige os três ramos");
             assertEquals(0, last.position().x(), tree.id() + " capstone x");
-            assertTrue(t.stream().filter(n -> n != last).allMatch(n -> n.position().y() < last.position().y()));
+            assertTrue(t.stream().filter(n -> n != last && !n.conditions().contains(TalentNode.CONDITION_PRIMARY_CAPSTONE)).allMatch(n -> n.position().y() < last.position().y()));
         }
     }
 

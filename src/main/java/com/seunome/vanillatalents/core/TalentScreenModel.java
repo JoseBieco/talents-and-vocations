@@ -37,9 +37,9 @@ public final class TalentScreenModel {
         List<TalentNode> nodes = r.tree(tree);
         for (TalentNode n : nodes) {
             int level = TalentRules.effectiveLevel(v, r, n.id());
-            spent += level;
+            spent += level * n.cost();
             if (level >= n.maxLevel()) maxed++;
-            total += n.maxLevel();
+            total += n.maxLevel() * n.cost();
         }
         return new TreeSummary(spent, maxed, nodes.size(), total);
     }
@@ -51,9 +51,10 @@ public final class TalentScreenModel {
         int total = 0;
         for (TalentNode n : nodes) {
             if (root == null && n.prerequisites().isEmpty()) root = n.id();
-            total += n.maxLevel();
+            total += n.maxLevel() * n.cost();
         }
-        return new ClassSummary(root, nodes.get(nodes.size() - 1).id(), nodes.size(), total);
+        String capstone = r.capstone(tree).map(TalentNode::id).orElse(nodes.get(nodes.size() - 1).id());
+        return new ClassSummary(root, capstone, nodes.size(), total);
     }
 
     /** Limita o deslocamento do arrastar a [viewSize - contentSize, 0]; conteúdo menor que a vista fica em 0. */

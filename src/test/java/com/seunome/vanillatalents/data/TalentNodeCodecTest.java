@@ -70,4 +70,27 @@ class TalentNodeCodecTest {
         JsonElement json = TalentNodeCodec.CODEC.encodeStart(JsonOps.INSTANCE, original).getOrThrow();
         assertEquals(original, TalentNodeCodec.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
     }
+
+    @Test
+    void costCapstoneConditionsDefault() {
+        TalentNode n = parse("""
+                { "id": "common_health", "treeCategory": "common", "name": "n", "description": "d",
+                  "icon": "minecraft:golden_apple", "maxLevel": 5, "position": { "x": 0, "y": 0 } }""");
+        assertEquals(1, n.cost());
+        assertFalse(n.capstone());
+        assertTrue(n.conditions().isEmpty());
+    }
+
+    @Test
+    void costCapstoneConditionsAreRead() {
+        TalentNode n = parse("""
+                { "id": "common_second_vocation", "treeCategory": "common", "name": "n", "description": "d",
+                  "icon": "minecraft:golden_apple", "maxLevel": 1, "position": { "x": 0, "y": 5 },
+                  "cost": 10, "capstone": true, "conditions": ["primary_capstone"] }""");
+        assertEquals(10, n.cost());
+        assertTrue(n.capstone());
+        assertEquals(List.of(TalentNode.CONDITION_PRIMARY_CAPSTONE), n.conditions());
+        assertEquals(n, TalentNodeCodec.CODEC.parse(JsonOps.INSTANCE,
+                TalentNodeCodec.CODEC.encodeStart(JsonOps.INSTANCE, n).getOrThrow()).getOrThrow());
+    }
 }

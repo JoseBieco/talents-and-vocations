@@ -59,6 +59,10 @@ public final class TalentRegistry {
             return "id deve começar com '" + n.tree().idPrefix() + "'";
         }
         if (n.maxLevel() < 1 || n.maxLevel() > 10) return "maxLevel " + n.maxLevel() + " fora de 1..10";
+        if (n.cost() < 1) return "cost " + n.cost() + " < 1";
+        for (String c : n.conditions()) {
+            if (!TalentNode.CONDITION_PRIMARY_CAPSTONE.equals(c)) return "condição desconhecida '" + c + "'";
+        }
         return null;
     }
 
@@ -120,6 +124,11 @@ public final class TalentRegistry {
 
     public Optional<TalentNode> get(String id) {
         return Optional.ofNullable(nodes.get(id));
+    }
+
+    /** Primeiro nó da árvore marcado como capstone. */
+    public Optional<TalentNode> capstone(TreeCategory tree) {
+        return byTree.get(tree).stream().filter(TalentNode::capstone).findFirst();
     }
 
     public List<TalentNode> tree(TreeCategory tree) {

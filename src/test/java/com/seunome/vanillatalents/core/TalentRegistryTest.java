@@ -151,4 +151,35 @@ public class TalentRegistryTest {
         assertFalse(TreeCategory.COMMON.isClass());
         assertTrue(TreeCategory.WARRIOR.isClass());
     }
+
+    private static TalentNode withExtras(String id, int cost, boolean capstone, List<String> conditions) {
+        return new TalentNode(id, TreeCategory.MINER, "n", "d", "i", 1, List.of(), new GridPos(0, 0), Map.of(),
+                cost, capstone, conditions);
+    }
+
+    @Test
+    void build_rejectsCostBelowOne() {
+        List<String> errors = new ArrayList<>();
+        TalentRegistry r = TalentRegistry.build(List.of(withExtras("miner_x", 0, false, List.of())), errors);
+        assertEquals(0, r.size());
+        assertTrue(errors.stream().anyMatch(e -> e.contains("miner_x") && e.contains("cost")), errors.toString());
+    }
+
+    @Test
+    void build_rejectsUnknownCondition() {
+        List<String> errors = new ArrayList<>();
+        TalentRegistry r = TalentRegistry.build(List.of(withExtras("miner_x", 1, false, List.of("foo"))), errors);
+        assertEquals(0, r.size());
+        assertTrue(errors.stream().anyMatch(e -> e.contains("foo")), errors.toString());
+    }
+
+    @Test
+    void capstone_returnsMarkedNode() {
+        TalentRegistry r = TalentRegistry.build(List.of(
+                node("miner_a", TreeCategory.MINER, 1, 0, 0),
+                new TalentNode("miner_z", TreeCategory.MINER, "n", "d", "i", 1, List.of(), new GridPos(0, 1), Map.of(),
+                        1, true, List.of())), new ArrayList<>());
+        assertEquals("miner_z", r.capstone(TreeCategory.MINER).orElseThrow().id());
+        assertTrue(r.capstone(TreeCategory.ARCHER).isEmpty());
+    }
 }

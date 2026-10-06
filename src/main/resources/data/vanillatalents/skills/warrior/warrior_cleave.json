@@ -27,5 +27,6 @@
     "ratio": 0.4,
     "radius": 1.5,
     "max_targets": 3
-  }
+  },
+  "capstone": true
 }

@@ -40,6 +40,9 @@ public final class TalentNodeCodec {
             Codec.INT.fieldOf("maxLevel").forGetter(TalentNode::maxLevel),
             PREREQUISITE.listOf().optionalFieldOf("prerequisites", List.of()).forGetter(TalentNode::prerequisites),
             GRID_POS.fieldOf("position").forGetter(TalentNode::position),
-            Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).optionalFieldOf("values", Map.of()).forGetter(TalentNode::values)
+            Codec.unboundedMap(Codec.STRING, Codec.DOUBLE).optionalFieldOf("values", Map.of()).forGetter(TalentNode::values),
+            Codec.INT.optionalFieldOf("cost", 1).forGetter(TalentNode::cost),
+            Codec.BOOL.optionalFieldOf("capstone", false).forGetter(TalentNode::capstone),
+            Codec.STRING.listOf().optionalFieldOf("conditions", List.of()).forGetter(TalentNode::conditions)
     ).apply(i, TalentNode::new));
 }
