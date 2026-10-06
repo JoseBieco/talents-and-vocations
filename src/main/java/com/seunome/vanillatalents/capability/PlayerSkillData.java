@@ -13,17 +13,32 @@ import java.util.Map;
 @AutoRegisterCapability
 public class PlayerSkillData implements INBTSerializable<CompoundTag>, SkillView {
 
-    private String currentClass = TalentRules.NO_CLASS;
+    private String primaryClass = TalentRules.NO_CLASS;
+    private String secondaryClass = TalentRules.NO_CLASS;
+    /** Vem da config a cada acesso; não é salvo em NBT. */
+    private int maxClasses = 2;
     private int availablePoints = 0;
     private final Map<String, Integer> unlockedNodes = new HashMap<>();
     private final Map<String, Long> cooldowns = new HashMap<>();
 
-    public String getCurrentClass() {
-        return currentClass;
+    public String getPrimaryClass() {
+        return primaryClass;
     }
 
-    public void setCurrentClass(String currentClass) {
-        this.currentClass = currentClass;
+    public void setPrimaryClass(String primaryClass) {
+        this.primaryClass = primaryClass;
+    }
+
+    public String getSecondaryClass() {
+        return secondaryClass;
+    }
+
+    public void setSecondaryClass(String secondaryClass) {
+        this.secondaryClass = secondaryClass;
+    }
+
+    public void setMaxClasses(int maxClasses) {
+        this.maxClasses = maxClasses;
     }
 
     public int getAvailablePoints() {
@@ -46,13 +61,10 @@ public class PlayerSkillData implements INBTSerializable<CompoundTag>, SkillView
         unlockedNodes.put(nodeId, getNodeLevel(nodeId) + 1);
     }
 
-    public void resetTree(boolean keepCommonTree) {
-        if (!keepCommonTree) {
-            unlockedNodes.clear();
-        } else {
-            // Remove apenas os nós que não começam com "common_"
-            unlockedNodes.keySet().removeIf(key -> !key.startsWith("common_"));
-        }
+    /** Remove os nós da árvore {@code classId} (ids com o prefixo {@code classId_}). */
+    public void removeClassNodes(String classId) {
+        String prefix = classId + "_";
+        unlockedNodes.keySet().removeIf(key -> key.startsWith(prefix));
     }
 
     public Map<String, Integer> getUnlockedNodes() {
@@ -69,7 +81,8 @@ public class PlayerSkillData implements INBTSerializable<CompoundTag>, SkillView
     }
 
     public void copyFrom(PlayerSkillData other) {
-        currentClass = other.currentClass;
+        primaryClass = other.primaryClass;
+        secondaryClass = other.secondaryClass;
         availablePoints = other.availablePoints;
         unlockedNodes.clear();
         unlockedNodes.putAll(other.unlockedNodes);
@@ -78,8 +91,18 @@ public class PlayerSkillData implements INBTSerializable<CompoundTag>, SkillView
     }
 
     @Override
-    public String currentClass() {
-        return currentClass;
+    public String primaryClass() {
+        return primaryClass;
+    }
+
+    @Override
+    public String secondaryClass() {
+        return secondaryClass;
+    }
+
+    @Override
+    public int maxClasses() {
+        return maxClasses;
     }
 
     @Override
@@ -95,7 +118,8 @@ public class PlayerSkillData implements INBTSerializable<CompoundTag>, SkillView
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider registryAccess) {
         CompoundTag nbt = new CompoundTag();
-        nbt.putString("CurrentClass", currentClass);
+        nbt.putString("PrimaryClass", primaryClass);
+        nbt.putString("SecondaryClass", secondaryClass);
         nbt.putInt("AvailablePoints", availablePoints);
 
         CompoundTag nodesTag = new CompoundTag();
@@ -115,7 +139,9 @@ public class PlayerSkillData implements INBTSerializable<CompoundTag>, SkillView
 
     @Override
     public void deserializeNBT(HolderLookup.Provider registryAccess, CompoundTag nbt) {
-        currentClass = nbt.getStringOr("CurrentClass", TalentRules.NO_CLASS);
+        // Save antigo (classe única) só tem CurrentClass: vira a principal.
+        primaryClass = nbt.getStringOr("PrimaryClass", nbt.getStringOr("CurrentClass", TalentRules.NO_CLASS));
+        secondaryClass = nbt.getStringOr("SecondaryClass", TalentRules.NO_CLASS);
         availablePoints = nbt.getIntOr("AvailablePoints", 0);
 
         unlockedNodes.clear();

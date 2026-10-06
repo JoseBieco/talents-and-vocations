@@ -93,6 +93,39 @@ class TalentScreenModelTest {
         assertEquals(p + ".maxed", TalentScreenModel.blockReasonKey(PurchaseResult.MAXED));
         assertEquals(p + ".no_points", TalentScreenModel.blockReasonKey(PurchaseResult.NOT_ENOUGH_POINTS));
         assertEquals(p + ".prerequisite", TalentScreenModel.blockReasonKey(PurchaseResult.PREREQUISITE_NOT_MET));
+        assertEquals(p + ".secondary_locked", TalentScreenModel.blockReasonKey(PurchaseResult.SECONDARY_LOCKED));
+        assertEquals(p + ".capstone_primary_only", TalentScreenModel.blockReasonKey(PurchaseResult.CAPSTONE_PRIMARY_ONLY));
+        assertEquals(p + ".primary_capstone", TalentScreenModel.blockReasonKey(PurchaseResult.PRIMARY_CAPSTONE_REQUIRED));
+        assertEquals(p + ".multiclass_disabled", TalentScreenModel.blockReasonKey(PurchaseResult.MULTICLASS_DISABLED));
+        for (PurchaseResult r : PurchaseResult.values()) {
+            if (r != PurchaseResult.OK) assertNotNull(TalentScreenModel.blockReasonKey(r), r.name());
+        }
+    }
+
+    @Test
+    void treeSummary_weightsByCost() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        var v = new TalentRulesTest.FakeView().cls("miner").lvl("common_health", 5).lvl("common_second_wind", 1)
+                .lvl(TalentRules.SECOND_VOCATION, 1);
+        var s = TalentScreenModel.treeSummary(v, reg, TreeCategory.COMMON);
+        assertEquals(5 + 1 + 10, s.spent());
+        assertEquals(3, s.maxedNodes());
+        assertEquals(3, s.nodeCount());
+        assertEquals(5 + 1 + 10, s.totalPoints());
+    }
+
+    @Test
+    void classSummary_usesMarkedCapstoneEvenWhenNotLast() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        var s = TalentScreenModel.classSummary(reg, TreeCategory.MINER);
+        assertEquals("miner_haste", s.rootId());
+        assertEquals("miner_vein", s.capstoneId());
+        assertEquals("miner_extra", reg.tree(TreeCategory.MINER).get(2).id(), "o capstone não é o último nó");
+        assertEquals(3, s.nodeCount());
+        assertEquals(5 + 1 + 2, s.totalPoints());
+        var common = TalentScreenModel.classSummary(reg, TreeCategory.COMMON);
+        assertEquals("common_second_wind", common.capstoneId());
+        assertEquals(5 + 1 + 10, common.totalPoints());
     }
 
     @Test

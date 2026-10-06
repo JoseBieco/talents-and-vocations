@@ -11,18 +11,24 @@ import static com.seunome.vanillatalents.core.TalentRegistryTest.node;
 import static com.seunome.vanillatalents.core.TalentRegistryTest.req;
 import static org.junit.jupiter.api.Assertions.*;
 
-class TalentRulesTest {
+public class TalentRulesTest {
 
     static final class FakeView implements SkillView {
-        String currentClass = "none";
+        String primaryClass = "none";
+        String secondaryClass = "none";
+        int maxClasses = 2;
         int points = 0;
         final Map<String, Integer> levels = new HashMap<>();
 
-        FakeView cls(String c) { currentClass = c; return this; }
+        FakeView cls(String c) { primaryClass = c; return this; }
+        FakeView sec(String c) { secondaryClass = c; return this; }
+        FakeView maxClasses(int m) { maxClasses = m; return this; }
         FakeView points(int p) { points = p; return this; }
         FakeView lvl(String id, int l) { levels.put(id, l); return this; }
 
-        @Override public String currentClass() { return currentClass; }
+        @Override public String primaryClass() { return primaryClass; }
+        @Override public String secondaryClass() { return secondaryClass; }
+        @Override public int maxClasses() { return maxClasses; }
         @Override public int availablePoints() { return points; }
         @Override public int rawLevel(String nodeId) { return levels.getOrDefault(nodeId, 0); }
     }
@@ -39,9 +45,117 @@ class TalentRulesTest {
             node("archer_aim", TreeCategory.ARCHER, 5, 0, 0)
     ), new ArrayList<>());
 
+    static TalentNode special(String id, TreeCategory tree, int max, int x, int y, int cost, boolean capstone,
+                              List<String> conditions, Prerequisite... prereqs) {
+        return new TalentNode(id, tree, "talent.vanillatalents." + id + ".name", "talent.vanillatalents." + id + ".desc",
+                "minecraft:stone", max, List.of(prereqs), new GridPos(x, y), Map.of(), cost, capstone, conditions);
+    }
+
+    /** Registro com capstones marcados (Comum, Minerador, Arqueiro) e a Segunda Vocação. */
+    public static final TalentRegistry MC_REG = TalentRegistry.build(List.of(
+            node("common_health", TreeCategory.COMMON, 5, 0, 0),
+            special("common_second_wind", TreeCategory.COMMON, 1, 0, 1, 1, true, List.of(), req("common_health", 3)),
+            special(TalentRules.SECOND_VOCATION, TreeCategory.COMMON, 1, 0, 2, 10, false,
+                    List.of(TalentNode.CONDITION_PRIMARY_CAPSTONE), req("common_second_wind", 1)),
+            node("miner_haste", TreeCategory.MINER, 5, 0, 0),
+            special("miner_vein", TreeCategory.MINER, 1, 0, 1, 1, true, List.of(), req("miner_haste", 3)),
+            node("miner_extra", TreeCategory.MINER, 2, 1, 2, req("miner_haste", 3)),
+            node("archer_aim", TreeCategory.ARCHER, 5, 0, 0),
+            special("archer_pierce", TreeCategory.ARCHER, 1, 0, 1, 1, true, List.of(), req("archer_aim", 3))
+    ), new ArrayList<>());
+
+    /** Principal minerador com capstone, secundária arqueiro, Segunda Vocação comprada. */
+    static FakeView activeMulticlass() {
+        return new FakeView().cls("miner").sec("archer").lvl("miner_haste", 5).lvl("miner_vein", 1)
+                .lvl("common_health", 5).lvl("common_second_wind", 1).lvl(TalentRules.SECOND_VOCATION, 1)
+                .lvl("archer_aim", 4).lvl("archer_pierce", 1);
+    }
+
     @Test
     void registryFixtureIsValid() {
         assertEquals(8, REG.size());
+        assertEquals(8, MC_REG.size());
+    }
+
+    @Test
+    void secondaryNode_countsWhenActive() {
+        FakeView v = activeMulticlass().points(1);
+        assertTrue(TalentRules.primaryCapstoneOwned(v, MC_REG));
+        assertTrue(TalentRules.secondaryActive(v, MC_REG));
+        assertEquals(4, TalentRules.effectiveLevel(v, MC_REG, "archer_aim"));
+        assertEquals(5, TalentRules.effectiveLevel(v, MC_REG, "miner_haste"));
+        assertEquals(PurchaseResult.OK, TalentRules.canPurchase(v, MC_REG, "archer_aim"));
+    }
+
+    @Test
+    void secondaryNode_frozenWithoutPrimaryCapstone() {
+        FakeView v = activeMulticlass().points(5).lvl("miner_vein", 0);
+        assertFalse(TalentRules.primaryCapstoneOwned(v, MC_REG));
+        assertFalse(TalentRules.secondaryActive(v, MC_REG));
+        assertEquals(0, TalentRules.effectiveLevel(v, MC_REG, "archer_aim"));
+        assertEquals(PurchaseResult.SECONDARY_LOCKED, TalentRules.canPurchase(v, MC_REG, "archer_aim"));
+    }
+
+    @Test
+    void secondaryNode_frozenWithoutSecondVocation() {
+        FakeView v = activeMulticlass().points(5).lvl(TalentRules.SECOND_VOCATION, 0);
+        assertFalse(TalentRules.secondaryActive(v, MC_REG));
+        assertEquals(0, TalentRules.effectiveLevel(v, MC_REG, "archer_aim"));
+        assertEquals(PurchaseResult.SECONDARY_LOCKED, TalentRules.canPurchase(v, MC_REG, "archer_aim"));
+    }
+
+    @Test
+    void secondaryCapstone_neverCounts_andCannotBeBought() {
+        FakeView v = activeMulticlass().points(5);
+        assertEquals(0, TalentRules.effectiveLevel(v, MC_REG, "archer_pierce"));
+        v.lvl("archer_pierce", 0);
+        assertEquals(PurchaseResult.CAPSTONE_PRIMARY_ONLY, TalentRules.canPurchase(v, MC_REG, "archer_pierce"));
+    }
+
+    @Test
+    void secondVocation_needsPrimaryCapstone() {
+        FakeView v = activeMulticlass().lvl(TalentRules.SECOND_VOCATION, 0).lvl("miner_vein", 0).points(10);
+        assertEquals(PurchaseResult.PRIMARY_CAPSTONE_REQUIRED, TalentRules.canPurchase(v, MC_REG, TalentRules.SECOND_VOCATION));
+        TalentNode vocation = MC_REG.get(TalentRules.SECOND_VOCATION).orElseThrow();
+        assertFalse(TalentRules.conditionsMet(v, MC_REG, vocation));
+        assertEquals(NodeState.LOCKED, TalentRules.nodeState(v, MC_REG, vocation));
+        v.lvl("miner_vein", 1);
+        assertTrue(TalentRules.conditionsMet(v, MC_REG, vocation));
+        assertEquals(NodeState.AVAILABLE, TalentRules.nodeState(v, MC_REG, vocation));
+        assertEquals(PurchaseResult.OK, TalentRules.canPurchase(v, MC_REG, TalentRules.SECOND_VOCATION));
+        v.points(9);
+        assertEquals(PurchaseResult.NOT_ENOUGH_POINTS, TalentRules.canPurchase(v, MC_REG, TalentRules.SECOND_VOCATION));
+    }
+
+    @Test
+    void secondVocation_withoutPrimaryClassNeedsCapstone() {
+        FakeView v = new FakeView().points(10).lvl("common_health", 5).lvl("common_second_wind", 1);
+        assertEquals(PurchaseResult.PRIMARY_CAPSTONE_REQUIRED, TalentRules.canPurchase(v, MC_REG, TalentRules.SECOND_VOCATION));
+    }
+
+    @Test
+    void maxClassesOne_disablesSecondary() {
+        FakeView v = activeMulticlass().maxClasses(1).points(10);
+        assertFalse(TalentRules.secondaryActive(v, MC_REG));
+        assertEquals(0, TalentRules.effectiveLevel(v, MC_REG, "archer_aim"));
+        assertEquals(5, TalentRules.effectiveLevel(v, MC_REG, "miner_haste"));
+        assertEquals(PurchaseResult.SECONDARY_LOCKED, TalentRules.canPurchase(v, MC_REG, "archer_aim"));
+        v.lvl(TalentRules.SECOND_VOCATION, 0);
+        assertEquals(PurchaseResult.MULTICLASS_DISABLED, TalentRules.canPurchase(v, MC_REG, TalentRules.SECOND_VOCATION));
+    }
+
+    @Test
+    void secondarySameAsPrimary_isNotActive() {
+        FakeView v = activeMulticlass().sec("miner");
+        assertFalse(TalentRules.secondaryActive(v, MC_REG));
+        assertEquals(1, TalentRules.effectiveLevel(v, MC_REG, "miner_vein"), "a principal continua valendo, capstone inclusive");
+    }
+
+    @Test
+    void thirdTree_isWrongClassEvenWithSecondary() {
+        FakeView v = activeMulticlass().points(5);
+        TalentRegistry withFarmer = TalentRegistry.build(List.of(node("farmer_harvest", TreeCategory.FARMER, 3, 0, 0)), new ArrayList<>());
+        assertEquals(PurchaseResult.WRONG_CLASS, TalentRules.canPurchase(v, withFarmer, "farmer_harvest"));
     }
 
     @Test

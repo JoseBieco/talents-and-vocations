@@ -23,7 +23,7 @@ class SkillTransactionsTest {
 
     static PlayerSkillData data(String cls, int points) {
         PlayerSkillData d = new PlayerSkillData();
-        d.setCurrentClass(cls);
+        d.setPrimaryClass(cls);
         d.addPoints(points);
         return d;
     }
@@ -45,6 +45,32 @@ class SkillTransactionsTest {
     }
 
     @Test
+    void buy_deductsNodeCost() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        PlayerSkillData d = data("miner", 10);
+        for (int i = 0; i < 5; i++) d.upgradeNode("common_health");
+        d.upgradeNode("common_second_wind");
+        for (int i = 0; i < 5; i++) d.upgradeNode("miner_haste");
+        d.upgradeNode("miner_vein");
+        assertEquals(PurchaseResult.OK, SkillTransactions.buy(d, reg, TalentRules.SECOND_VOCATION));
+        assertEquals(0, d.getAvailablePoints());
+        assertEquals(1, d.getNodeLevel(TalentRules.SECOND_VOCATION));
+    }
+
+    @Test
+    void buy_secondVocationWithNinePointsChangesNothing() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        PlayerSkillData d = data("miner", 9);
+        for (int i = 0; i < 5; i++) d.upgradeNode("common_health");
+        d.upgradeNode("common_second_wind");
+        for (int i = 0; i < 5; i++) d.upgradeNode("miner_haste");
+        d.upgradeNode("miner_vein");
+        assertEquals(PurchaseResult.NOT_ENOUGH_POINTS, SkillTransactions.buy(d, reg, TalentRules.SECOND_VOCATION));
+        assertEquals(9, d.getAvailablePoints());
+        assertEquals(0, d.getNodeLevel(TalentRules.SECOND_VOCATION));
+    }
+
+    @Test
     void buy_rejectedLeavesStateUntouched() {
         PlayerSkillData d = data("miner", 3);
         assertEquals(PurchaseResult.WRONG_CLASS, SkillTransactions.buy(d, REG, "archer_aim"));
@@ -61,7 +87,7 @@ class SkillTransactionsTest {
         var result = SkillTransactions.changeClass(d, "miner", 0, 10, 25);
         assertEquals(RespecCheck.OK_FIRST_CHOICE, result.check());
         assertEquals(0, result.feeLevels());
-        assertEquals("miner", d.getCurrentClass());
+        assertEquals("miner", d.getPrimaryClass());
         assertEquals(4, d.getAvailablePoints());
         assertEquals(Map.of("common_health", 1), d.getUnlockedNodes());
     }
@@ -76,7 +102,7 @@ class SkillTransactionsTest {
         assertEquals(RespecCheck.OK_PAID, result.check());
         assertEquals(10, result.feeLevels());
         assertEquals(3, result.refund());
-        assertEquals("archer", d.getCurrentClass());
+        assertEquals("archer", d.getPrimaryClass());
         assertEquals(1 + 3, d.getAvailablePoints());
         assertEquals(Map.of("common_health", 5), d.getUnlockedNodes());
     }
@@ -89,7 +115,7 @@ class SkillTransactionsTest {
         assertEquals(RespecCheck.OK_PAID, result.check());
         assertEquals(0, result.feeLevels());
         assertEquals(0, result.refund());
-        assertEquals("archer", d.getCurrentClass());
+        assertEquals("archer", d.getPrimaryClass());
         assertEquals(2, d.getAvailablePoints());
         assertEquals(Map.of("common_health", 1), d.getUnlockedNodes());
     }
@@ -102,7 +128,7 @@ class SkillTransactionsTest {
         assertEquals(RespecCheck.NOT_ENOUGH_LEVELS, SkillTransactions.changeClass(d, "archer", 9, 10, 25).check());
         assertEquals(RespecCheck.INVALID_CLASS, SkillTransactions.changeClass(d, "wizard", 50, 10, 25).check());
         assertEquals(RespecCheck.INVALID_CLASS, SkillTransactions.changeClass(d, "z".repeat(65), 50, 10, 25).check());
-        assertEquals("miner", d.getCurrentClass());
+        assertEquals("miner", d.getPrimaryClass());
         assertEquals(2, d.getAvailablePoints());
         assertEquals(Map.of("miner_haste", 1), d.getUnlockedNodes());
     }

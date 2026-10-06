@@ -83,7 +83,7 @@ public class ClassScreen extends Screen {
     }
 
     private String currentClass() {
-        return ClientTalentState.data().getCurrentClass();
+        return ClientTalentState.data().getPrimaryClass();
     }
 
     private boolean isCurrent(TreeCategory tree) {
@@ -131,7 +131,7 @@ public class ClassScreen extends Screen {
 
     private TalentScreenModel.RespecPreview preview() {
         PlayerSkillData data = ClientTalentState.data();
-        return TalentScreenModel.respecPreview(data.getUnlockedNodes(), data.getCurrentClass(), ClientTalentState.economy());
+        return TalentScreenModel.respecPreview(data.getUnlockedNodes(), data.getPrimaryClass(), ClientTalentState.economy());
     }
 
     private boolean enoughLevels() {

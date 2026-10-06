@@ -29,6 +29,10 @@ public final class TalentScreenModel {
             case MAXED -> "gui.vanillatalents.reason.maxed";
             case NOT_ENOUGH_POINTS -> "gui.vanillatalents.reason.no_points";
             case PREREQUISITE_NOT_MET -> "gui.vanillatalents.reason.prerequisite";
+            case SECONDARY_LOCKED -> "gui.vanillatalents.reason.secondary_locked";
+            case CAPSTONE_PRIMARY_ONLY -> "gui.vanillatalents.reason.capstone_primary_only";
+            case PRIMARY_CAPSTONE_REQUIRED -> "gui.vanillatalents.reason.primary_capstone";
+            case MULTICLASS_DISABLED -> "gui.vanillatalents.reason.multiclass_disabled";
         };
     }
 

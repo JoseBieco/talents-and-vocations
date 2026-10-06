@@ -41,7 +41,7 @@ public final class DebugCommands {
     private static int reply(CommandContext<CommandSourceStack> ctx, String result) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         String state = SkillAccess.get(player)
-                .map(d -> "class=" + d.getCurrentClass() + " pt=" + d.getAvailablePoints() + " nodes=" + d.getUnlockedNodes())
+                .map(d -> "primary=" + d.getPrimaryClass() + " secondary=" + d.getSecondaryClass() + " pt=" + d.getAvailablePoints() + " nodes=" + d.getUnlockedNodes())
                 .orElse("sem capability");
         ctx.getSource().sendSuccess(() -> Component.literal(result + " | lvl=" + player.experienceLevel + " | " + state), false);
         return 1;

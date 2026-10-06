@@ -20,7 +20,7 @@ public final class SkillTransactions {
         if (!isValidId(nodeId)) return PurchaseResult.UNKNOWN_NODE;
         PurchaseResult result = TalentRules.canPurchase(data, registry, nodeId);
         if (result == PurchaseResult.OK) {
-            data.removePoints(1);
+            data.removePoints(registry.get(nodeId).orElseThrow().cost());
             data.upgradeNode(nodeId);
         }
         return result;
@@ -29,18 +29,19 @@ public final class SkillTransactions {
     /** Aplica a troca de classe; a taxa em níveis devolvida em {@code feeLevels} é cobrada por quem chamou. */
     public static ClassChange changeClass(PlayerSkillData data, String newClass, int playerLevel, int feeLevels, int refundPercent) {
         if (!isValidId(newClass)) return new ClassChange(RespecCheck.INVALID_CLASS, 0, 0);
-        int spent = RespecRules.spentClassPoints(data.getUnlockedNodes(), data.getCurrentClass());
+        String oldPrimary = data.getPrimaryClass();
+        int spent = RespecRules.spentClassPoints(data.getUnlockedNodes(), oldPrimary);
         int fee = RespecRules.feeFor(spent, feeLevels);
-        RespecCheck check = RespecRules.validateChange(data.getCurrentClass(), newClass, playerLevel, fee);
+        RespecCheck check = RespecRules.validateChange(oldPrimary, newClass, playerLevel, fee);
         return switch (check) {
             case OK_FIRST_CHOICE -> {
-                data.setCurrentClass(newClass);
+                data.setPrimaryClass(newClass);
                 yield new ClassChange(check, 0, 0);
             }
             case OK_PAID -> {
                 int refund = RespecRules.refund(spent, refundPercent);
-                data.resetTree(true);
-                data.setCurrentClass(newClass);
+                data.removeClassNodes(oldPrimary);
+                data.setPrimaryClass(newClass);
                 data.addPoints(refund);
                 yield new ClassChange(check, fee, refund);
             }

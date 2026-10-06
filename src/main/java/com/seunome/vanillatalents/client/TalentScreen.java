@@ -87,7 +87,7 @@ public class TalentScreen extends Screen {
 
     private @Nullable TreeCategory visibleTree() {
         if (!classTab) return TreeCategory.COMMON;
-        return TreeCategory.byId(ClientTalentState.data().getCurrentClass()).filter(TreeCategory::isClass).orElse(null);
+        return TreeCategory.byId(ClientTalentState.data().getPrimaryClass()).filter(TreeCategory::isClass).orElse(null);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class TalentScreen extends Screen {
         panel.keepScrollFrom(previousPanel);
         addRenderableWidget(panel.buyButton());
 
-        TreeCategory currentClass = TreeCategory.byId(data.getCurrentClass()).filter(TreeCategory::isClass).orElse(null);
+        TreeCategory currentClass = TreeCategory.byId(data.getPrimaryClass()).filter(TreeCategory::isClass).orElse(null);
         classIcon = currentClass == null ? noClassIcon : rootIcon(currentClass);
 
         boolean changeClass = classTab && tree != null;

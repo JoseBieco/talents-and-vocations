@@ -126,7 +126,9 @@ class DesignDocConsistencyTest {
         for (TreeCategory tree : TreeCategory.values()) {
             if (!tree.isClass()) continue;
             com.seunome.vanillatalents.core.SkillView maxed = new com.seunome.vanillatalents.core.SkillView() {
-                public String currentClass() { return tree.id(); }
+                public String primaryClass() { return tree.id(); }
+                public String secondaryClass() { return com.seunome.vanillatalents.core.TalentRules.NO_CLASS; }
+                public int maxClasses() { return 2; }
                 public int availablePoints() { return 0; }
                 public int rawLevel(String nodeId) { return 10; }
             };
