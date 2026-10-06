@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.seunome.vanillatalents.effect.hooks.PetHooks;
 import net.minecraft.world.entity.animal.feline.Cat;
 import net.minecraft.world.entity.player.Player;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(targets = "net.minecraft.world.entity.animal.feline.Cat$CatRelaxOnOwnerGoal")
 public abstract class CatRelaxOnOwnerGoalMixin {
 
-    @Shadow private Cat cat;
+    @Shadow @Final private Cat cat;
     @Shadow private Player ownerPlayer;
 
     @ModifyExpressionValue(method = "stop",
