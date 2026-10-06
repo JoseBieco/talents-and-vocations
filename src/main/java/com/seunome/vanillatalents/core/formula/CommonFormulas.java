@@ -31,4 +31,14 @@ public final class CommonFormulas {
     public static int antidoteDuration(int duration, int level, double perLevel) {
         return Math.max(1, (int) Math.round(duration * HookFormulas.reductionMultiplier(level, perLevel)));
     }
+
+    /** common_frostblood: fator sobre o dano de congelamento; 0 = imune. */
+    public static double frostMultiplier(int level, double perLevel) {
+        return Math.max(0, 1 - level * perLevel);
+    }
+
+    /** common_iron_gut: a Fome ativa é só a da comida (não havia uma mais longa antes). */
+    public static boolean ironGutClears(int currentHungerDuration, int foodHungerDuration) {
+        return currentHungerDuration <= foodHungerDuration;
+    }
 }

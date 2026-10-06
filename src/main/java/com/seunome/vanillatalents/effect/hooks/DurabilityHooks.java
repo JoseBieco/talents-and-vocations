@@ -6,6 +6,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.equipment.Equippable;
 
 /** Consumo de durabilidade sem evento no Forge: chamado por ItemStackMixin em hurtAndBreak. */
 public final class DurabilityHooks {
@@ -17,6 +18,8 @@ public final class DurabilityHooks {
         if (stack.is(ItemTags.PICKAXES) || stack.is(ItemTags.SHOVELS)) return "miner_durability";
         if (stack.is(ItemTags.HOES)) return "farmer_hoe_care";
         if (stack.has(DataComponents.GLIDER) && player.isFallFlying()) return "explorer_glider";
+        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        if (equippable != null && equippable.slot().isArmor()) return "common_armor_care";
         return null;
     }
 

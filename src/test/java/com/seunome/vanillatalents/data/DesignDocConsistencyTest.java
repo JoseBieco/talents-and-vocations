@@ -31,7 +31,7 @@ class DesignDocConsistencyTest {
     record Expected(int nodes, int points) {}
 
     static final Map<TreeCategory, Expected> EXPECTED = Map.of(
-            TreeCategory.COMMON, new Expected(12, 37), TreeCategory.MINER, new Expected(12, 36),
+            TreeCategory.COMMON, new Expected(16, 46), TreeCategory.MINER, new Expected(12, 36),
             TreeCategory.FARMER, new Expected(12, 35), TreeCategory.EXPLORER, new Expected(12, 34),
             TreeCategory.WARRIOR, new Expected(12, 35), TreeCategory.ARCHER, new Expected(12, 37));
 

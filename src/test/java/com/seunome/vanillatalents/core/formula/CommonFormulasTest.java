@@ -37,4 +37,20 @@ class CommonFormulasTest {
         assertEquals(1, CommonFormulas.antidoteDuration(1, 3, .1));
         assertEquals(600, CommonFormulas.antidoteDuration(600, 0, .1));
     }
+
+    @Test
+    void frostMultiplier_halvesThenZero() {
+        assertEquals(0.5, CommonFormulas.frostMultiplier(1, .5), 1e-9);
+        assertEquals(0.0, CommonFormulas.frostMultiplier(2, .5), 1e-9);
+    }
+
+    @Test
+    void ironGutClears_sameDuration() {
+        assertTrue(CommonFormulas.ironGutClears(600, 600));
+    }
+
+    @Test
+    void ironGutClears_keepsLongerHusk() {
+        assertFalse(CommonFormulas.ironGutClears(900, 600));
+    }
 }
