@@ -71,4 +71,30 @@ class WarriorFormulasTest {
         float reduced = 10f * (1 - 17f / 25f);
         assertEquals(reduced / full, WarriorFormulas.armorBreakRatio(10f, 20f, 3, .05, absorb), 1e-6);
     }
+
+    @Test
+    void parryEligible_allTrue() {
+        assertTrue(WarriorFormulas.parryEligible(true, true, true));
+    }
+
+    @Test
+    void parryEligible_noSword() {
+        assertFalse(WarriorFormulas.parryEligible(false, true, true));
+    }
+
+    @Test
+    void parryEligible_projectile() {
+        assertFalse(WarriorFormulas.parryEligible(true, false, true));
+    }
+
+    @Test
+    void parryEligible_onCooldown() {
+        assertFalse(WarriorFormulas.parryEligible(true, true, false));
+    }
+
+    @Test
+    void bonusMultiplier() {
+        assertEquals(1.45, WarriorFormulas.bonusMultiplier(3, .15), 1e-9);
+        assertEquals(1.4, WarriorFormulas.bonusMultiplier(2, .2), 1e-9);
+    }
 }

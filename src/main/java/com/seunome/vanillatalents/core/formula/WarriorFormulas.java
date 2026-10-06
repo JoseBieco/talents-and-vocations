@@ -49,6 +49,16 @@ public final class WarriorFormulas {
         return 1 + level * perLevel;
     }
 
+    /** warrior_parry: espada na mão principal, golpe corpo a corpo direto e recarga livre. */
+    public static boolean parryEligible(boolean swordInMainHand, boolean directMelee, boolean cooldownReady) {
+        return swordInMainHand && directMelee && cooldownReady;
+    }
+
+    /** warrior_lumber, warrior_smash e warrior_counter: fator {@code 1 + nível × perLevel}. */
+    public static double bonusMultiplier(int level, double perLevel) {
+        return 1 + level * perLevel;
+    }
+
     /** warrior_cleave: os mais próximos primeiro (lista já ordenada), até {@code max}. */
     public static <T> List<T> cleaveTargets(List<T> sortedByDistance, int max) {
         return sortedByDistance.subList(0, Math.min(Math.max(0, max), sortedByDistance.size()));

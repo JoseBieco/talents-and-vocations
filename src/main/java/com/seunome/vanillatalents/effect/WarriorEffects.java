@@ -6,6 +6,8 @@ import com.seunome.vanillatalents.core.RecursionGuard;
 import com.seunome.vanillatalents.core.formula.WarriorFormulas;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.damagesource.CombatRules;
@@ -16,11 +18,16 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MaceItem;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -38,6 +45,8 @@ import java.util.UUID;
 public final class WarriorEffects {
 
     private static final String CLEAVE_GUARD = "warrior_cleave";
+    /** Chave de "recarga" usada como janela do Contra-Ataque: ativa enquanto !cooldownReady. */
+    private static final String COUNTER_WINDOW = "warrior_counter_window";
     private static final float FULL_CHARGE = 0.9F;
 
     /** Se o último ataque corpo a corpo do jogador saiu com carga ≥ 0,9 (lido antes do reset da carga). */
@@ -71,8 +80,65 @@ public final class WarriorEffects {
             event.setAmount(resistedAmount(event.getAmount(), victim, source));
         }
         if (source.getEntity() instanceof ServerPlayer attacker && source.getDirectEntity() == attacker) {
-            event.setAmount(meleeAmount(event.getAmount(), event.getEntity(), attacker, source));
+            float amount = meleeAmount(event.getAmount(), event.getEntity(), attacker, source);
+            amount = smashAmount(amount, attacker);
+            event.setAmount(counterAmount(amount, attacker));
         }
+    }
+
+    /** warrior_parry: chance de anular um golpe corpo a corpo direto com espada na mão (true cancela o ataque). */
+    @SubscribeEvent
+    public static boolean onAttacked(LivingAttackEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer victim)) return false;
+        int level = Talents.level(victim, "warrior_parry");
+        if (level <= 0) return false;
+        DamageSource source = event.getSource();
+        boolean directMelee = source.getEntity() instanceof LivingEntity && source.getDirectEntity() == source.getEntity()
+                && !source.is(DamageTypeTags.IS_PROJECTILE) && !source.is(DamageTypeTags.IS_EXPLOSION);
+        if (!WarriorFormulas.parryEligible(isSword(victim.getMainHandItem()), directMelee,
+                Talents.cooldownReady(victim, "warrior_parry"))) return false;
+        if (victim.getRandom().nextDouble() >= level * Talents.value(victim, "warrior_parry", "per_level")) return false;
+        victim.level().playSound(null, victim.getX(), victim.getY(), victim.getZ(), SoundEvents.SHIELD_BLOCK,
+                victim.getSoundSource(), 1.0F, 0.8F + victim.getRandom().nextFloat() * 0.4F);
+        Talents.startCooldown(victim, "warrior_parry", (long) Talents.value(victim, "warrior_parry", "cooldown"));
+        return true;
+    }
+
+    /** warrior_counter: bloquear com escudo abre a janela do próximo ataque. */
+    @SubscribeEvent
+    public static void onShieldBlock(ShieldBlockEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || event.getBlockedDamage() <= 0) return;
+        if (Talents.level(player, "warrior_counter") <= 0) return;
+        Talents.startCooldown(player, COUNTER_WINDOW, (long) Talents.value(player, "warrior_counter", "window"));
+    }
+
+    /** warrior_lumber: troncos com machado. Roda nos dois lados, como os bônus do Minerador: o cliente prevê a quebra. */
+    @SubscribeEvent
+    public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
+        Player player = event.getEntity();
+        if (!isAxe(player.getMainHandItem()) || !event.getState().is(BlockTags.LOGS)) return;
+        int level = Talents.level(player, "warrior_lumber");
+        if (level <= 0) return;
+        event.setNewSpeed((float) (event.getNewSpeed()
+                * WarriorFormulas.bonusMultiplier(level, Talents.value(player, "warrior_lumber", "per_level"))));
+    }
+
+    /** warrior_smash: bônus sobre o dano total do golpe esmagador da maça (a parte de queda não é separável aqui). */
+    private static float smashAmount(float amount, ServerPlayer attacker) {
+        ItemStack weapon = attacker.getMainHandItem();
+        if (!weapon.is(Items.MACE) || !MaceItem.canSmashAttack(attacker)) return amount;
+        int level = Talents.level(attacker, "warrior_smash");
+        if (level <= 0) return amount;
+        return (float) (amount * WarriorFormulas.bonusMultiplier(level, Talents.value(attacker, "warrior_smash", "per_level")));
+    }
+
+    /** warrior_counter: janela aberta → bônus no primeiro golpe e fecha a janela (fim = tick atual). */
+    private static float counterAmount(float amount, ServerPlayer attacker) {
+        if (RecursionGuard.SERVER.isActive(attacker.getUUID(), CLEAVE_GUARD)) return amount; // dano do Golpe Amplo não consome a janela
+        int level = Talents.level(attacker, "warrior_counter");
+        if (level <= 0 || Talents.cooldownReady(attacker, COUNTER_WINDOW)) return amount;
+        Talents.startCooldown(attacker, COUNTER_WINDOW, 0);
+        return (float) (amount * WarriorFormulas.bonusMultiplier(level, Talents.value(attacker, "warrior_counter", "per_level")));
     }
 
     // Helpers não recebem o evento: o EventBus 7 exige @SubscribeEvent em todo método estático com evento.
