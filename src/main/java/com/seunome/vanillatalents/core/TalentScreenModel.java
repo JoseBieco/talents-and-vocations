@@ -120,6 +120,7 @@ public final class TalentScreenModel {
             case WARRIOR -> "textures/block/polished_blackstone.png";
             case ARCHER -> "textures/block/oak_planks.png";
             case ANGLER -> "textures/block/sand.png";
+            case TAMER -> "textures/block/hay_block_side.png";
         };
     }
 

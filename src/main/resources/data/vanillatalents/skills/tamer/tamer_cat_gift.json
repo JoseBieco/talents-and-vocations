@@ -1,0 +1,21 @@
+{
+  "id": "tamer_cat_gift",
+  "treeCategory": "tamer",
+  "name": "talent.vanillatalents.tamer_cat_gift.name",
+  "description": "talent.vanillatalents.tamer_cat_gift.desc",
+  "icon": "minecraft:string",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "tamer_friendly",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.25
+  }
+}

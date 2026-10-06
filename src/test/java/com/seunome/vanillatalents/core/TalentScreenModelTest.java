@@ -313,6 +313,7 @@ class TalentScreenModelTest {
         assertEquals("textures/block/polished_blackstone.png", TalentScreenModel.backgroundTexture(TreeCategory.WARRIOR));
         assertEquals("textures/block/oak_planks.png", TalentScreenModel.backgroundTexture(TreeCategory.ARCHER));
         assertEquals("textures/block/sand.png", TalentScreenModel.backgroundTexture(TreeCategory.ANGLER));
+        assertEquals("textures/block/hay_block_side.png", TalentScreenModel.backgroundTexture(TreeCategory.TAMER));
         for (TreeCategory t : TreeCategory.values()) assertNotNull(TalentScreenModel.backgroundTexture(t));
     }
 }

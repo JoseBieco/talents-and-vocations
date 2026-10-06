@@ -9,7 +9,8 @@ public enum TreeCategory {
     EXPLORER("explorer"),
     WARRIOR("warrior"),
     ARCHER("archer"),
-    ANGLER("angler");
+    ANGLER("angler"),
+    TAMER("tamer");
 
     private final String id;
 
