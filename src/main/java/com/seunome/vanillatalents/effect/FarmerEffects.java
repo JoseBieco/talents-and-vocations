@@ -434,15 +434,23 @@ public final class FarmerEffects {
         return bee.getTarget() == player || (persistent != null && persistent.matches(player));
     }
 
-    /** farmer_compost: se a vanilla não subiu o nível, rola a chance extra; ao chegar a 7, agenda o tick como a vanilla. */
+    /**
+     * farmer_compost: se a vanilla usou o item (a pilha diminuiu; no criativo a vanilla não consome) mas não subiu o
+     * nível, rola a chance extra; ao chegar a 7, agenda o tick como a vanilla.
+     */
     private static void scheduleCompost(ServerPlayer player, BlockPos pos, BlockState before, ItemStack stack) {
         int beforeLevel = before.getValue(ComposterBlock.LEVEL);
         if (beforeLevel >= ComposterBlock.MAX_LEVEL || stack.get(DataComponents.COMPOSTABLE) == null) return;
+        // Agachado com algo na mão a vanilla não usa o bloco (ServerPlayerGameMode.useItemOn).
+        if (player.isSecondaryUseActive()) return;
         int level = Talents.level(player, "farmer_compost");
         if (level <= 0) return;
         double chance = HookFormulas.chance(level, Talents.value(player, "farmer_compost", "per_level"));
         ServerLevel world = player.level();
+        int countBefore = stack.getCount();
         scheduleOnce(player, pos, "farmer_compost", () -> {
+            boolean consumed = stack.getCount() < countBefore || player.hasInfiniteMaterials();
+            if (!consumed) return;
             BlockState now = world.getBlockState(pos);
             if (!(now.getBlock() instanceof ComposterBlock)) return;
             boolean roll = player.getRandom().nextDouble() < chance;
