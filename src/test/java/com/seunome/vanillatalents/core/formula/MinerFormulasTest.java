@@ -49,4 +49,39 @@ class MinerFormulasTest {
     void fortuneChance_isPerLevel() {
         assertEquals(0.20, MinerFormulas.fortuneChance(4, .05), 1e-9);
     }
+
+    @Test
+    void hardStoneMultiplier_perLevel() {
+        assertEquals(1.6, MinerFormulas.hardStoneMultiplier(2, .3), 1e-9);
+    }
+
+    @Test
+    void smeltTarget_rawIron() {
+        assertEquals(java.util.Optional.of("minecraft:iron_ingot"), MinerFormulas.smeltTarget("minecraft:raw_iron"));
+    }
+
+    @Test
+    void smeltTarget_rawGold() {
+        assertEquals(java.util.Optional.of("minecraft:gold_ingot"), MinerFormulas.smeltTarget("minecraft:raw_gold"));
+    }
+
+    @Test
+    void smeltTarget_rawCopper() {
+        assertEquals(java.util.Optional.of("minecraft:copper_ingot"), MinerFormulas.smeltTarget("minecraft:raw_copper"));
+    }
+
+    @Test
+    void smeltTarget_diamond() {
+        assertTrue(MinerFormulas.smeltTarget("minecraft:diamond").isEmpty());
+    }
+
+    @Test
+    void underdwellerMultiplier_belowZero() {
+        assertEquals(0.85, MinerFormulas.underdwellerMultiplier(3, .05, -10), 1e-9);
+    }
+
+    @Test
+    void underdwellerMultiplier_atOrAboveZero() {
+        assertEquals(1.0, MinerFormulas.underdwellerMultiplier(3, .05, 0), 1e-9);
+    }
 }

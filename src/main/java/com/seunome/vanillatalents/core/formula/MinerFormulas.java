@@ -88,4 +88,24 @@ public final class MinerFormulas {
     public static double fortuneChance(int level, double perLevel) {
         return HookFormulas.chance(level, perLevel);
     }
+
+    /** miner_obsidian: multiplicador de velocidade em pedra dura (obsidiana, detritos ancestrais). */
+    public static double hardStoneMultiplier(int level, double perLevel) {
+        return 1 + level * perLevel;
+    }
+
+    /** miner_smelter: lingote correspondente ao material bruto, se houver. */
+    public static java.util.Optional<String> smeltTarget(String itemId) {
+        return switch (itemId) {
+            case "minecraft:raw_iron" -> java.util.Optional.of("minecraft:iron_ingot");
+            case "minecraft:raw_gold" -> java.util.Optional.of("minecraft:gold_ingot");
+            case "minecraft:raw_copper" -> java.util.Optional.of("minecraft:copper_ingot");
+            default -> java.util.Optional.empty();
+        };
+    }
+
+    /** miner_underdweller: multiplicador de dano de mobs; reduz só abaixo de Y 0. */
+    public static double underdwellerMultiplier(int level, double perLevel, double y) {
+        return y < 0 ? 1 - level * perLevel : 1;
+    }
 }
