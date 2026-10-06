@@ -18,6 +18,14 @@ public final class AnglerFormulas {
         return (int) Math.max(1, Math.round(ticks * factor));
     }
 
+    /**
+     * Escala linear {@code base · (1 + level·perLevel)}: aceleração do barco (angler_boat_speed), duração da Graça do
+     * Golfinho (angler_dolphin), alcance da neblina d'água (angler_sea_eyes) e a Lealdade.
+     */
+    public static double scaled(double base, int level, double perLevel) {
+        return base * (1 + level * perLevel);
+    }
+
     /** Anti-AFK: o jogador se moveu ou girou a câmera nos últimos {@code idleTicks}. */
     public static boolean active(long lastActiveTick, long now, int idleTicks) {
         return now - lastActiveTick <= idleTicks;

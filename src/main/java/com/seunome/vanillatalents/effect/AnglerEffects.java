@@ -1,5 +1,7 @@
 package com.seunome.vanillatalents.effect;
 
+import com.seunome.vanillatalents.VanillaTalents;
+import com.seunome.vanillatalents.core.RecursionGuard;
 import com.seunome.vanillatalents.core.formula.AnglerFormulas;
 import com.seunome.vanillatalents.core.formula.HookFormulas;
 import com.seunome.vanillatalents.effect.loot.Smelting;
@@ -9,16 +11,67 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
-/** Efeitos do Pescador. A fisgada (angler_lure / Maré Alta) fica em FishingHooks; aqui ficam o loot e as condições. */
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+/**
+ * Efeitos do Pescador. A fisgada (angler_lure / Maré Alta) fica em FishingHooks e o barco em BoatHooks; aqui ficam o
+ * loot, as condições e o Amigo dos Golfinhos.
+ */
+@Mod.EventBusSubscriber(modid = VanillaTalents.MODID)
 public final class AnglerEffects {
 
+    private static final String DOLPHIN_GUARD = "angler_dolphin";
+
+    /** Graça do Golfinho recém-aplicada a estender no próximo tick: jogador → duração aplicada. */
+    private static final Map<UUID, Integer> PENDING_DOLPHIN = new HashMap<>();
+
     private AnglerEffects() {}
+
+    /** angler_dolphin: marca a Graça do Golfinho recém-aplicada para reaplicar mais longa no próximo tick. */
+    @SubscribeEvent
+    public static void onEffectAdded(MobEffectEvent.Added event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        MobEffectInstance effect = event.getEffectInstance();
+        if (!effect.is(MobEffects.DOLPHINS_GRACE) || effect.isInfiniteDuration()) return;
+        if (RecursionGuard.SERVER.isActive(player.getUUID(), DOLPHIN_GUARD)) return;
+        if (Talents.level(player, "angler_dolphin") <= 0) return;
+        PENDING_DOLPHIN.put(player.getUUID(), effect.getDuration());
+    }
+
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent.Post event) {
+        if (!(event.player() instanceof ServerPlayer player)) return;
+        Integer appliedDuration = PENDING_DOLPHIN.remove(player.getUUID());
+        if (appliedDuration == null) return;
+        int level = Talents.level(player, "angler_dolphin");
+        if (level <= 0) return;
+        MobEffectInstance current = player.getEffect(MobEffects.DOLPHINS_GRACE);
+        // Só estende se o efeito ativo é o que acabou de ser aplicado (não um mais longo que já existia).
+        if (current == null || current.isInfiniteDuration()
+                || current.getDuration() > appliedDuration || current.getDuration() < appliedDuration - 2) return;
+        int duration = (int) Math.round(AnglerFormulas.scaled(current.getDuration(), level,
+                Talents.value(player, "angler_dolphin", "per_level")));
+        MobEffectInstance extended = new MobEffectInstance(MobEffects.DOLPHINS_GRACE, duration,
+                current.getAmplifier(), current.isAmbient(), current.isVisible(), current.showIcon());
+        RecursionGuard.SERVER.runGuarded(player.getUUID(), DOLPHIN_GUARD, () -> {
+            player.removeEffect(MobEffects.DOLPHINS_GRACE);
+            player.addEffect(extended, null);
+        });
+    }
 
     public static void registerLoot() {
         TalentLootModifier.register(TalentLootModifier.Kind.ANGLER_CATCH, AnglerEffects::catchLoot);

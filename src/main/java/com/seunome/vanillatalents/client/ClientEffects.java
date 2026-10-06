@@ -1,10 +1,12 @@
 package com.seunome.vanillatalents.client;
 
+import com.seunome.vanillatalents.core.formula.AnglerFormulas;
 import com.seunome.vanillatalents.core.formula.ArcherFormulas;
 import com.seunome.vanillatalents.effect.Talents;
 import com.seunome.vanillatalents.core.formula.ExplorerFormulas;
 import net.minecraft.client.player.ClientInput;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Player;
@@ -13,12 +15,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.TickEvent;
 
 /**
- * Efeitos do lado do cliente: Atirar Andando, Comer Andando e Escalador (o Faro Mineral fica em OreHighlights).
+ * Efeitos do lado do cliente: Atirar Andando, Comer Andando, Escalador e Olhos do Mar (o Faro Mineral fica em
+ * OreHighlights).
  * O movimento do jogador local é calculado no cliente, então estes efeitos só funcionam aqui.
  */
 public final class ClientEffects {
@@ -28,6 +33,7 @@ public final class ClientEffects {
     static void register() {
         MovementInputUpdateEvent.BUS.addListener(ClientEffects::onMovementInput);
         TickEvent.PlayerTickEvent.Post.BUS.addListener(ClientEffects::onPlayerTick);
+        ViewportEvent.RenderFog.BUS.addListener(ClientEffects::onRenderFog);
     }
 
     /**
@@ -78,5 +84,25 @@ public final class ClientEffects {
         if (level <= 0) return;
         double factor = ExplorerFormulas.climbFactor(level, Talents.value(player, "explorer_climb", "per_level"));
         player.setDeltaMovement(motion.x, motion.y * factor, motion.z);
+    }
+
+    /**
+     * angler_sea_eyes: debaixo d'água (FogType.WATER), afasta o começo e o fim da neblina por scaled(1, nível,
+     * per_level). Na 26.3 a neblina d'água vem dos planos "environmental" do FogData (WaterFogEnvironment, padrão
+     * 96 blocos), não dos planos da distância de renderização (getNear/FarPlaneDistance), que ficam como estão para
+     * não revelar a borda dos chunks. skyEnd/cloudEnd acompanham, como na vanilla. O Forge aplica as mudanças no
+     * FogData sem precisar cancelar o evento.
+     */
+    private static void onRenderFog(ViewportEvent.RenderFog event) {
+        if (event.getType() != FogType.WATER) return;
+        if (!(event.getCamera().entity() instanceof LocalPlayer player)) return;
+        int level = Talents.level(player, "angler_sea_eyes");
+        if (level <= 0) return;
+        float factor = (float) AnglerFormulas.scaled(1, level, Talents.value(player, "angler_sea_eyes", "per_level"));
+        FogData data = event.getData();
+        data.environmentalStart *= factor;
+        data.environmentalEnd *= factor;
+        data.skyEnd *= factor;
+        data.cloudEnd *= factor;
     }
 }

@@ -73,4 +73,19 @@ class AnglerFormulasTest {
     void catchResult_fishSingleCooked() {
         assertEquals(new AnglerFormulas.Catch(1, true), AnglerFormulas.catchResult(true, false, true));
     }
+
+    @Test
+    void scaled_boatAcceleration() {
+        assertEquals(0.046, AnglerFormulas.scaled(0.04, 3, 0.05), 1e-9);
+    }
+
+    @Test
+    void scaled_dolphinDuration() {
+        assertEquals(200, AnglerFormulas.scaled(100, 2, 0.5), 1e-9);
+    }
+
+    @Test
+    void scaled_seaEyesFog() {
+        assertEquals(144, AnglerFormulas.scaled(96, 2, 0.25), 1e-9);
+    }
 }
