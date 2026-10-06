@@ -103,6 +103,26 @@ class TalentScreenModelTest {
     }
 
     @Test
+    void displayLevel_frozenSecondaryShowsSavedLevels() {
+        TalentRegistry reg = TalentRulesTest.MC_REG;
+        var frozen = TalentRulesTest.activeMulticlass().lvl("miner_vein", 0);
+        assertTrue(TalentScreenModel.frozenSecondary(frozen, reg, TreeCategory.ARCHER));
+        assertFalse(TalentScreenModel.frozenSecondary(frozen, reg, TreeCategory.MINER));
+        assertEquals(0, TalentRules.effectiveLevel(frozen, reg, "archer_aim"));
+        assertEquals(4, TalentScreenModel.displayLevel(frozen, reg, reg.get("archer_aim").orElseThrow()));
+        assertEquals(0, TalentScreenModel.displayLevel(frozen, reg, reg.get("archer_pierce").orElseThrow()), "capstone da secundária nunca conta");
+        assertEquals(5, TalentScreenModel.displayLevel(frozen, reg, reg.get("miner_haste").orElseThrow()));
+        assertEquals(4, TalentScreenModel.treeSummary(frozen, reg, TreeCategory.ARCHER).spent());
+
+        var active = TalentRulesTest.activeMulticlass();
+        assertFalse(TalentScreenModel.frozenSecondary(active, reg, TreeCategory.ARCHER));
+        var other = TalentRulesTest.activeMulticlass().cls("farmer").lvl("miner_haste", 2);
+        assertEquals(0, TalentScreenModel.displayLevel(other, reg, reg.get("miner_haste").orElseThrow()), "árvore sem espaço continua 0");
+        assertEquals(0, TalentScreenModel.displayLevel(TalentRulesTest.activeMulticlass().maxClasses(1).lvl("miner_vein", 0), reg,
+                reg.get("archer_aim").orElseThrow()), "multiclasse desligado não é congelada");
+    }
+
+    @Test
     void primaryCapstoneId_followsPrimaryClass() {
         TalentRegistry reg = TalentRulesTest.MC_REG;
         assertEquals("miner_vein", TalentScreenModel.primaryCapstoneId(new TalentRulesTest.FakeView().cls("miner"), reg));

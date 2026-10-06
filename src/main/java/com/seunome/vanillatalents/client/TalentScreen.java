@@ -263,7 +263,10 @@ public class TalentScreen extends Screen {
         TreeCategory tree = switch (hovered) {
             case COMMON -> null;
             case PRIMARY -> classTree(data.getPrimaryClass());
-            case SECONDARY -> classTree(data.getSecondaryClass());
+            case SECONDARY -> switch (secondaryState()) {
+                case ACTIVE, FROZEN -> classTree(data.getSecondaryClass());
+                default -> null;
+            };
         };
         if (tree != null) {
             lines.add(Component.translatable("vanillatalents.class." + tree.id()).withStyle(ChatFormatting.GRAY).getVisualOrderText());

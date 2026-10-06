@@ -37,11 +37,28 @@ public final class TalentScreenModel {
         };
     }
 
+    /** {@code tree} é a classe secundária e ela está congelada (escolhida, liberada, mas sem efeito). */
+    public static boolean frozenSecondary(SkillView v, TalentRegistry r, TreeCategory tree) {
+        return tree.isClass() && tree.id().equals(v.secondaryClass()) && secondaryTab(v, r) == SecondaryTab.FROZEN;
+    }
+
+    /**
+     * Nível mostrado na GUI: o efetivo, exceto na secundária congelada, onde aparece o nível salvo (limitado ao
+     * máximo) para o jogador ver o progresso guardado. O capstone da secundária nunca conta e segue o efetivo.
+     */
+    public static int displayLevel(SkillView v, TalentRegistry r, TalentNode n) {
+        if (!n.capstone() && frozenSecondary(v, r, n.tree())) {
+            return Math.max(0, Math.min(v.rawLevel(n.id()), n.maxLevel()));
+        }
+        return TalentRules.effectiveLevel(v, r, n.id());
+    }
+
+    /** Resumo para exibição: usa {@link #displayLevel} (níveis salvos na secundária congelada). */
     public static TreeSummary treeSummary(SkillView v, TalentRegistry r, TreeCategory tree) {
         int spent = 0, maxed = 0, total = 0;
         List<TalentNode> nodes = r.tree(tree);
         for (TalentNode n : nodes) {
-            int level = TalentRules.effectiveLevel(v, r, n.id());
+            int level = displayLevel(v, r, n);
             spent += level * n.cost();
             if (level >= n.maxLevel()) maxed++;
             total += n.maxLevel() * n.cost();

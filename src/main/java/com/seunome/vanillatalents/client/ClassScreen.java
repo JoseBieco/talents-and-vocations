@@ -302,7 +302,8 @@ public class ClassScreen extends Screen {
         y += LINE_H + 5;
 
         TalentScreenModel.RespecPreview preview = preview();
-        if (preview.freezesSecondary()) {
+        // Com multiclasse desligado a secundária já não tem efeito: o aviso não se aplica.
+        if (preview.freezesSecondary() && ClientTalentState.data().maxClasses() >= 2) {
             for (FormattedCharSequence line : font.split(Component.translatable("gui.vanillatalents.classes.freezes_secondary"), textW)) {
                 g.text(font, line, x, y, COLOR_DANGER, true);
                 y += 9;

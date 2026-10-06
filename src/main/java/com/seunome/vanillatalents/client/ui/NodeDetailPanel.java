@@ -107,8 +107,9 @@ public final class NodeDetailPanel {
         int ty = top + scroll;
         ty = wrapped(g, font, Component.translatable(selected.nameKey()), ty, COLOR_NAME);
         ty = wrapped(g, font, Component.translatable(selected.descKey()), ty + 2, COLOR_MUTED);
-        ty = wrapped(g, font, Component.translatable("gui.vanillatalents.level",
-                TalentRules.effectiveLevel(data, registry, selected.id()), selected.maxLevel()), ty + 3, COLOR_TEXT);
+        Component level = Component.translatable("gui.vanillatalents.level",
+                TalentScreenModel.displayLevel(data, registry, selected), selected.maxLevel());
+        ty = wrapped(g, font, frozenMarked(level, data, registry, selected.tree()), ty + 3, COLOR_TEXT);
         boolean needsPrimaryCapstone = selected.conditions().contains(TalentNode.CONDITION_PRIMARY_CAPSTONE);
         if (!selected.prerequisites().isEmpty() || needsPrimaryCapstone) {
             ty = wrapped(g, font, Component.translatable("gui.vanillatalents.detail.requirements"), ty + 3, COLOR_TEXT);
@@ -136,6 +137,12 @@ public final class NodeDetailPanel {
         if (reason != null) wrapped(g, font, reason, textBottom, COLOR_UNMET);
     }
 
+    /** Na secundária congelada, acrescenta "(congelada)": o número mostrado é o nível salvo, sem efeito. */
+    private static Component frozenMarked(Component text, PlayerSkillData data, TalentRegistry registry, TreeCategory tree) {
+        if (!TalentScreenModel.frozenSecondary(data, registry, tree)) return text;
+        return Component.translatable("gui.vanillatalents.frozen_suffix", text);
+    }
+
     /** Nome traduzido do capstone da classe principal, ou "—" sem principal. */
     private static Component primaryCapstoneName(PlayerSkillData data, TalentRegistry registry) {
         String id = TalentScreenModel.primaryCapstoneId(data, registry);
@@ -148,7 +155,8 @@ public final class NodeDetailPanel {
         int top = y + PAD, bottom = y + h - PAD;
         g.enableScissor(x + 1, top - 1, x + w - 1, bottom);
         int ty = top + scroll;
-        ty = wrapped(g, font, Component.translatable("gui.vanillatalents.summary.spent", s.spent()), ty, COLOR_TEXT);
+        Component spent = Component.translatable("gui.vanillatalents.summary.spent", s.spent());
+        ty = wrapped(g, font, frozenMarked(spent, data, registry, tree), ty, COLOR_TEXT);
         ty = wrapped(g, font, Component.translatable("gui.vanillatalents.summary.nodes", s.maxedNodes(), s.nodeCount()), ty + 2, COLOR_TEXT);
         ty = wrapped(g, font, Component.translatable("gui.vanillatalents.summary.total",
                 Math.max(0, s.totalPoints() - s.spent())), ty + 2, COLOR_TEXT);
