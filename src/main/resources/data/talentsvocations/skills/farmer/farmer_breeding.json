@@ -1,0 +1,21 @@
+{
+  "id": "farmer_breeding",
+  "treeCategory": "farmer",
+  "name": "talent.talentsvocations.farmer_breeding.name",
+  "description": "talent.talentsvocations.farmer_breeding.desc",
+  "icon": "minecraft:carrot",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "farmer_animal_drops",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 1,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.15
+  }
+}

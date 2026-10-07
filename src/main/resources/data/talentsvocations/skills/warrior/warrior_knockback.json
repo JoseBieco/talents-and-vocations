@@ -1,0 +1,21 @@
+{
+  "id": "warrior_knockback",
+  "treeCategory": "warrior",
+  "name": "talent.talentsvocations.warrior_knockback.name",
+  "description": "talent.talentsvocations.warrior_knockback.desc",
+  "icon": "minecraft:piston",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "warrior_resistance",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 2,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.5
+  }
+}

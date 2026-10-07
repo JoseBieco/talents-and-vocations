@@ -1,12 +1,12 @@
-# Vanilla+ Talents
+# Talents & Vocations
 
-![Vanilla+ Talents Logo](assets/images/vanillatalents_logo.jpg)
+![Talents & Vocations Logo](assets/images/talentsvocations_logo.jpg)
 
 ## Objetivo
-O **Vanilla+ Talents** é um mod para Minecraft focado em expandir a progressão do jogador através de um sistema de árvores de talentos. O objetivo é oferecer uma experiência de RPG imersiva mantendo a essência "vanilla", permitindo aos jogadores investir seus níveis de experiência (XP) na compra de Pontos de Talento (PT) para desbloquear habilidades e buffs exclusivos para se adaptar ao seu estilo de jogo.
+O **Talents & Vocations** é um mod para Minecraft focado em expandir a progressão do jogador através de um sistema de árvores de talentos. O objetivo é oferecer uma experiência de RPG imersiva mantendo a essência "vanilla", permitindo aos jogadores investir seus níveis de experiência (XP) na compra de Pontos de Talento (PT) para desbloquear habilidades e buffs exclusivos para se adaptar ao seu estilo de jogo.
 
 ## O Que Foi Implementado na V2
-![Vanilla+ Talents 2.0.0](assets/images/vanillatalents_v2_banner.jpg)
+![Talents & Vocations 2.0.0](assets/images/talentsvocations_v2_banner.jpg)
 
 - **Árvores de Talentos Customizadas:** 10 árvores completas contendo no total 145 nós.
 - **Sistema de Progressão (XP para PT):** Os jogadores convertem níveis de XP diretamente em Pontos de Talento através da interface.
@@ -19,7 +19,7 @@ O **Vanilla+ Talents** é um mod para Minecraft focado em expandir a progressão
 
 O mod agora possui 9 classes principais e 1 árvore de sobrevivência universal:
 
-![Classes Clássicas](assets/images/vanillatalents_classes.jpg)
+![Classes Clássicas](assets/images/talentsvocations_classes.jpg)
 
 1. 🌳 **Comum (Sobrevivência)**: *Sempre ativa para todos os jogadores e não é afetada por mudanças de classe.* (Aumento de vida, fôlego e resistência).
 2. ⛏️ **Minerador**: Quebra mais rápida de blocos, minérios extras e visão no escuro.
@@ -30,7 +30,7 @@ O mod agora possui 9 classes principais e 1 árvore de sobrevivência universal:
 
 ### 🌟 Novas Classes (A partir da v2.0.0)
 
-![Novas Classes](assets/images/vanillatalents_v2_newclasses.jpg)
+![Novas Classes](assets/images/talentsvocations_v2_newclasses.jpg)
 
 7. 🔱 **Pescador / Navegante**: Especialista do oceano. Ganha bônus de pesca rápida, barco acelerado e aumento de dano usando Tridente.
 8. 🐺 **Domador**: Mestre das feras. Concede bônus passivos de vida/dano e utilidade para lobos, cavalos, golens e gatos.
@@ -39,7 +39,7 @@ O mod agora possui 9 classes principais e 1 árvore de sobrevivência universal:
 
 ## Resumo dos Buffs e Balanceamento (V2)
 
-![Balanceamento](assets/images/vanillatalents_v2_balance.jpg)
+![Balanceamento](assets/images/talentsvocations_v2_balance.jpg)
 
 Para garantir que o acúmulo de duas classes (Multiclasse) não quebre o jogo, o sistema é estritamente balanceado:
 - **Encantamentos**: Bônus percentuais do mod são aplicados *depois* e *multiplicativamente* aos encantamentos vanilla.
@@ -48,14 +48,14 @@ Para garantir que o acúmulo de duas classes (Multiclasse) não quebre o jogo, o
 
 ## Como Funciona a Compra de Pontos (PT)
 
-![Sistema de Progressão](assets/images/vanillatalents_gui.jpg)
+![Sistema de Progressão](assets/images/talentsvocations_gui.jpg)
 
 - **Conversão Base**: A cada **5 Níveis de XP** normais, você pode convertê-los em **1 Ponto de Talento (PT)** através da interface do mod.
 - Ao clicar em um nó na árvore de sua classe, você verá os requisitos. Se possuir PTs e cumprir os requisitos, o talento pode ser desbloqueado.
 
 ## Mudança de Classes e Multiclasse
 
-![Sistema de Multiclasse](assets/images/vanillatalents_v2_multiclass.jpg)
+![Sistema de Multiclasse](assets/images/talentsvocations_v2_multiclass.jpg)
 
 **Escolha Inicial e Respec (Troca de Classe):**
 - A primeira escolha de classe do jogador é totalmente gratuita.

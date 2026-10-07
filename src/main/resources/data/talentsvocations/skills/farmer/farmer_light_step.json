@@ -1,0 +1,19 @@
+{
+  "id": "farmer_light_step",
+  "treeCategory": "farmer",
+  "name": "talent.talentsvocations.farmer_light_step.name",
+  "description": "talent.talentsvocations.farmer_light_step.desc",
+  "icon": "minecraft:feather",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "farmer_area_harvest",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": -2,
+    "y": 2
+  },
+  "values": {}
+}

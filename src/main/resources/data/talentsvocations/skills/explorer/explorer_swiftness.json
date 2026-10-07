@@ -1,0 +1,16 @@
+{
+  "id": "explorer_swiftness",
+  "treeCategory": "explorer",
+  "name": "talent.talentsvocations.explorer_swiftness.name",
+  "description": "talent.talentsvocations.explorer_swiftness.desc",
+  "icon": "minecraft:sugar",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 0.03
+  }
+}

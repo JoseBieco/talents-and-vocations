@@ -1,0 +1,22 @@
+{
+  "id": "warrior_bloodlust",
+  "treeCategory": "warrior",
+  "name": "talent.talentsvocations.warrior_bloodlust.name",
+  "description": "talent.talentsvocations.warrior_bloodlust.desc",
+  "icon": "minecraft:redstone",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "warrior_crit",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 3
+  },
+  "values": {
+    "per_level": 1,
+    "cooldown": 40
+  }
+}

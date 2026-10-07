@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.josebieco.talentsvocations.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AbstractBoatMixin",
+    "AnvilMenuMixin",
+    "CatRelaxOnOwnerGoalMixin",
+    "EnchantmentMenuMixin",
+    "FishingHookMixin",
+    "FoodDataMixin",
+    "ItemStackMixin",
+    "LivingEntityMixin",
+    "PlayerMixin",
+    "ServerPlayerMixin",
+    "SmithingMenuMixin",
+    "ThrownTridentMixin",
+    "VillagerMixin"
+  ],
+  "client": [
+    "client.EnchantmentScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

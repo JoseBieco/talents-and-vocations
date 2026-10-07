@@ -1,0 +1,31 @@
+{
+  "id": "angler_high_tide",
+  "treeCategory": "angler",
+  "name": "talent.talentsvocations.angler_high_tide.name",
+  "description": "talent.talentsvocations.angler_high_tide.desc",
+  "icon": "minecraft:conduit",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "angler_rod_care",
+      "level": 2
+    },
+    {
+      "id": "angler_sea_eyes",
+      "level": 1
+    },
+    {
+      "id": "angler_depths",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 4
+  },
+  "values": {
+    "lure_reduction": 0.25,
+    "trident_bonus": 0.15
+  },
+  "capstone": true
+}

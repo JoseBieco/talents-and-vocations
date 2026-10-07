@@ -1,0 +1,21 @@
+{
+  "id": "tamer_wolf_armor",
+  "treeCategory": "tamer",
+  "name": "talent.talentsvocations.tamer_wolf_armor.name",
+  "description": "talent.talentsvocations.tamer_wolf_armor.desc",
+  "icon": "minecraft:wolf_armor",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "tamer_fangs",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -2,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.2
+  }
+}

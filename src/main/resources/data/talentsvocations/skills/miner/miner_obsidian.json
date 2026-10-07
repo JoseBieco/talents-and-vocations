@@ -1,0 +1,21 @@
+{
+  "id": "miner_obsidian",
+  "treeCategory": "miner",
+  "name": "talent.talentsvocations.miner_obsidian.name",
+  "description": "talent.talentsvocations.miner_obsidian.desc",
+  "icon": "minecraft:obsidian",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "miner_mole",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -2,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.30
+  }
+}

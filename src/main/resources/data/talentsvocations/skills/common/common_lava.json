@@ -1,0 +1,21 @@
+{
+  "id": "common_lava",
+  "treeCategory": "common",
+  "name": "talent.talentsvocations.common_lava.name",
+  "description": "talent.talentsvocations.common_lava.desc",
+  "icon": "minecraft:lava_bucket",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "common_fireproof",
+      "level": 5
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.08
+  }
+}

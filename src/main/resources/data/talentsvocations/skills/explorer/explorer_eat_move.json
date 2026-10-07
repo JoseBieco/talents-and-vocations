@@ -1,0 +1,21 @@
+{
+  "id": "explorer_eat_move",
+  "treeCategory": "explorer",
+  "name": "talent.talentsvocations.explorer_eat_move.name",
+  "description": "talent.talentsvocations.explorer_eat_move.desc",
+  "icon": "minecraft:cooked_beef",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "explorer_sprint",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 3,
+    "y": 2
+  },
+  "values": {
+    "value": 0.5
+  }
+}

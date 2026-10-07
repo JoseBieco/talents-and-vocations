@@ -1,0 +1,21 @@
+{
+  "id": "builder_yield",
+  "treeCategory": "builder",
+  "name": "talent.talentsvocations.builder_yield.name",
+  "description": "talent.talentsvocations.builder_yield.desc",
+  "icon": "minecraft:crafting_table",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "builder_thrifty",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.2
+  }
+}

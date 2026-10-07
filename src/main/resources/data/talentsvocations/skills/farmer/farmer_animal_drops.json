@@ -1,0 +1,21 @@
+{
+  "id": "farmer_animal_drops",
+  "treeCategory": "farmer",
+  "name": "talent.talentsvocations.farmer_animal_drops.name",
+  "description": "talent.talentsvocations.farmer_animal_drops.desc",
+  "icon": "minecraft:leather",
+  "maxLevel": 5,
+  "prerequisites": [
+    {
+      "id": "farmer_harvest",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

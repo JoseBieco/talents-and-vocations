@@ -1,0 +1,21 @@
+{
+  "id": "artisan_repair",
+  "treeCategory": "artisan",
+  "name": "talent.talentsvocations.artisan_repair.name",
+  "description": "talent.talentsvocations.artisan_repair.desc",
+  "icon": "minecraft:iron_ingot",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "artisan_anvil_care",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

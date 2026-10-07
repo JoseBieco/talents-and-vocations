@@ -1,0 +1,21 @@
+{
+  "id": "miner_stoneskin",
+  "treeCategory": "miner",
+  "name": "talent.talentsvocations.miner_stoneskin.name",
+  "description": "talent.talentsvocations.miner_stoneskin.desc",
+  "icon": "minecraft:cobblestone",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "miner_darkvision",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.08
+  }
+}

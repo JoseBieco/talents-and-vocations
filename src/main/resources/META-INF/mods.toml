@@ -3,21 +3,21 @@ loaderVersion="[66,)"
 license="All Rights Reserved"
 
 [[mods]]
-modId="vanillatalents"
+modId="talentsvocations"
 version="2.0.0"
-displayName="Vanilla+ Talents"
-authors="SeuNome"
+displayName="Talents & Vocations"
+authors="José Bieco"
 
-description='''Vanilla+ Talents expande o late game do Minecraft adicionando árvores de habilidades. Converta XP em Pontos de Talento e personalize o seu jogo com classes como Minerador, Guerreiro e mais!'''
+description='''Talents & Vocations expande o late game do Minecraft adicionando árvores de habilidades. Converta XP em Pontos de Talento e personalize o seu jogo com classes como Minerador, Guerreiro e mais!'''
 
-[[dependencies.vanillatalents]]
+[[dependencies.talentsvocations]]
     modId="forge"
     mandatory=true
     versionRange="[66,)"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.vanillatalents]]
+[[dependencies.talentsvocations]]
     modId="minecraft"
     mandatory=true
     versionRange="[26.3,26.4,)"

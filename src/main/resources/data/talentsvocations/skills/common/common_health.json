@@ -1,0 +1,16 @@
+{
+  "id": "common_health",
+  "treeCategory": "common",
+  "name": "talent.talentsvocations.common_health.name",
+  "description": "talent.talentsvocations.common_health.desc",
+  "icon": "minecraft:golden_apple",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 2
+  }
+}

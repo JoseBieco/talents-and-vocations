@@ -1,0 +1,21 @@
+{
+  "id": "tamer_fangs",
+  "treeCategory": "tamer",
+  "name": "talent.talentsvocations.tamer_fangs.name",
+  "description": "talent.talentsvocations.tamer_fangs.desc",
+  "icon": "minecraft:bone",
+  "maxLevel": 4,
+  "prerequisites": [
+    {
+      "id": "tamer_bond",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.5
+  }
+}

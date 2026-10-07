@@ -1,0 +1,21 @@
+{
+  "id": "common_frostblood",
+  "treeCategory": "common",
+  "name": "talent.talentsvocations.common_frostblood.name",
+  "description": "talent.talentsvocations.common_frostblood.desc",
+  "icon": "minecraft:powder_snow_bucket",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "common_extinguish",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 2,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.5
+  }
+}

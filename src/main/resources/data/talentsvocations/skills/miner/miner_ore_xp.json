@@ -1,0 +1,21 @@
+{
+  "id": "miner_ore_xp",
+  "treeCategory": "miner",
+  "name": "talent.talentsvocations.miner_ore_xp.name",
+  "description": "talent.talentsvocations.miner_ore_xp.desc",
+  "icon": "minecraft:experience_bottle",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "miner_fortune",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -1,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

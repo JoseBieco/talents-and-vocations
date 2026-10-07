@@ -1,0 +1,21 @@
+{
+  "id": "warrior_shield",
+  "treeCategory": "warrior",
+  "name": "talent.talentsvocations.warrior_shield.name",
+  "description": "talent.talentsvocations.warrior_shield.desc",
+  "icon": "minecraft:shield",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "warrior_steadfast",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.25
+  }
+}

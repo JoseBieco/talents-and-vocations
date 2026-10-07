@@ -1,0 +1,16 @@
+{
+  "id": "warrior_strength",
+  "treeCategory": "warrior",
+  "name": "talent.talentsvocations.warrior_strength.name",
+  "description": "talent.talentsvocations.warrior_strength.desc",
+  "icon": "minecraft:iron_sword",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 0.5
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "archer_recover",
+  "treeCategory": "archer",
+  "name": "talent.talentsvocations.archer_recover.name",
+  "description": "talent.talentsvocations.archer_recover.desc",
+  "icon": "minecraft:bundle",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "archer_conserve",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 2,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.2
+  }
+}

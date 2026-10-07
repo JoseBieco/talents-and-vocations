@@ -1,0 +1,19 @@
+{
+  "id": "artisan_insight",
+  "treeCategory": "artisan",
+  "name": "talent.talentsvocations.artisan_insight.name",
+  "description": "talent.talentsvocations.artisan_insight.desc",
+  "icon": "minecraft:enchanting_table",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "artisan_lapis",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 1,
+    "y": 2
+  },
+  "values": {}
+}

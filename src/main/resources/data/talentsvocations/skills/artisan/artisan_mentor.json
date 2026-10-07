@@ -1,0 +1,21 @@
+{
+  "id": "artisan_mentor",
+  "treeCategory": "artisan",
+  "name": "talent.talentsvocations.artisan_mentor.name",
+  "description": "talent.talentsvocations.artisan_mentor.desc",
+  "icon": "minecraft:book",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "artisan_brewing",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.25
+  }
+}

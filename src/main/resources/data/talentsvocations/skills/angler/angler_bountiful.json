@@ -1,0 +1,21 @@
+{
+  "id": "angler_bountiful",
+  "treeCategory": "angler",
+  "name": "talent.talentsvocations.angler_bountiful.name",
+  "description": "talent.talentsvocations.angler_bountiful.desc",
+  "icon": "minecraft:cod",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "angler_treasure",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.15
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "common_toughness",
+  "treeCategory": "common",
+  "name": "talent.talentsvocations.common_toughness.name",
+  "description": "talent.talentsvocations.common_toughness.desc",
+  "icon": "minecraft:leather_chestplate",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "common_regen",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 2
+  },
+  "values": {
+    "per_level": 1
+  }
+}

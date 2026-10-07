@@ -1,0 +1,23 @@
+{
+  "id": "common_second_vocation",
+  "treeCategory": "common",
+  "name": "talent.talentsvocations.common_second_vocation.name",
+  "description": "talent.talentsvocations.common_second_vocation.desc",
+  "icon": "minecraft:enchanted_book",
+  "maxLevel": 1,
+  "cost": 10,
+  "conditions": [
+    "primary_capstone"
+  ],
+  "prerequisites": [
+    {
+      "id": "common_second_wind",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 5
+  },
+  "values": {}
+}

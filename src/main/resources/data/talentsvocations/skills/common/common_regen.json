@@ -1,0 +1,21 @@
+{
+  "id": "common_regen",
+  "treeCategory": "common",
+  "name": "talent.talentsvocations.common_regen.name",
+  "description": "talent.talentsvocations.common_regen.desc",
+  "icon": "minecraft:glistering_melon_slice",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "common_health",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

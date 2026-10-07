@@ -1,0 +1,21 @@
+{
+  "id": "farmer_compost",
+  "treeCategory": "farmer",
+  "name": "talent.talentsvocations.farmer_compost.name",
+  "description": "talent.talentsvocations.farmer_compost.desc",
+  "icon": "minecraft:composter",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "farmer_forester",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.10
+  }
+}

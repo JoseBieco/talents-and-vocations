@@ -1,0 +1,21 @@
+{
+  "id": "archer_firework",
+  "treeCategory": "archer",
+  "name": "talent.talentsvocations.archer_firework.name",
+  "description": "talent.talentsvocations.archer_firework.desc",
+  "icon": "minecraft:firework_rocket",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "archer_bolt",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

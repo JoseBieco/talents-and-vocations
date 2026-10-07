@@ -1,0 +1,21 @@
+{
+  "id": "common_armor_care",
+  "treeCategory": "common",
+  "name": "talent.talentsvocations.common_armor_care.name",
+  "description": "talent.talentsvocations.common_armor_care.desc",
+  "icon": "minecraft:iron_chestplate",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "common_toughness",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.06
+  }
+}

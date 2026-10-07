@@ -1,0 +1,22 @@
+{
+  "id": "explorer_nightwatch",
+  "treeCategory": "explorer",
+  "name": "talent.talentsvocations.explorer_nightwatch.name",
+  "description": "talent.talentsvocations.explorer_nightwatch.desc",
+  "icon": "minecraft:red_bed",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "explorer_jump",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 2,
+    "y": 3
+  },
+  "values": {
+    "base_ticks": 72000,
+    "per_level_ticks": 24000
+  }
+}

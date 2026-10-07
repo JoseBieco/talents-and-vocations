@@ -1,14 +1,14 @@
 {
   "replace": false,
   "entries": [
-    "vanillatalents:miner_fortune",
-    "vanillatalents:miner_smelter",
-    "vanillatalents:miner_geode",
-    "vanillatalents:farmer_harvest",
-    "vanillatalents:farmer_forester",
-    "vanillatalents:farmer_replant",
-    "vanillatalents:farmer_gatherer",
-    "vanillatalents:angler_catch",
-    "vanillatalents:builder_glass"
+    "talentsvocations:miner_fortune",
+    "talentsvocations:miner_smelter",
+    "talentsvocations:miner_geode",
+    "talentsvocations:farmer_harvest",
+    "talentsvocations:farmer_forester",
+    "talentsvocations:farmer_replant",
+    "talentsvocations:farmer_gatherer",
+    "talentsvocations:angler_catch",
+    "talentsvocations:builder_glass"
   ]
 }

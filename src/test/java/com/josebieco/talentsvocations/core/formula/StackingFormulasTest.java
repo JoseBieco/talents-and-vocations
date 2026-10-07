@@ -1,0 +1,51 @@
+package com.josebieco.talentsvocations.core.formula;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class StackingFormulasTest {
+
+    @Test
+    void combatMultiplier_multipliesBelowTheCap() {
+        assertEquals(0.56, StackingFormulas.combatMultiplier(List.of(0.8, 0.7), 0.5), 1e-9);
+    }
+
+    @Test
+    void combatMultiplier_isLimitedByTheCap() {
+        assertEquals(0.5, StackingFormulas.combatMultiplier(List.of(0.6, 0.7), 0.5), 1e-9);
+    }
+
+    @Test
+    void combatMultiplier_emptyListIsOne() {
+        assertEquals(1.0, StackingFormulas.combatMultiplier(List.of(), 0.5), 1e-9);
+    }
+
+    @Test
+    void cappedProduct_isLimitedByTheCap() {
+        // Desbravador −50% × Trabalho em Altura −20% × Sela −20% daria 0,32; o teto R3 de 60% segura em 0,4
+        assertEquals(0.4, StackingFormulas.cappedProduct(List.of(0.5, 0.8, 0.8), 0.6), 1e-9);
+    }
+
+    @Test
+    void cappedProduct_multipliesBelowTheCap() {
+        assertEquals(0.48, StackingFormulas.cappedProduct(List.of(0.8, 0.6), 0.6), 1e-9);
+    }
+
+    @Test
+    void cappedProduct_emptyListIsOne() {
+        assertEquals(1.0, StackingFormulas.cappedProduct(List.of(), 0.6), 1e-9);
+    }
+
+    @Test
+    void combinedChance_rollsIndependentlyAndIsLimitedByTheCap() {
+        assertEquals(0.5, StackingFormulas.combinedChance(List.of(0.4, 0.2), 0.5), 1e-9);
+    }
+
+    @Test
+    void combinedChance_singleSourceBelowTheCapIsUnchanged() {
+        assertEquals(0.4, StackingFormulas.combinedChance(List.of(0.4), 0.5), 1e-9);
+    }
+}

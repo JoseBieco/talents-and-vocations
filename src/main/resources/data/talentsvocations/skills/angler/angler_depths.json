@@ -1,0 +1,21 @@
+{
+  "id": "angler_depths",
+  "treeCategory": "angler",
+  "name": "talent.talentsvocations.angler_depths.name",
+  "description": "talent.talentsvocations.angler_depths.desc",
+  "icon": "minecraft:prismarine_shard",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "angler_trident",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

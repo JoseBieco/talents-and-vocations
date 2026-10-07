@@ -1,0 +1,21 @@
+{
+  "id": "tamer_warhorse",
+  "treeCategory": "tamer",
+  "name": "talent.talentsvocations.tamer_warhorse.name",
+  "description": "talent.talentsvocations.tamer_warhorse.desc",
+  "icon": "minecraft:iron_horse_armor",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "tamer_steed",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -1,
+    "y": 2
+  },
+  "values": {
+    "per_level": 2
+  }
+}

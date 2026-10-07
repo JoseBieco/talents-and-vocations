@@ -1,0 +1,28 @@
+{
+  "id": "farmer_replant",
+  "treeCategory": "farmer",
+  "name": "talent.talentsvocations.farmer_replant.name",
+  "description": "talent.talentsvocations.farmer_replant.desc",
+  "icon": "minecraft:wheat_seeds",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "farmer_hoe_care",
+      "level": 2
+    },
+    {
+      "id": "farmer_twins",
+      "level": 2
+    },
+    {
+      "id": "farmer_bonemeal",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 4
+  },
+  "values": {},
+  "capstone": true
+}

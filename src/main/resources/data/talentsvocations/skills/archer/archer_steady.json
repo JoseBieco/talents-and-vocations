@@ -1,0 +1,21 @@
+{
+  "id": "archer_steady",
+  "treeCategory": "archer",
+  "name": "talent.talentsvocations.archer_steady.name",
+  "description": "talent.talentsvocations.archer_steady.desc",
+  "icon": "minecraft:target",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "archer_draw",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.2
+  }
+}

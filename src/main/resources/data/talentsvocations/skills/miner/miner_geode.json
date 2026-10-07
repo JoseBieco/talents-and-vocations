@@ -1,0 +1,21 @@
+{
+  "id": "miner_geode",
+  "treeCategory": "miner",
+  "name": "talent.talentsvocations.miner_geode.name",
+  "description": "talent.talentsvocations.miner_geode.desc",
+  "icon": "minecraft:amethyst_shard",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "miner_prospector",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 1,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.25
+  }
+}

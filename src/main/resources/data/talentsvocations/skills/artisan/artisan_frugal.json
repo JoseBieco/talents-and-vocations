@@ -1,0 +1,16 @@
+{
+  "id": "artisan_frugal",
+  "treeCategory": "artisan",
+  "name": "talent.talentsvocations.artisan_frugal.name",
+  "description": "talent.talentsvocations.artisan_frugal.desc",
+  "icon": "minecraft:anvil",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 0.05
+  }
+}

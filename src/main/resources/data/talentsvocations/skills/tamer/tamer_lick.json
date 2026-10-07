@@ -1,0 +1,25 @@
+{
+  "id": "tamer_lick",
+  "treeCategory": "tamer",
+  "name": "talent.talentsvocations.tamer_lick.name",
+  "description": "talent.talentsvocations.tamer_lick.desc",
+  "icon": "minecraft:rabbit_foot",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "tamer_pack",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 3
+  },
+  "values": {
+    "heal": 1,
+    "quiet_ticks": 100,
+    "interval_base": 100,
+    "interval_per_level": 40,
+    "radius": 16
+  }
+}

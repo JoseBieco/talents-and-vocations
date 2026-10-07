@@ -1,0 +1,22 @@
+{
+  "id": "artisan_bookshelf",
+  "treeCategory": "artisan",
+  "name": "talent.talentsvocations.artisan_bookshelf.name",
+  "description": "talent.talentsvocations.artisan_bookshelf.desc",
+  "icon": "minecraft:bookshelf",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "artisan_lapis",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -1,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.25,
+    "max_shelves": 15
+  }
+}

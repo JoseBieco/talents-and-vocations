@@ -1,0 +1,21 @@
+{
+  "id": "angler_trident",
+  "treeCategory": "angler",
+  "name": "talent.talentsvocations.angler_trident.name",
+  "description": "talent.talentsvocations.angler_trident.desc",
+  "icon": "minecraft:trident",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "angler_lure",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 3,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.08
+  }
+}

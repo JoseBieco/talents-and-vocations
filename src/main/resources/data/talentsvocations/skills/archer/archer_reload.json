@@ -1,0 +1,21 @@
+{
+  "id": "archer_reload",
+  "treeCategory": "archer",
+  "name": "talent.talentsvocations.archer_reload.name",
+  "description": "talent.talentsvocations.archer_reload.desc",
+  "icon": "minecraft:crossbow",
+  "maxLevel": 4,
+  "prerequisites": [
+    {
+      "id": "archer_aim",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.08
+  }
+}

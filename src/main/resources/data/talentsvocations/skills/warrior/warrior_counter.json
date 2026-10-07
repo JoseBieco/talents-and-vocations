@@ -1,0 +1,22 @@
+{
+  "id": "warrior_counter",
+  "treeCategory": "warrior",
+  "name": "talent.talentsvocations.warrior_counter.name",
+  "description": "talent.talentsvocations.warrior_counter.desc",
+  "icon": "minecraft:shield",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "warrior_steadfast",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 3,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.15,
+    "window": 60
+  }
+}

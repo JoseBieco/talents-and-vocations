@@ -1,0 +1,21 @@
+{
+  "id": "archer_marker",
+  "treeCategory": "archer",
+  "name": "talent.talentsvocations.archer_marker.name",
+  "description": "talent.talentsvocations.archer_marker.desc",
+  "icon": "minecraft:spectral_arrow",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "archer_longshot",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 3
+  },
+  "values": {
+    "ticks_per_level": 40
+  }
+}

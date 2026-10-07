@@ -1,0 +1,21 @@
+{
+  "id": "common_gourmet",
+  "treeCategory": "common",
+  "name": "talent.talentsvocations.common_gourmet.name",
+  "description": "talent.talentsvocations.common_gourmet.desc",
+  "icon": "minecraft:golden_carrot",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "common_saturation",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -1,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

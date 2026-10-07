@@ -1,0 +1,21 @@
+{
+  "id": "tamer_saddle",
+  "treeCategory": "tamer",
+  "name": "talent.talentsvocations.tamer_saddle.name",
+  "description": "talent.talentsvocations.tamer_saddle.desc",
+  "icon": "minecraft:leather_boots",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "tamer_steed",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 1,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.25
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "farmer_twins",
+  "treeCategory": "farmer",
+  "name": "talent.talentsvocations.farmer_twins.name",
+  "description": "talent.talentsvocations.farmer_twins.desc",
+  "icon": "minecraft:egg",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "farmer_breeding",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 1,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.05,
+    "chunk_limit": 32
+  }
+}

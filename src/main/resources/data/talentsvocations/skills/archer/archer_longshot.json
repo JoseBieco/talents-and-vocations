@@ -1,0 +1,22 @@
+{
+  "id": "archer_longshot",
+  "treeCategory": "archer",
+  "name": "talent.talentsvocations.archer_longshot.name",
+  "description": "talent.talentsvocations.archer_longshot.desc",
+  "icon": "minecraft:spyglass",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "archer_conserve",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1,
+    "min_distance": 20
+  }
+}

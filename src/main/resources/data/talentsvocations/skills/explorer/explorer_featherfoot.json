@@ -1,0 +1,30 @@
+{
+  "id": "explorer_featherfoot",
+  "treeCategory": "explorer",
+  "name": "talent.talentsvocations.explorer_featherfoot.name",
+  "description": "talent.talentsvocations.explorer_featherfoot.desc",
+  "icon": "minecraft:phantom_membrane",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "explorer_terrain",
+      "level": 1
+    },
+    {
+      "id": "explorer_roll",
+      "level": 1
+    },
+    {
+      "id": "explorer_jump",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 4
+  },
+  "values": {
+    "safe_blocks": 12
+  },
+  "capstone": true
+}

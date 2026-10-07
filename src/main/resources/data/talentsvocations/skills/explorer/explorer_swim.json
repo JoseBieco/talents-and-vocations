@@ -1,0 +1,21 @@
+{
+  "id": "explorer_swim",
+  "treeCategory": "explorer",
+  "name": "talent.talentsvocations.explorer_swim.name",
+  "description": "talent.talentsvocations.explorer_swim.desc",
+  "icon": "minecraft:tropical_fish",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "explorer_sprint",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

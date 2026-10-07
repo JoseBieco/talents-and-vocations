@@ -1,0 +1,28 @@
+{
+  "id": "artisan_master",
+  "treeCategory": "artisan",
+  "name": "talent.talentsvocations.artisan_master.name",
+  "description": "talent.talentsvocations.artisan_master.desc",
+  "icon": "minecraft:netherite_upgrade_smithing_template",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "artisan_repair",
+      "level": 2
+    },
+    {
+      "id": "artisan_bookshelf",
+      "level": 1
+    },
+    {
+      "id": "artisan_trade",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 4
+  },
+  "values": {},
+  "capstone": true
+}

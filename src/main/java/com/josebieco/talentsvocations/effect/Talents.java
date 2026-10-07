@@ -1,0 +1,57 @@
+package com.josebieco.talentsvocations.effect;
+
+import com.josebieco.talentsvocations.capability.SkillAccess;
+import com.josebieco.talentsvocations.core.SkillView;
+import com.josebieco.talentsvocations.core.TalentNode;
+import com.josebieco.talentsvocations.core.TalentRegistry;
+import com.josebieco.talentsvocations.core.TalentRules;
+import com.josebieco.talentsvocations.data.TalentRegistries;
+import net.minecraft.world.entity.player.Player;
+
+import java.util.function.Supplier;
+
+/**
+ * Leitura de nível efetivo e de {@code values} para os handlers. No servidor lê a capability; no cliente
+ * (efeitos que o cliente precisa prever, como velocidade de quebra) lê o estado sincronizado.
+ */
+public final class Talents {
+
+    private static volatile Supplier<SkillView> clientView;
+
+    private Talents() {}
+
+    /** Chamado pela inicialização do cliente. */
+    public static void setClientView(Supplier<SkillView> view) {
+        clientView = view;
+    }
+
+    /** Nível efetivo do nó para o jogador (0 se não tiver, se for de outra classe ou se o nó não existir). */
+    public static int level(Player player, String nodeId) {
+        if (player.level().isClientSide()) {
+            Supplier<SkillView> view = clientView;
+            return view == null ? 0 : TalentRules.effectiveLevel(view.get(), TalentRegistries.client(), nodeId);
+        }
+        return SkillAccess.get(player)
+                .map(data -> TalentRules.effectiveLevel(data, TalentRegistries.server(), nodeId))
+                .orElse(0);
+    }
+
+    /** Recarga persistida em PlayerSkillData (servidor); livre quando o game time já passou do limite. */
+    public static boolean cooldownReady(Player player, String key) {
+        long now = player.level().getGameTime();
+        return SkillAccess.get(player).map(d -> now >= d.getCooldownUntil(key)).orElse(false);
+    }
+
+    public static void startCooldown(Player player, String key, long ticks) {
+        long now = player.level().getGameTime();
+        SkillAccess.get(player).ifPresent(d -> d.setCooldownUntil(key, now + ticks));
+    }
+
+    /** Valor de balanceamento do JSON do lado do jogador; só chamar quando {@link #level} > 0. */
+    public static double value(Player player, String nodeId, String key) {
+        TalentRegistry registry = player.level().isClientSide() ? TalentRegistries.client() : TalentRegistries.server();
+        TalentNode node = registry.get(nodeId)
+                .orElseThrow(() -> new IllegalStateException("Talent node not loaded: " + nodeId));
+        return node.value(key);
+    }
+}

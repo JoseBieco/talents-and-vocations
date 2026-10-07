@@ -1,0 +1,16 @@
+{
+  "id": "miner_haste",
+  "treeCategory": "miner",
+  "name": "talent.talentsvocations.miner_haste.name",
+  "description": "talent.talentsvocations.miner_haste.desc",
+  "icon": "minecraft:iron_pickaxe",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

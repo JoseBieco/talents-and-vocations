@@ -1,0 +1,21 @@
+{
+  "id": "archer_mobile",
+  "treeCategory": "archer",
+  "name": "talent.talentsvocations.archer_mobile.name",
+  "description": "talent.talentsvocations.archer_mobile.desc",
+  "icon": "minecraft:leather_boots",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "archer_draw",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -2,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.25
+  }
+}
