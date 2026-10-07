@@ -50,4 +50,24 @@ class BuilderFormulasTest {
         assertEquals(4, BuilderFormulas.quickDelay(4, false, 2));
         assertEquals(1, BuilderFormulas.quickDelay(1, true, 2));
     }
+
+    @Test
+    void refundEligible_onlySameTickBlockItemOfPlacedAndNotCreative() {
+        assertTrue(BuilderFormulas.refundEligible(true, true, false));
+        assertFalse(BuilderFormulas.refundEligible(false, true, false));
+        assertFalse(BuilderFormulas.refundEligible(true, false, false)); // enxada na mão usada, terra na outra
+        assertFalse(BuilderFormulas.refundEligible(true, true, true));
+    }
+
+    @Test
+    void quickHandsHolding_blockItemInTheHandThatWillBeUsed() {
+        // mira, principal vazia, principal bloco, secundária vazia, secundária bloco
+        assertTrue(BuilderFormulas.quickHandsHolding(true, false, true, true, false));
+        assertTrue(BuilderFormulas.quickHandsHolding(true, false, true, false, true));
+        assertTrue(BuilderFormulas.quickHandsHolding(true, true, false, false, true));
+        assertFalse(BuilderFormulas.quickHandsHolding(true, false, true, false, false)); // terra + ovo
+        assertFalse(BuilderFormulas.quickHandsHolding(false, false, true, true, false)); // mirando o ar
+        assertFalse(BuilderFormulas.quickHandsHolding(true, false, false, false, true)); // pérola + terra
+        assertFalse(BuilderFormulas.quickHandsHolding(true, true, false, true, false));
+    }
 }

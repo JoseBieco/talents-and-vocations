@@ -40,6 +40,27 @@ public final class BuilderFormulas {
     }
 
     /**
+     * builder_thrifty/builder_torch: só devolve se a mão registrada no clique direito é do mesmo tick da colocação e
+     * segurava (cópia de antes do uso) o BlockItem do bloco colocado — senão o bloco veio de outra coisa (enxada em
+     * terra grossa vira terra) e devolver seria duplicar. Criativo nunca devolve.
+     */
+    public static boolean refundEligible(boolean sameTick, boolean heldIsBlockItemOfPlaced, boolean creative) {
+        return sameTick && heldIsBlockItemOfPlaced && !creative;
+    }
+
+    /**
+     * builder_quick_hands: a mão que o clique direito vai usar tem BlockItem. Exige mirar num bloco (mirando o ar o
+     * BlockItem passa e a vanilla tenta a outra mão) e: principal com bloco e secundária vazia ou com bloco, ou principal
+     * vazia e secundária com bloco. Assim terra + ovo/bola de neve ou pérola + terra ficam no intervalo vanilla.
+     */
+    public static boolean quickHandsHolding(boolean aimingAtBlock, boolean mainEmpty, boolean mainBlock,
+                                            boolean offEmpty, boolean offBlock) {
+        if (!aimingAtBlock) return false;
+        if (mainBlock) return offEmpty || offBlock;
+        return mainEmpty && offBlock;
+    }
+
+    /**
      * builder_quick_hands: com BlockItem na mão, o atraso do clique direito ({@code Minecraft.rightClickDelay}) cai
      * para {@code quickDelay}; nunca aumenta um atraso que já é menor.
      */

@@ -20,6 +20,8 @@ import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FogType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
 import net.minecraftforge.client.event.ViewportEvent;
@@ -46,9 +48,8 @@ public final class ClientEffects {
      * builder_quick_hands: encurta Minecraft.rightClickDelay (AT) com bloco na mão. Em Minecraft.tick a ordem é:
      * decremento do atraso → ClientTickEvent.Pre → handleKeybinds (startUseItem põe 4) → ClientTickEvent.Post. No Post o
      * valor ainda é o 4 recém-posto, então trocá-lo por delay_ticks dá exatamente esse intervalo entre colocações (no Pre
-     * o jogo já teria descontado um tick: 3 → 2 daria intervalo 3). A mão considerada é a que startUseItem tenta
-     * primeiro: a principal, ou a secundária só com a principal vazia — assim uma pérola, ovo ou bola de neve na mão
-     * principal com blocos na secundária não é acelerada.
+     * o jogo já teria descontado um tick: 3 → 2 daria intervalo 3). Quando vale: {@link BuilderFormulas#quickHandsHolding}
+     * (mirando um bloco, e nenhuma mão que a vanilla possa tentar segura pérola, ovo, bola de neve ou comida).
      */
     private static void onQuickHandsTick() {
         Minecraft minecraft = Minecraft.getInstance();
@@ -56,8 +57,10 @@ public final class ClientEffects {
         if (player == null) return;
         if (Talents.level(player, "builder_quick_hands") <= 0) return;
         ItemStack main = player.getMainHandItem();
-        ItemStack used = main.isEmpty() ? player.getOffhandItem() : main;
-        boolean holdingBlock = used.getItem() instanceof BlockItem;
+        ItemStack off = player.getOffhandItem();
+        boolean aimingAtBlock = minecraft.hitResult instanceof BlockHitResult hit && hit.getType() == HitResult.Type.BLOCK;
+        boolean holdingBlock = BuilderFormulas.quickHandsHolding(aimingAtBlock,
+                main.isEmpty(), main.getItem() instanceof BlockItem, off.isEmpty(), off.getItem() instanceof BlockItem);
         int delay = (int) Talents.value(player, "builder_quick_hands", "delay_ticks");
         minecraft.rightClickDelay = BuilderFormulas.quickDelay(minecraft.rightClickDelay, holdingBlock, delay);
     }

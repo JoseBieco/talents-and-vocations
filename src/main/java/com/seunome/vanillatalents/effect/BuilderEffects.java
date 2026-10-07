@@ -13,6 +13,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -23,6 +24,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.listener.Priority;
@@ -53,6 +55,15 @@ public final class BuilderEffects {
     /** Jogador → gameTime da última colocação de bloco (builder_height_work). */
     private static final Map<UUID, Long> LAST_PLACE = new HashMap<>();
 
+    /**
+     * Jogador → última mão do clique direito em bloco (builder_thrifty/builder_torch). Em
+     * ServerPlayerGameMode.useItemOn o RightClickBlock dispara antes do useOn daquela mão, então a última gravada no
+     * tick da colocação é a mão que colocou.
+     */
+    private record UseHand(InteractionHand hand, long gameTime) {}
+
+    private static final Map<UUID, UseHand> USE_HAND = new HashMap<>();
+
     /** Sentinela de {@link #lastPlaceTick} para quem não colocou bloco nesta sessão. */
     public static final long NEVER = Long.MIN_VALUE;
 
@@ -65,6 +76,7 @@ public final class BuilderEffects {
     public static void forget(UUID player) {
         BUILDING_BREAK.remove(player);
         LAST_PLACE.remove(player);
+        USE_HAND.remove(player);
     }
 
     /** gameTime da última colocação de bloco do jogador, ou {@link #NEVER}. */
@@ -94,18 +106,30 @@ public final class BuilderEffects {
         maybeRefund(player, event.getPlacedBlock());
     }
 
+    /** Grava a mão do clique direito em bloco (lado servidor) para {@link #maybeRefund}. */
+    @SubscribeEvent
+    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            USE_HAND.put(player.getUUID(), new UseHand(event.getHand(), player.level().getGameTime()));
+        }
+    }
+
     /**
      * Econômico/Iluminador. Em ForgeHooks.onPlaceItemIntoWorld o evento dispara depois do useOn (que já gastou o item),
-     * mas com a mão restaurada para a cópia de antes do uso: a mão que segura o item do bloco colocado é a usada, mesmo
-     * no último bloco da pilha. Itens sem forma de item (fogo, gelo do Passo Gelado) dão AIR e são ignorados.
+     * mas com a mão restaurada para a cópia de antes do uso, então a mão gravada no RightClickBlock ainda segura o item
+     * mesmo no último bloco da pilha. Só devolve se essa mão (e só ela) segurava o BlockItem do bloco colocado: blocos
+     * que surgem de outro item (enxada em terra grossa → terra, fogo, gelo do Passo Gelado) não devolvem nada.
+     * Tocha na parede: wall_torch.asItem() é a tocha, e a tocha é StandingAndWallBlockItem (um BlockItem) da tocha.
      */
     private static void maybeRefund(ServerPlayer player, BlockState placed) {
-        if (player.hasInfiniteMaterials()) return;
         Item item = placed.getBlock().asItem();
         if (item == Items.AIR) return;
-        InteractionHand hand = usedHand(player, item);
-        if (hand == null) return;
-        ItemStack held = player.getItemInHand(hand);
+        UseHand use = USE_HAND.get(player.getUUID());
+        if (use == null) return;
+        ItemStack held = player.getItemInHand(use.hand());
+        boolean heldIsPlaced = held.getItem() instanceof BlockItem blockItem && blockItem.getBlock().asItem() == item;
+        boolean sameTick = use.gameTime() == player.level().getGameTime();
+        if (!BuilderFormulas.refundEligible(sameTick, heldIsPlaced, player.hasInfiniteMaterials())) return;
         boolean cheap = held.is(CHEAP_BLOCKS);
         boolean torch = item == Items.TORCH || item == Items.SOUL_TORCH || item == Items.COPPER_TORCH;
         int thrifty = cheap ? Talents.level(player, "builder_thrifty") : 0;
@@ -115,14 +139,7 @@ public final class BuilderEffects {
                 cheap, thrifty, thrifty > 0 ? Talents.value(player, "builder_thrifty", "per_level") : 0,
                 torch, torchLvl, torchLvl > 0 ? Talents.value(player, "builder_torch", "per_level") : 0);
         if (player.getRandom().nextDouble() >= chance) return;
-        giveBack(player, hand, held.copyWithCount(1));
-    }
-
-    /** Mão principal se ela segura o item, senão a secundária, senão nenhuma (null). */
-    private static InteractionHand usedHand(ServerPlayer player, Item item) {
-        if (player.getMainHandItem().is(item)) return InteractionHand.MAIN_HAND;
-        if (player.getOffhandItem().is(item)) return InteractionHand.OFF_HAND;
-        return null;
+        giveBack(player, use.hand(), held.copyWithCount(1));
     }
 
     /**
@@ -171,6 +188,7 @@ public final class BuilderEffects {
     public static void onServerStopped(ServerStoppedEvent event) {
         BUILDING_BREAK.clear();
         LAST_PLACE.clear();
+        USE_HAND.clear();
     }
 
     private static void markPlaced(ServerPlayer player) {
