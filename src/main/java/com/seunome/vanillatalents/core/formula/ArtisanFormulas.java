@@ -66,4 +66,12 @@ public final class ArtisanFormulas {
     public static int potionDuration(int ticks, int level, double perLevel) {
         return (int) Math.round(ticks * (1 + level * perLevel));
     }
+
+    /**
+     * artisan_bookshelf: estantes efetivas da mesa de encantamento, {@code min(maxShelves, floor(shelves · (1 + lvl·per)))}
+     * (cada estante vale 1,25 no nível 1 e 1,5 no nível 2; o teto vanilla de 15 estantes = nível 30 continua).
+     */
+    public static int boostedShelves(int shelves, int level, double perLevel, int maxShelves) {
+        return Math.min(maxShelves, (int) Math.floor(shelves * (1 + level * perLevel)));
+    }
 }

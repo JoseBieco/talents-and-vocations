@@ -3,6 +3,7 @@ package com.seunome.vanillatalents.effect;
 import com.seunome.vanillatalents.VanillaTalents;
 import com.seunome.vanillatalents.core.RecursionGuard;
 import com.seunome.vanillatalents.core.formula.ArtisanFormulas;
+import com.seunome.vanillatalents.effect.hooks.EnchantHooks;
 import com.seunome.vanillatalents.effect.hooks.TradeHooks;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
@@ -15,6 +16,8 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.enchanting.EnchantmentLevelSetEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.event.entity.player.TradeWithVillagerEvent;
@@ -26,8 +29,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Efeitos da árvore do Artífice por evento (bigorna, trocas e ferraria por Mixin ficam em effect/hooks: AnvilHooks,
- * TradeHooks, SmithingHooks).
+ * Efeitos da árvore do Artífice por evento (bigorna, trocas, ferraria e lápis por Mixin ficam em effect/hooks: AnvilHooks,
+ * TradeHooks, SmithingHooks, EnchantHooks).
  */
 @Mod.EventBusSubscriber(modid = VanillaTalents.MODID)
 public final class ArtisanEffects {
@@ -113,5 +116,23 @@ public final class ArtisanEffects {
                 }
             });
         });
+    }
+
+    /**
+     * artisan_bookshelf: o evento dispara em {@code EnchantmentMenu.slotsChanged} (só servidor) para cada linha, depois
+     * do custo vanilla. Se outro mod já mudou o nível, não mexemos. Detalhes (como achar o jogador) em
+     * {@link EnchantHooks#bookshelfLevel}.
+     */
+    @SubscribeEvent
+    public static void onEnchantmentLevelSet(EnchantmentLevelSetEvent event) {
+        if (event.getEnchantLevel() != event.getOriginalLevel()) return;
+        event.setEnchantLevel(EnchantHooks.bookshelfLevel(event.getLevel(), event.getItem(), event.getEnchantRow(),
+                event.getPower(), event.getEnchantLevel()));
+    }
+
+    /** artisan_insight: só com a mesa aberta; ver {@link EnchantHooks#tickInsight}. */
+    @SubscribeEvent
+    public static void onPlayerTick(TickEvent.PlayerTickEvent.Post event) {
+        if (event.player() instanceof ServerPlayer player) EnchantHooks.tickInsight(player);
     }
 }

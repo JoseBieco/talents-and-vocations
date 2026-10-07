@@ -88,4 +88,24 @@ class ArtisanFormulasTest {
     void potionDuration_tenPercentPerLevel() {
         assertEquals(4680, ArtisanFormulas.potionDuration(3600, 3, .1));
     }
+
+    @Test
+    void boostedShelves_capsAtMaxShelves() {
+        assertEquals(15, ArtisanFormulas.boostedShelves(15, 2, .25, 15));
+    }
+
+    @Test
+    void boostedShelves_levelTwoCountsOneAndAHalf() {
+        assertEquals(12, ArtisanFormulas.boostedShelves(8, 2, .25, 15));
+    }
+
+    @Test
+    void boostedShelves_levelOneCountsOneAndAQuarter() {
+        assertEquals(10, ArtisanFormulas.boostedShelves(8, 1, .25, 15));
+    }
+
+    @Test
+    void boostedShelves_noShelvesStaysZero() {
+        assertEquals(0, ArtisanFormulas.boostedShelves(0, 2, .25, 15));
+    }
 }

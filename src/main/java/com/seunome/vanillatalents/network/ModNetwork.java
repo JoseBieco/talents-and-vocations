@@ -12,7 +12,7 @@ public final class ModNetwork {
 
     public static final SimpleChannel CHANNEL = ChannelBuilder
             .named(Identifier.fromNamespaceAndPath(VanillaTalents.MODID, "main"))
-            .networkProtocolVersion(2)
+            .networkProtocolVersion(3)
             .simpleChannel();
 
     private ModNetwork() {}
@@ -36,6 +36,9 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(S2CProspectorHighlight.class, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(S2CProspectorHighlight::encode).decoder(S2CProspectorHighlight::decode)
                 .consumerMainThread(S2CProspectorHighlight::handle).add();
+        CHANNEL.messageBuilder(S2CEnchantInsight.class, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(S2CEnchantInsight::encode).decoder(S2CEnchantInsight::decode)
+                .consumerMainThread(S2CEnchantInsight::handle).add();
         CHANNEL.build();
     }
 

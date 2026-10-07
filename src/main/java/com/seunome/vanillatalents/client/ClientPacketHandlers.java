@@ -3,6 +3,7 @@ package com.seunome.vanillatalents.client;
 import com.seunome.vanillatalents.VanillaTalents;
 import com.seunome.vanillatalents.core.TalentRegistry;
 import com.seunome.vanillatalents.data.TalentRegistries;
+import com.seunome.vanillatalents.network.S2CEnchantInsight;
 import com.seunome.vanillatalents.network.S2CProspectorHighlight;
 import com.seunome.vanillatalents.network.S2CSyncDefinitions;
 import com.seunome.vanillatalents.network.S2CSyncPlayer;
@@ -28,5 +29,9 @@ public final class ClientPacketHandlers {
 
     public static void prospectorHighlight(S2CProspectorHighlight msg) {
         OreHighlights.show(msg.positions());
+    }
+
+    public static void enchantInsight(S2CEnchantInsight msg) {
+        EnchantInsightClient.receive(msg);
     }
 }

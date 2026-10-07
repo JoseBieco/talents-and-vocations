@@ -11,6 +11,7 @@ public final class ClientSetup {
         KeyBindings.register();
         ClientEffects.register();
         OreHighlights.register();
+        EnchantInsightClient.register();
         Talents.setClientView(ClientTalentState::data);
     }
 }

@@ -376,5 +376,6 @@
   "vanillatalents.class.angler.desc": "Pesca, navegação e oceano: fisgada mais rápida e melhor, barco mais veloz e tridente contra afogados e guardiões.",
   "vanillatalents.class.tamer.desc": "Quem luta e viaja acompanhado: lobos mais fortes, cavalos mais resistentes e companheiros (gatos, golens) que fazem diferença.",
   "vanillatalents.class.builder.desc": "Quem passa o jogo construindo: alcança mais longe, desmonta rápido, trabalha em altura com segurança e gasta menos material barato.",
-  "vanillatalents.class.artisan.desc": "Quem transforma recursos em equipamento: gasta menos na bigorna e na mesa de encantamento, mantém o equipamento vivo por mais tempo e negocia melhor com aldeões."
+  "vanillatalents.class.artisan.desc": "Quem transforma recursos em equipamento: gasta menos na bigorna e na mesa de encantamento, mantém o equipamento vivo por mais tempo e negocia melhor com aldeões.",
+  "gui.vanillatalents.enchant.insight": "Visão Arcana — esta opção dará:"
 }

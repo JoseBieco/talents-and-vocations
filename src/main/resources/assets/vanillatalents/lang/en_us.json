@@ -376,5 +376,6 @@
   "vanillatalents.class.angler.desc": "Fishing, sailing and the ocean: faster and better catches, quicker boats and the trident against drowned and guardians.",
   "vanillatalents.class.tamer.desc": "Fight and travel in company: stronger wolves, sturdier horses and companions (cats, golems) that make a difference.",
   "vanillatalents.class.builder.desc": "For those who spend the game building: longer reach, fast dismantling, safe work at height and less cheap material spent.",
-  "vanillatalents.class.artisan.desc": "Turns resources into gear: spends less at the anvil and enchanting table, keeps equipment alive longer and haggles better with villagers."
+  "vanillatalents.class.artisan.desc": "Turns resources into gear: spends less at the anvil and enchanting table, keeps equipment alive longer and haggles better with villagers.",
+  "gui.vanillatalents.enchant.insight": "Arcane Insight — this option grants:"
 }
