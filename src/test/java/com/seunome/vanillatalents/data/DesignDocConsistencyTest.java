@@ -36,7 +36,8 @@ class DesignDocConsistencyTest {
             TreeCategory.WARRIOR, new Expected(16, 46), TreeCategory.ARCHER, new Expected(16, 46),
             TreeCategory.ANGLER, new Expected(12, 32),
             TreeCategory.TAMER, new Expected(12, 31),
-            TreeCategory.BUILDER, new Expected(12, 31));
+            TreeCategory.BUILDER, new Expected(12, 31),
+            TreeCategory.ARTISAN, new Expected(12, 29));
 
     static int totalExpectedNodes() {
         return EXPECTED.values().stream().mapToInt(Expected::nodes).sum();

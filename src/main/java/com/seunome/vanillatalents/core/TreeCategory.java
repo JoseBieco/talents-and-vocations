@@ -11,7 +11,8 @@ public enum TreeCategory {
     ARCHER("archer"),
     ANGLER("angler"),
     TAMER("tamer"),
-    BUILDER("builder");
+    BUILDER("builder"),
+    ARTISAN("artisan");
 
     private final String id;
 
