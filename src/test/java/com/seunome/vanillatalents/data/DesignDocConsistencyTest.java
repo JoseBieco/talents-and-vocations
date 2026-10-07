@@ -7,6 +7,7 @@ import com.seunome.vanillatalents.core.Prerequisite;
 import com.seunome.vanillatalents.core.TalentNode;
 import com.seunome.vanillatalents.core.TalentRegistry;
 import com.seunome.vanillatalents.core.TreeCategory;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,11 @@ class DesignDocConsistencyTest {
     static final Path SKILLS = Path.of("src/main/resources/data/vanillatalents/skills");
     static final Path LANG = Path.of("src/main/resources/assets/vanillatalents/lang");
     static final Path DOCS = Path.of("docs/arvores");
+
+    /** docs/ fica fora do repositório (gitignore): no CI as comparações com as tabelas dos docs são puladas. */
+    static boolean docsPresent() {
+        return Files.isDirectory(DOCS);
+    }
 
     record Expected(int nodes, int points) {}
 
@@ -83,6 +89,7 @@ class DesignDocConsistencyTest {
 
     @Test
     void nodesMatchDesignDocTables() throws IOException {
+        Assumptions.assumeTrue(docsPresent(), "docs/arvores ausente (fora do repositório)");
         Map<String, DocRow> doc = readDocRows();
         assertEquals(totalExpectedNodes(), doc.size(), "linhas de tabela em docs/arvores");
         assertEquals(doc.keySet(), new TreeSet<>(registry.all().stream().map(TalentNode::id).toList()));
@@ -95,7 +102,7 @@ class DesignDocConsistencyTest {
 
     @Test
     void translationKeysExistAndPtBrNamesMatchDocs() throws IOException {
-        Map<String, DocRow> doc = readDocRows();
+        Map<String, DocRow> doc = docsPresent() ? readDocRows() : null;
         for (String lang : List.of("pt_br", "en_us")) {
             JsonObject json = JsonParser.parseString(Files.readString(LANG.resolve(lang + ".json"), StandardCharsets.UTF_8))
                     .getAsJsonObject();
@@ -104,7 +111,7 @@ class DesignDocConsistencyTest {
                 assertEquals("talent.vanillatalents." + n.id() + ".desc", n.descKey());
                 assertTrue(json.has(n.nameKey()), lang + " sem " + n.nameKey());
                 assertTrue(json.has(n.descKey()), lang + " sem " + n.descKey());
-                if (lang.equals("pt_br")) {
+                if (doc != null && lang.equals("pt_br")) {
                     assertEquals(doc.get(n.id()).name(), json.get(n.nameKey()).getAsString(), n.id());
                 }
             }
