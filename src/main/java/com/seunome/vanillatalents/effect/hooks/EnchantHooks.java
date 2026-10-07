@@ -58,7 +58,9 @@ public final class EnchantHooks {
      * {@link ArtisanFormulas#boostedShelves}. O evento não traz o jogador; ele dispara dentro de
      * {@code slotsChanged → access.execute} (só servidor), com {@code item} = {@code enchantSlots.getItem(0)} — a
      * instância exata do slot 0 daquele menu. Cada menu tem o próprio {@code SimpleContainer}, então o jogador é o único
-     * do nível cujo {@code containerMenu} é um EnchantmentMenu com essa mesma instância no slot 0.
+     * do nível cujo {@code containerMenu} é um EnchantmentMenu com essa mesma instância no slot 0. Por isso, achado esse
+     * jogador e ele não tendo o nó, devolver o nível atual (sem procurar outros) é intencional: nenhum outro menu tem
+     * essa instância de ItemStack.
      * <p>
      * Recalcula como a vanilla faria com as estantes ampliadas: {@code RandomSource} semeado com
      * {@code enchantmentSeed} (o {@code setSeed} da vanilla) e {@code getEnchantmentCost} chamado para as linhas
@@ -133,7 +135,10 @@ public final class EnchantHooks {
         for (EnchantmentInstance instance : list) {
             Holder<Enchantment> holder = instance.enchantment();
             Optional<ResourceKey<Enchantment>> key = holder.unwrapKey();
-            key.ifPresent(k -> out.add(new EnchantLine(k.identifier().toString(), instance.level())));
+            if (out.size() >= S2CEnchantInsight.MAX_LINES) break;
+            key.map(k -> k.identifier().toString())
+                    .filter(id -> id.length() <= S2CEnchantInsight.MAX_ID_LENGTH)
+                    .ifPresent(id -> out.add(new EnchantLine(id, instance.level())));
         }
         return out;
     }
