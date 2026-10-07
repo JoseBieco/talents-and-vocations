@@ -29,6 +29,21 @@ class ExplorerFormulasTest {
     }
 
     @Test
+    void climbBoost_multipliesOnlyWhenVanillaResetsY() {
+        assertEquals(0.1176 * 1.6, ExplorerFormulas.climbBoost(0.1176, 1.6, true, false, false), 1e-9);
+        assertEquals(0.1176, ExplorerFormulas.climbBoost(0.1176, 1.6, false, false, false), 1e-9);
+        assertEquals(0.1176, ExplorerFormulas.climbBoost(0.1176, 1.6, true, true, false), 1e-9);
+        assertEquals(0.1176, ExplorerFormulas.climbBoost(0.1176, 1.6, true, false, true), 1e-9);
+        assertEquals(-0.15, ExplorerFormulas.climbBoost(-0.15, 1.6, true, false, false), 1e-9);
+    }
+
+    @Test
+    void climbBoost_isBoundedByTheVanillaClimbSpeed() {
+        // lançado para cima (carga de vento) dentro do andaime: 0,8 × 1,6 seria 1,28; limite 0,2 × 1,6
+        assertEquals(0.32, ExplorerFormulas.climbBoost(0.8, 1.6, true, false, false), 1e-9);
+    }
+
+    @Test
     void featherfootDistance_shiftsByTwelveBlocks() {
         assertEquals(31.0, ExplorerFormulas.featherfootDistance(40.0, 12, 3), 1e-9);
         assertEquals(1.0, ExplorerFormulas.featherfootDistance(10.0, 12, 3), 1e-9);

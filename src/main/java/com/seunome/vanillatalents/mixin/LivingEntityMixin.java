@@ -1,7 +1,7 @@
 package com.seunome.vanillatalents.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.seunome.vanillatalents.client.ScaffoldHooks;
+import com.seunome.vanillatalents.effect.hooks.ScaffoldHooks;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;

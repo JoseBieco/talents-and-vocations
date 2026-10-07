@@ -50,6 +50,20 @@ public final class ExplorerFormulas {
         return 1 + level * perLevel;
     }
 
+    /** y que a vanilla grava subindo algo escalável (pulo ou colisão horizontal), logo depois do move. */
+    public static final double CLIMB_RESET_Y = 0.2;
+
+    /**
+     * Subida com fator (explorer_climb, builder_scaffold): só multiplica quando a vanilla vai reescrever o y para
+     * {@link #CLIMB_RESET_Y} no próximo tick ({@code resetCondition} = colisão horizontal ou pulo), fora d'água e sem
+     * Levitação; senão o fator compõe tick após tick. O resultado nunca passa de {@code 0,2 × fator}. Sem subida
+     * (y ≤ 0) devolve y.
+     */
+    public static double climbBoost(double y, double factor, boolean resetCondition, boolean inWater, boolean levitating) {
+        if (y <= 0 || !resetCondition || inWater || levitating) return y;
+        return Math.min(y * factor, CLIMB_RESET_Y * factor);
+    }
+
     /** explorer_tailwind: duração do foguete (ticks) usado durante o voo de élitra. */
     public static int tailwindLifetime(int lifetime, int level, double perLevel) {
         return (int) Math.round(lifetime * (1 + level * perLevel));

@@ -10,6 +10,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
@@ -73,7 +74,8 @@ public final class ClientEffects {
     /**
      * explorer_climb: depois do tick do jogador local, subindo uma escada de mão ou trepadeira (tag
      * {@code #minecraft:climbable}, sem o andaime), multiplica a velocidade vertical usada no próximo tick.
-     * A vanilla reescreve o y para 0,2 a cada tick de subida, então o fator não acumula.
+     * A vanilla reescreve o y para 0,2 a cada tick de subida, então o fator não acumula — desde que essa reescrita
+     * aconteça (colisão horizontal ou pulo), fora d'água e sem Levitação: ver {@link #climbBoost}.
      */
     private static void onPlayerTick(TickEvent.PlayerTickEvent.Post event) {
         if (!(event.player() instanceof LocalPlayer player)) return;
@@ -85,13 +87,14 @@ public final class ClientEffects {
         int level = Talents.level(player, "explorer_climb");
         if (level <= 0) return;
         double factor = ExplorerFormulas.climbFactor(level, Talents.value(player, "explorer_climb", "per_level"));
-        player.setDeltaMovement(motion.x, motion.y * factor, motion.z);
+        player.setDeltaMovement(motion.x, climbBoost(player, motion.y, factor), motion.z);
     }
 
     /**
      * builder_scaffold (subida): depois do tick do jogador local, dentro do andaime e subindo, multiplica a velocidade
      * vertical usada no próximo tick. Subindo (pulo ou colisão horizontal) a vanilla reescreve o y para 0,2 logo depois
-     * do move, então o fator não acumula. Não colide com explorer_climb, que exclui o andaime. A descida não dá para
+     * do move, então o fator não acumula; fora dessa condição (levitação, água, lançado para cima) ele não se aplica
+     * ({@link #climbBoost}). Não colide com explorer_climb, que exclui o andaime. A descida não dá para
      * fazer aqui: o próximo tick prende o y em −0,15 antes do move (LivingEntity.handleOnClimbable), desfazendo
      * qualquer fator; ela fica em ScaffoldHooks (mixin nesse método).
      */
@@ -104,7 +107,17 @@ public final class ClientEffects {
         int level = Talents.level(player, "builder_scaffold");
         if (level <= 0) return;
         double factor = BuilderFormulas.scaffoldFactor(level, Talents.value(player, "builder_scaffold", "per_level"));
-        player.setDeltaMovement(motion.x, motion.y * factor, motion.z);
+        player.setDeltaMovement(motion.x, climbBoost(player, motion.y, factor), motion.z);
+    }
+
+    /**
+     * Condição da reescrita vanilla do y (LivingEntity.handleRelativeFrictionAndCalculateMovement:
+     * {@code (horizontalCollision || jumping) && onClimbable()}; no jogador local {@code jumping} vem da tecla de pulo)
+     * passada à regra pura ExplorerFormulas.climbBoost.
+     */
+    private static double climbBoost(LocalPlayer player, double y, double factor) {
+        boolean reset = player.horizontalCollision || player.input.keyPresses.jump();
+        return ExplorerFormulas.climbBoost(y, factor, reset, player.isInWater(), player.hasEffect(MobEffects.LEVITATION));
     }
 
     /**
