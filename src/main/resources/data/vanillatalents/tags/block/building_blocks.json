@@ -1,0 +1,20 @@
+{
+  "values": [
+    "#c:glass_blocks",
+    "#c:glass_panes",
+    "#minecraft:wool",
+    "#minecraft:wool_carpets",
+    "#minecraft:terracotta",
+    "#c:concretes",
+    "#minecraft:planks",
+    "#minecraft:wooden_stairs",
+    "#minecraft:wooden_slabs",
+    "#minecraft:wooden_fences",
+    "#minecraft:wooden_doors",
+    "#minecraft:wooden_trapdoors",
+    "minecraft:bricks",
+    "minecraft:brick_stairs",
+    "minecraft:brick_slab",
+    "minecraft:brick_wall"
+  ]
+}

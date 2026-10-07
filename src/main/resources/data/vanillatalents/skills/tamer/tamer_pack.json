@@ -1,0 +1,23 @@
+{
+  "id": "tamer_pack",
+  "treeCategory": "tamer",
+  "name": "talent.vanillatalents.tamer_pack.name",
+  "description": "talent.vanillatalents.tamer_pack.desc",
+  "icon": "minecraft:bone_block",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "tamer_fangs",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.02,
+    "max_wolves": 3,
+    "radius": 16
+  }
+}

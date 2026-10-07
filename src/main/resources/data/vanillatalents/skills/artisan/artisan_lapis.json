@@ -1,0 +1,21 @@
+{
+  "id": "artisan_lapis",
+  "treeCategory": "artisan",
+  "name": "talent.vanillatalents.artisan_lapis.name",
+  "description": "talent.vanillatalents.artisan_lapis.desc",
+  "icon": "minecraft:lapis_lazuli",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "artisan_frugal",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.2
+  }
+}

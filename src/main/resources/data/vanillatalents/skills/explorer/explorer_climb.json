@@ -1,0 +1,21 @@
+{
+  "id": "explorer_climb",
+  "treeCategory": "explorer",
+  "name": "talent.vanillatalents.explorer_climb.name",
+  "description": "talent.vanillatalents.explorer_climb.desc",
+  "icon": "minecraft:ladder",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "explorer_step",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.25
+  }
+}

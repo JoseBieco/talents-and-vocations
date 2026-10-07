@@ -1,0 +1,16 @@
+{
+  "id": "tamer_bond",
+  "treeCategory": "tamer",
+  "name": "talent.vanillatalents.tamer_bond.name",
+  "description": "talent.vanillatalents.tamer_bond.desc",
+  "icon": "minecraft:lead",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 2
+  }
+}

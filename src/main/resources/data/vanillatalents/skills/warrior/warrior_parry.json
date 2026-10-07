@@ -1,0 +1,22 @@
+{
+  "id": "warrior_parry",
+  "treeCategory": "warrior",
+  "name": "talent.vanillatalents.warrior_parry.name",
+  "description": "talent.vanillatalents.warrior_parry.desc",
+  "icon": "minecraft:iron_sword",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "warrior_sweep",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.04,
+    "cooldown": 40
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "archer_held_breath",
+  "treeCategory": "archer",
+  "name": "talent.vanillatalents.archer_held_breath.name",
+  "description": "talent.vanillatalents.archer_held_breath.desc",
+  "icon": "minecraft:bow",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "archer_mobile",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": -2,
+    "y": 3
+  },
+  "values": {
+    "value": 0.2,
+    "still_ticks": 20
+  }
+}

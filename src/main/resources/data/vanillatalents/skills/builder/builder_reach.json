@@ -1,0 +1,16 @@
+{
+  "id": "builder_reach",
+  "treeCategory": "builder",
+  "name": "talent.vanillatalents.builder_reach.name",
+  "description": "talent.vanillatalents.builder_reach.desc",
+  "icon": "minecraft:stick",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 0.5
+  }
+}

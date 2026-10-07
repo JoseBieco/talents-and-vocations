@@ -1,0 +1,16 @@
+{
+  "id": "angler_lure",
+  "treeCategory": "angler",
+  "name": "talent.vanillatalents.angler_lure.name",
+  "description": "talent.vanillatalents.angler_lure.desc",
+  "icon": "minecraft:fishing_rod",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 0.08
+  }
+}

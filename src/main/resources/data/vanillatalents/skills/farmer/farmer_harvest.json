@@ -1,0 +1,16 @@
+{
+  "id": "farmer_harvest",
+  "treeCategory": "farmer",
+  "name": "talent.vanillatalents.farmer_harvest.name",
+  "description": "talent.vanillatalents.farmer_harvest.desc",
+  "icon": "minecraft:wheat",
+  "maxLevel": 5,
+  "prerequisites": [],
+  "position": {
+    "x": 0,
+    "y": 0
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

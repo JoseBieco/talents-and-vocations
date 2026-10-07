@@ -1,0 +1,21 @@
+{
+  "id": "farmer_gatherer",
+  "treeCategory": "farmer",
+  "name": "talent.vanillatalents.farmer_gatherer.name",
+  "description": "talent.vanillatalents.farmer_gatherer.desc",
+  "icon": "minecraft:sweet_berries",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "farmer_area_harvest",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.20
+  }
+}

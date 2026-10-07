@@ -1,0 +1,22 @@
+{
+  "id": "farmer_apiarist",
+  "treeCategory": "farmer",
+  "name": "talent.vanillatalents.farmer_apiarist.name",
+  "description": "talent.vanillatalents.farmer_apiarist.desc",
+  "icon": "minecraft:honeycomb",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "farmer_bonemeal",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 2,
+    "y": 3
+  },
+  "values": {
+    "comb_chance": 0.25,
+    "calm_radius": 16
+  }
+}

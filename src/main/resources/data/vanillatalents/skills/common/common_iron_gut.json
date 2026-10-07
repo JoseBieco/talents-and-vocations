@@ -1,0 +1,19 @@
+{
+  "id": "common_iron_gut",
+  "treeCategory": "common",
+  "name": "talent.vanillatalents.common_iron_gut.name",
+  "description": "talent.vanillatalents.common_iron_gut.desc",
+  "icon": "minecraft:rotten_flesh",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "common_gourmet",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -1,
+    "y": 3
+  },
+  "values": {}
+}

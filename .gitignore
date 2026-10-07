@@ -28,3 +28,6 @@ forge*changelog.txt
 # run dirs / tooling
 run-data
 .superpowers
+docs/
+gdd_vanilla_talents.md
+plano_de_a_o_implementa_o.md

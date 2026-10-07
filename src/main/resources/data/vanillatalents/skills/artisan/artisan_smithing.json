@@ -1,0 +1,21 @@
+{
+  "id": "artisan_smithing",
+  "treeCategory": "artisan",
+  "name": "talent.vanillatalents.artisan_smithing.name",
+  "description": "talent.vanillatalents.artisan_smithing.desc",
+  "icon": "minecraft:smithing_table",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "artisan_anvil_care",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -2,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.15
+  }
+}

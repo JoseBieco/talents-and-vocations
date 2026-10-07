@@ -1,0 +1,21 @@
+{
+  "id": "miner_underdweller",
+  "treeCategory": "miner",
+  "name": "talent.vanillatalents.miner_underdweller.name",
+  "description": "talent.vanillatalents.miner_underdweller.desc",
+  "icon": "minecraft:deepslate",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "miner_footing",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": 2,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.05
+  }
+}

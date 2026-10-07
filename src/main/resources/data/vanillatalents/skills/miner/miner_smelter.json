@@ -1,0 +1,21 @@
+{
+  "id": "miner_smelter",
+  "treeCategory": "miner",
+  "name": "talent.vanillatalents.miner_smelter.name",
+  "description": "talent.vanillatalents.miner_smelter.desc",
+  "icon": "minecraft:iron_ingot",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "miner_ore_xp",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -1,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.08
+  }
+}
