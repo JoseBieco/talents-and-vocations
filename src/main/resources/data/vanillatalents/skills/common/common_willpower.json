@@ -1,0 +1,21 @@
+{
+  "id": "common_willpower",
+  "treeCategory": "common",
+  "name": "talent.vanillatalents.common_willpower.name",
+  "description": "talent.vanillatalents.common_willpower.desc",
+  "icon": "minecraft:iron_ingot",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "common_antidote",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 3,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

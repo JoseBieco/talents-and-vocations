@@ -1,0 +1,19 @@
+{
+  "id": "builder_glass",
+  "treeCategory": "builder",
+  "name": "talent.vanillatalents.builder_glass.name",
+  "description": "talent.vanillatalents.builder_glass.desc",
+  "icon": "minecraft:glass_pane",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "builder_dismantle",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -4,
+    "y": 2
+  },
+  "values": {}
+}

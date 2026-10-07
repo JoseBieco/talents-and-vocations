@@ -1,0 +1,21 @@
+{
+  "id": "farmer_forester",
+  "treeCategory": "farmer",
+  "name": "talent.vanillatalents.farmer_forester.name",
+  "description": "talent.vanillatalents.farmer_forester.desc",
+  "icon": "minecraft:oak_sapling",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "farmer_growth_aura",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 4,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

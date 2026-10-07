@@ -1,0 +1,21 @@
+{
+  "id": "archer_antiair",
+  "treeCategory": "archer",
+  "name": "talent.vanillatalents.archer_antiair.name",
+  "description": "talent.vanillatalents.archer_antiair.desc",
+  "icon": "minecraft:phantom_membrane",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "archer_steady",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -4,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

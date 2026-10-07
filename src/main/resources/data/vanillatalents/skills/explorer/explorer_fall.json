@@ -1,0 +1,21 @@
+{
+  "id": "explorer_fall",
+  "treeCategory": "explorer",
+  "name": "talent.vanillatalents.explorer_fall.name",
+  "description": "talent.vanillatalents.explorer_fall.desc",
+  "icon": "minecraft:feather",
+  "maxLevel": 5,
+  "prerequisites": [
+    {
+      "id": "explorer_swiftness",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

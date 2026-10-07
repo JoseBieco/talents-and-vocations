@@ -1,60 +1,72 @@
 package com.seunome.vanillatalents;
 
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.Item;
+import com.seunome.vanillatalents.core.CostMode;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
-// Demonstrates how to use Forge's config APIs
-@Mod.EventBusSubscriber(modid = VanillaTalents.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class Config {
+public final class Config {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
-            .comment("Whether to log the dirt block on common setup")
-            .define("logDirtBlock", true);
+    public static final ForgeConfigSpec.EnumValue<CostMode> COST_MODE = BUILDER
+            .comment("How 1 Talent Point is paid: LEVELS (whole XP levels) or POINTS (raw XP points)")
+            .defineEnum("costMode", CostMode.LEVELS);
 
-    private static final ForgeConfigSpec.IntValue MAGIC_NUMBER = BUILDER
-            .comment("A magic number")
-            .defineInRange("magicNumber", 42, 0, Integer.MAX_VALUE);
+    public static final ForgeConfigSpec.IntValue COST_LEVELS = BUILDER
+            .comment("XP levels per Talent Point when costMode = LEVELS")
+            .defineInRange("costLevels", 5, 1, 1000);
 
-    public static final ForgeConfigSpec.ConfigValue<String> MAGIC_NUMBER_INTRODUCTION = BUILDER
-            .comment("What you want the introduction message to be for the magic number")
-            .define("magicNumberIntroduction", "The magic number is... ");
+    public static final ForgeConfigSpec.IntValue COST_POINTS = BUILDER
+            .comment("XP points per Talent Point when costMode = POINTS")
+            .defineInRange("costPoints", 100, 1, 1_000_000);
 
-    // a list of strings that are treated as resource locations for items
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
-            .comment("A list of items to log on common setup.")
-            .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), Config::validateItemName);
+    public static final ForgeConfigSpec.IntValue RESPEC_FEE_LEVELS = BUILDER
+            .comment("XP levels charged to change class (the first class choice is free)")
+            .defineInRange("respecFeeLevels", 10, 0, 1000);
+
+    public static final ForgeConfigSpec.IntValue RESPEC_REFUND_PERCENT = BUILDER
+            .comment("Percent of the old class's spent points returned on respec (rounded down)")
+            .defineInRange("respecRefundPercent", 25, 0, 100);
+
+    public static final ForgeConfigSpec.IntValue AURA_MAX_PER_PULSE = BUILDER
+            .comment("Fertile Aura: maximum plants advanced per pulse")
+            .defineInRange("auraMaxPerPulse", 32, 0, 4096);
+
+    public static final ForgeConfigSpec.IntValue AURA_IDLE_TICKS = BUILDER
+            .comment("Fertile Aura stops if the player has not moved for this many ticks")
+            .defineInRange("auraIdleTicks", 1200, 0, 72000);
+
+    public static final ForgeConfigSpec.DoubleValue FALL_REDUCTION_CAP = BUILDER
+            .comment("Maximum fall damage reduction from Landing + Roll (0.6 = never below 40% of the damage)")
+            .defineInRange("fallReductionCap", 0.6, 0.0, 1.0);
+
+    public static final ForgeConfigSpec.IntValue CROSSBOW_MIN_TICKS = BUILDER
+            .comment("Swift Reload never makes the crossbow load faster than this many ticks")
+            .defineInRange("crossbowMinTicks", 8, 1, 100);
+
+    public static final ForgeConfigSpec.BooleanValue VEIN_REQUIRES_SNEAK = BUILDER
+            .comment("Vein only triggers while crouching")
+            .define("veinRequiresSneak", true);
+
+    public static final ForgeConfigSpec.DoubleValue PVP_DAMAGE_MULTIPLIER = BUILDER
+            .comment("Scales Thick Hide and Steadfast when both attacker and victim are players (1.0 = full effect)")
+            .defineInRange("pvpDamageMultiplier", 1.0, 0.0, 1.0);
+
+    public static final ForgeConfigSpec.IntValue MAX_CLASSES = BUILDER
+            .comment("Class slots per player: 2 enables a secondary class (after Second Vocation), 1 disables multiclass")
+            .defineInRange("maxClasses", 2, 1, 2);
+
+    public static final ForgeConfigSpec.DoubleValue COMBAT_REDUCTION_CAP = BUILDER
+            .comment("Maximum combined reduction of combat damage (source is an entity) from all talents")
+            .defineInRange("combatReductionCap", 0.5, 0.0, 1.0);
+
+    public static final ForgeConfigSpec.DoubleValue DURABILITY_SAVE_CAP = BUILDER
+            .comment("Maximum combined chance of not spending durability from all talents (before Unbreaking)")
+            .defineInRange("durabilitySaveCap", 0.5, 0.0, 1.0);
+
+    public static final ForgeConfigSpec.IntValue ANGLER_IDLE_TICKS = BUILDER
+            .comment("Live Bait and High Tide's fishing bonus stop if the player has not moved or turned the camera for this many ticks")
+            .defineInRange("anglerIdleTicks", 1200, 0, 72000);
 
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
-    public static boolean logDirtBlock;
-    public static int magicNumber;
-    public static String magicNumberIntroduction;
-    public static Set<Item> items;
-
-    private static boolean validateItemName(final Object obj) {
-        return obj instanceof final String itemName && ForgeRegistries.ITEMS.containsKey(Identifier.tryParse(itemName));
-    }
-
-    @SubscribeEvent
-    static void onLoad(final ModConfigEvent event) {
-        logDirtBlock = LOG_DIRT_BLOCK.get();
-        magicNumber = MAGIC_NUMBER.get();
-        magicNumberIntroduction = MAGIC_NUMBER_INTRODUCTION.get();
-
-        // convert the list of strings into a set of items
-        items = ITEM_STRINGS.get().stream()
-                .map(itemName -> ForgeRegistries.ITEMS.getValue(Identifier.tryParse(itemName)))
-                .collect(Collectors.toSet());
-    }
+    private Config() {}
 }

@@ -1,0 +1,21 @@
+{
+  "id": "angler_sea_eyes",
+  "treeCategory": "angler",
+  "name": "talent.vanillatalents.angler_sea_eyes.name",
+  "description": "talent.vanillatalents.angler_sea_eyes.desc",
+  "icon": "minecraft:sea_lantern",
+  "maxLevel": 2,
+  "prerequisites": [
+    {
+      "id": "angler_boat_speed",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 1,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.25
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "explorer_tailwind",
+  "treeCategory": "explorer",
+  "name": "talent.vanillatalents.explorer_tailwind.name",
+  "description": "talent.vanillatalents.explorer_tailwind.desc",
+  "icon": "minecraft:firework_rocket",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "explorer_glider",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 1,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.15
+  }
+}

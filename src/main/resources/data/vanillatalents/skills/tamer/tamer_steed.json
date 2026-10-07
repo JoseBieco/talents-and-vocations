@@ -1,0 +1,21 @@
+{
+  "id": "tamer_steed",
+  "treeCategory": "tamer",
+  "name": "talent.vanillatalents.tamer_steed.name",
+  "description": "talent.vanillatalents.tamer_steed.desc",
+  "icon": "minecraft:saddle",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "tamer_bond",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

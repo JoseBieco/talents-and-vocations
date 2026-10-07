@@ -1,0 +1,22 @@
+{
+  "id": "warrior_executioner",
+  "treeCategory": "warrior",
+  "name": "talent.vanillatalents.warrior_executioner.name",
+  "description": "talent.vanillatalents.warrior_executioner.desc",
+  "icon": "minecraft:wither_skeleton_skull",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "warrior_armor_break",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.1,
+    "threshold": 0.3
+  }
+}

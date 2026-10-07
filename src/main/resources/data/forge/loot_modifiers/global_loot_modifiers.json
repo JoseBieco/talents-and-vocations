@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "entries": [
+    "vanillatalents:miner_fortune",
+    "vanillatalents:miner_smelter",
+    "vanillatalents:miner_geode",
+    "vanillatalents:farmer_harvest",
+    "vanillatalents:farmer_forester",
+    "vanillatalents:farmer_replant",
+    "vanillatalents:farmer_gatherer",
+    "vanillatalents:angler_catch",
+    "vanillatalents:builder_glass"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "tamer_eternal",
+  "treeCategory": "tamer",
+  "name": "talent.vanillatalents.tamer_eternal.name",
+  "description": "talent.vanillatalents.tamer_eternal.desc",
+  "icon": "minecraft:totem_of_undying",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "tamer_lick",
+      "level": 1
+    },
+    {
+      "id": "tamer_saddle",
+      "level": 1
+    },
+    {
+      "id": "tamer_golem",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 4
+  },
+  "values": {
+    "resistance_ticks": 60,
+    "resistance_amplifier": 3,
+    "cooldown_ticks": 6000
+  },
+  "capstone": true
+}

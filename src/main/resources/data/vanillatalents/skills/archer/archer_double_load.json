@@ -1,0 +1,21 @@
+{
+  "id": "archer_double_load",
+  "treeCategory": "archer",
+  "name": "talent.vanillatalents.archer_double_load.name",
+  "description": "talent.vanillatalents.archer_double_load.desc",
+  "icon": "minecraft:crossbow",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "archer_bolt",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": -1,
+    "y": 3
+  },
+  "values": {
+    "per_level": 0.08
+  }
+}

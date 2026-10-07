@@ -1,0 +1,21 @@
+{
+  "id": "farmer_bonemeal",
+  "treeCategory": "farmer",
+  "name": "talent.vanillatalents.farmer_bonemeal.name",
+  "description": "talent.vanillatalents.farmer_bonemeal.desc",
+  "icon": "minecraft:bone",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "farmer_growth_aura",
+      "level": 2
+    }
+  ],
+  "position": {
+    "x": 2,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.15
+  }
+}

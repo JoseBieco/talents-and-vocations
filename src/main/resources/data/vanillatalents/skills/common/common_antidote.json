@@ -1,0 +1,21 @@
+{
+  "id": "common_antidote",
+  "treeCategory": "common",
+  "name": "talent.vanillatalents.common_antidote.name",
+  "description": "talent.vanillatalents.common_antidote.desc",
+  "icon": "minecraft:milk_bucket",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "common_fireproof",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": 3,
+    "y": 2
+  },
+  "values": {
+    "per_level": 0.1
+  }
+}

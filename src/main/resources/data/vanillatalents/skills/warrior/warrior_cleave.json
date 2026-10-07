@@ -1,0 +1,32 @@
+{
+  "id": "warrior_cleave",
+  "treeCategory": "warrior",
+  "name": "talent.vanillatalents.warrior_cleave.name",
+  "description": "talent.vanillatalents.warrior_cleave.desc",
+  "icon": "minecraft:netherite_axe",
+  "maxLevel": 1,
+  "prerequisites": [
+    {
+      "id": "warrior_bloodlust",
+      "level": 1
+    },
+    {
+      "id": "warrior_executioner",
+      "level": 2
+    },
+    {
+      "id": "warrior_shield",
+      "level": 1
+    }
+  ],
+  "position": {
+    "x": 0,
+    "y": 4
+  },
+  "values": {
+    "ratio": 0.4,
+    "radius": 1.5,
+    "max_targets": 3
+  },
+  "capstone": true
+}
