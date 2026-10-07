@@ -1,0 +1,21 @@
+{
+  "id": "builder_dismantle",
+  "treeCategory": "builder",
+  "name": "talent.vanillatalents.builder_dismantle.name",
+  "description": "talent.vanillatalents.builder_dismantle.desc",
+  "icon": "minecraft:iron_pickaxe",
+  "maxLevel": 3,
+  "prerequisites": [
+    {
+      "id": "builder_reach",
+      "level": 3
+    }
+  ],
+  "position": {
+    "x": -3,
+    "y": 1
+  },
+  "values": {
+    "per_level": 0.2
+  }
+}

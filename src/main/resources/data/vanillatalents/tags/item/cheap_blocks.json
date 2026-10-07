@@ -1,0 +1,17 @@
+{
+  "values": [
+    "minecraft:stone",
+    "minecraft:cobblestone",
+    "minecraft:cobbled_deepslate",
+    "minecraft:dirt",
+    "minecraft:sand",
+    "minecraft:gravel",
+    "#minecraft:planks",
+    "minecraft:glass",
+    "minecraft:stone_bricks",
+    "minecraft:scaffolding",
+    "minecraft:torch",
+    "minecraft:soul_torch",
+    "minecraft:copper_torch"
+  ]
+}
