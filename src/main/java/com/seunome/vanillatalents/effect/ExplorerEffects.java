@@ -2,7 +2,10 @@ package com.seunome.vanillatalents.effect;
 
 import com.seunome.vanillatalents.Config;
 import com.seunome.vanillatalents.VanillaTalents;
+import com.seunome.vanillatalents.core.formula.BuilderFormulas;
 import com.seunome.vanillatalents.core.formula.ExplorerFormulas;
+import com.seunome.vanillatalents.core.formula.HookFormulas;
+import com.seunome.vanillatalents.core.formula.StackingFormulas;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
@@ -19,6 +22,9 @@ import net.minecraftforge.event.entity.player.PlayerSpawnPhantomsEvent;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Efeitos do Desbravador que usam eventos. Atributos (swiftness, step, terrain, safe_height, swim) vêm de
  * AttributeSync; glider, sprint e jump vêm dos hooks de Mixin.
@@ -30,7 +36,11 @@ public final class ExplorerEffects {
 
     private ExplorerEffects() {}
 
-    /** explorer_featherfoot (distância), explorer_fall e explorer_roll (multiplicador com teto). */
+    /**
+     * Queda do jogador: explorer_featherfoot (distância) e os fatores R3 — explorer_fall, explorer_roll (agachado),
+     * tamer_saddle (montado) e builder_height_work (colocou bloco há pouco) — juntos num só teto
+     * ({@code fallReductionCap}, via {@link StackingFormulas#cappedProduct}).
+     */
     @SubscribeEvent
     public static void onFall(LivingFallEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
@@ -41,24 +51,41 @@ public final class ExplorerEffects {
                     player.getAttributeValue(Attributes.SAFE_FALL_DISTANCE)));
         }
 
-        int fall = Talents.level(player, "explorer_fall");
-        boolean roll = player.isShiftKeyDown() && Talents.level(player, "explorer_roll") > 0;
-        int saddle = player.isPassenger() ? Talents.level(player, "tamer_saddle") : 0;
         // Montado, a queda chega aqui pela propagação da montaria, com o multiplicador que a montaria usou. Se a Sela
         // Firme já reduziu a montaria (TamerEffects.onMountFall), tira-se esse fator para não somar duas vezes.
         double incoming = event.getDamageMultiplier();
         double mountFactor = player.isPassenger() ? TamerEffects.saddleMountFactor(player.getVehicle()) : 1;
         if (mountFactor > 0 && mountFactor < 1) incoming /= mountFactor;
-        if (fall == 0 && !roll && saddle == 0) {
+        List<Double> factors = fallFactors(player);
+        if (factors.isEmpty()) {
             if (incoming != event.getDamageMultiplier()) event.setDamageMultiplier((float) incoming);
             return;
         }
-        double multiplier = ExplorerFormulas.fallMultiplier(
-                fall, fall > 0 ? Talents.value(player, "explorer_fall", "per_level") : 0,
-                roll, roll ? Talents.value(player, "explorer_roll", "value") : 0,
-                saddle, saddle > 0 ? Talents.value(player, "tamer_saddle", "per_level") : 0,
-                Config.FALL_REDUCTION_CAP.get());
+        double multiplier = StackingFormulas.cappedProduct(factors, Config.FALL_REDUCTION_CAP.get());
         event.setDamageMultiplier((float) (incoming * multiplier));
+    }
+
+    /** Fatores R3 ativos na queda deste jogador, na ordem de sempre (queda, rolamento, sela) + Trabalho em Altura. */
+    private static List<Double> fallFactors(ServerPlayer player) {
+        List<Double> factors = new ArrayList<>(4);
+        int fall = Talents.level(player, "explorer_fall");
+        if (fall > 0) {
+            factors.add(HookFormulas.reductionMultiplier(fall, Talents.value(player, "explorer_fall", "per_level")));
+        }
+        if (player.isShiftKeyDown() && Talents.level(player, "explorer_roll") > 0) {
+            factors.add(ExplorerFormulas.rollFactor(Talents.value(player, "explorer_roll", "value")));
+        }
+        int saddle = player.isPassenger() ? Talents.level(player, "tamer_saddle") : 0;
+        if (saddle > 0) {
+            factors.add(HookFormulas.reductionMultiplier(saddle, Talents.value(player, "tamer_saddle", "per_level")));
+        }
+        int heightWork = Talents.level(player, "builder_height_work");
+        if (heightWork > 0 && BuilderFormulas.recentlyPlaced(BuilderEffects.lastPlaceTick(player),
+                player.level().getGameTime(), (int) Talents.value(player, "builder_height_work", "window_ticks"))) {
+            factors.add(HookFormulas.reductionMultiplier(heightWork,
+                    Talents.value(player, "builder_height_work", "per_level")));
+        }
+        return factors;
     }
 
     /** explorer_mounts: modificador temporário na velocidade da montaria, removido ao desmontar. */

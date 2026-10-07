@@ -9,6 +9,7 @@
     "FishingHookMixin",
     "FoodDataMixin",
     "ItemStackMixin",
+    "LivingEntityMixin",
     "PlayerMixin",
     "ServerPlayerMixin",
     "ThrownTridentMixin"

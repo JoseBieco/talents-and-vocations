@@ -21,6 +21,8 @@ import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.listener.Priority;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -45,6 +47,12 @@ public final class BuilderEffects {
      */
     private static final Map<UUID, Long> BUILDING_BREAK = new HashMap<>();
 
+    /** Jogador → gameTime da última colocação de bloco (builder_height_work). */
+    private static final Map<UUID, Long> LAST_PLACE = new HashMap<>();
+
+    /** Sentinela de {@link #lastPlaceTick} para quem não colocou bloco nesta sessão. */
+    public static final long NEVER = Long.MIN_VALUE;
+
     private BuilderEffects() {}
 
     public static void registerLoot() {
@@ -53,6 +61,34 @@ public final class BuilderEffects {
 
     public static void forget(UUID player) {
         BUILDING_BREAK.remove(player);
+        LAST_PLACE.remove(player);
+    }
+
+    /** gameTime da última colocação de bloco do jogador, ou {@link #NEVER}. */
+    public static long lastPlaceTick(ServerPlayer player) {
+        return LAST_PLACE.getOrDefault(player.getUUID(), NEVER);
+    }
+
+    /** builder_height_work: grava a colocação. LOWEST para só contar o que nenhum outro listener cancelou. */
+    @SubscribeEvent(priority = Priority.LOWEST)
+    public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) markPlaced(player);
+    }
+
+    /** Camas, portas e afins disparam o evento múltiplo, que tem barramento próprio. */
+    @SubscribeEvent(priority = Priority.LOWEST)
+    public static void onMultiBlockPlace(BlockEvent.EntityMultiPlaceEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) markPlaced(player);
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent event) {
+        BUILDING_BREAK.clear();
+        LAST_PLACE.clear();
+    }
+
+    private static void markPlaced(ServerPlayer player) {
+        LAST_PLACE.put(player.getUUID(), player.level().getGameTime());
     }
 
     /** Verdadeiro só durante a quebra (mesmo tick) de um bloco da tag por esse jogador. Usado pela lista R4. */

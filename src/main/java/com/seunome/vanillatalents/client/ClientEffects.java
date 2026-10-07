@@ -2,6 +2,7 @@ package com.seunome.vanillatalents.client;
 
 import com.seunome.vanillatalents.core.formula.AnglerFormulas;
 import com.seunome.vanillatalents.core.formula.ArcherFormulas;
+import com.seunome.vanillatalents.core.formula.BuilderFormulas;
 import com.seunome.vanillatalents.effect.Talents;
 import com.seunome.vanillatalents.core.formula.ExplorerFormulas;
 import net.minecraft.client.player.ClientInput;
@@ -22,8 +23,8 @@ import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.TickEvent;
 
 /**
- * Efeitos do lado do cliente: Atirar Andando, Comer Andando, Escalador e Olhos do Mar (o Faro Mineral fica em
- * OreHighlights).
+ * Efeitos do lado do cliente: Atirar Andando, Comer Andando, Escalador, Andaimista (subida; a descida fica em
+ * ScaffoldHooks) e Olhos do Mar (o Faro Mineral fica em OreHighlights).
  * O movimento do jogador local é calculado no cliente, então estes efeitos só funcionam aqui.
  */
 public final class ClientEffects {
@@ -33,6 +34,7 @@ public final class ClientEffects {
     static void register() {
         MovementInputUpdateEvent.BUS.addListener(ClientEffects::onMovementInput);
         TickEvent.PlayerTickEvent.Post.BUS.addListener(ClientEffects::onPlayerTick);
+        TickEvent.PlayerTickEvent.Post.BUS.addListener(ClientEffects::onScaffoldTick);
         ViewportEvent.RenderFog.BUS.addListener(ClientEffects::onRenderFog);
     }
 
@@ -83,6 +85,25 @@ public final class ClientEffects {
         int level = Talents.level(player, "explorer_climb");
         if (level <= 0) return;
         double factor = ExplorerFormulas.climbFactor(level, Talents.value(player, "explorer_climb", "per_level"));
+        player.setDeltaMovement(motion.x, motion.y * factor, motion.z);
+    }
+
+    /**
+     * builder_scaffold (subida): depois do tick do jogador local, dentro do andaime e subindo, multiplica a velocidade
+     * vertical usada no próximo tick. Subindo (pulo ou colisão horizontal) a vanilla reescreve o y para 0,2 logo depois
+     * do move, então o fator não acumula. Não colide com explorer_climb, que exclui o andaime. A descida não dá para
+     * fazer aqui: o próximo tick prende o y em −0,15 antes do move (LivingEntity.handleOnClimbable), desfazendo
+     * qualquer fator; ela fica em ScaffoldHooks (mixin nesse método).
+     */
+    private static void onScaffoldTick(TickEvent.PlayerTickEvent.Post event) {
+        if (!(event.player() instanceof LocalPlayer player)) return;
+        if (player.getAbilities().flying) return;
+        Vec3 motion = player.getDeltaMovement();
+        if (motion.y <= 0) return;
+        if (!player.getInBlockState().isScaffolding(player)) return;
+        int level = Talents.level(player, "builder_scaffold");
+        if (level <= 0) return;
+        double factor = BuilderFormulas.scaffoldFactor(level, Talents.value(player, "builder_scaffold", "per_level"));
         player.setDeltaMovement(motion.x, motion.y * factor, motion.z);
     }
 

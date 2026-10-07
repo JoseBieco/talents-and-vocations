@@ -1,5 +1,7 @@
 package com.seunome.vanillatalents.core.formula;
 
+import java.util.List;
+
 /** Fórmulas da árvore do Desbravador. */
 public final class ExplorerFormulas {
 
@@ -19,10 +21,15 @@ public final class ExplorerFormulas {
      */
     public static double fallMultiplier(int fallLvl, double fallPer, boolean rollActive, double rollValue,
                                         int saddleLvl, double saddlePer, double cap) {
-        double multiplier = HookFormulas.reductionMultiplier(fallLvl, fallPer);
-        if (rollActive) multiplier *= 1 - rollValue;
-        multiplier *= HookFormulas.reductionMultiplier(saddleLvl, saddlePer);
-        return Math.max(multiplier, 1 - cap);
+        return StackingFormulas.cappedProduct(List.of(
+                HookFormulas.reductionMultiplier(fallLvl, fallPer),
+                rollActive ? rollFactor(rollValue) : 1.0,
+                HookFormulas.reductionMultiplier(saddleLvl, saddlePer)), cap);
+    }
+
+    /** explorer_roll: fator de queda quando agachado no impacto ({@code 1 − value}, sem clamp, como sempre foi). */
+    public static double rollFactor(double rollValue) {
+        return 1 - rollValue;
     }
 
     /**

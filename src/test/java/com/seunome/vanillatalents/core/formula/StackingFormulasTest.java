@@ -24,6 +24,22 @@ class StackingFormulasTest {
     }
 
     @Test
+    void cappedProduct_isLimitedByTheCap() {
+        // Desbravador −50% × Trabalho em Altura −20% × Sela −20% daria 0,32; o teto R3 de 60% segura em 0,4
+        assertEquals(0.4, StackingFormulas.cappedProduct(List.of(0.5, 0.8, 0.8), 0.6), 1e-9);
+    }
+
+    @Test
+    void cappedProduct_multipliesBelowTheCap() {
+        assertEquals(0.48, StackingFormulas.cappedProduct(List.of(0.8, 0.6), 0.6), 1e-9);
+    }
+
+    @Test
+    void cappedProduct_emptyListIsOne() {
+        assertEquals(1.0, StackingFormulas.cappedProduct(List.of(), 0.6), 1e-9);
+    }
+
+    @Test
     void combinedChance_rollsIndependentlyAndIsLimitedByTheCap() {
         assertEquals(0.5, StackingFormulas.combinedChance(List.of(0.4, 0.2), 0.5), 1e-9);
     }
