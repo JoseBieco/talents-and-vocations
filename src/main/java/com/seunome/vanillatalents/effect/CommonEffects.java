@@ -38,7 +38,8 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = VanillaTalents.MODID)
 public final class CommonEffects {
 
-    private static final String ANTIDOTE_GUARD = "common_antidote";
+    /** Também usado pelo Alquimista (ArtisanEffects): efeito reaplicado sob este guard não é reduzido de novo. */
+    static final String ANTIDOTE_GUARD = "common_antidote";
 
     /** Efeito → nó que reduz sua duração (mesma fórmula, mesmo guard). */
     private static final Map<Holder<MobEffect>, String> EFFECT_NODES = Map.of(

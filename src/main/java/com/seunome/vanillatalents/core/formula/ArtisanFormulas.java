@@ -41,4 +41,29 @@ public final class ArtisanFormulas {
     public static float breakChance(float vanilla, int level, double perLevel) {
         return (float) Math.max(0, vanilla * (1 - level * perLevel));
     }
+
+    /**
+     * artisan_trade: unidades a descontar do preço base, como o Herói da Vila: {@code floor(base · lvl·per)}, mínimo 1
+     * (nível 0 = 0). O preço final nunca fica abaixo de 1: a vanilla limita em {@code MerchantOffer.getCostA}.
+     */
+    public static int tradeDiscount(int baseCost, int level, double perLevel) {
+        if (level <= 0) return 0;
+        return Math.max(1, (int) Math.floor(baseCost * level * perLevel));
+    }
+
+    /**
+     * artisan_mentor: XP de profissão extra do aldeão, {@code floor(xp·lvl·per)} mais 1 se {@code roll} (em [0,1)) cair
+     * abaixo da parte fracionária — a média é exatamente {@code xp·lvl·per}, mesmo em trocas de 1 XP.
+     */
+    public static int mentorBonus(int xp, int level, double perLevel, double roll) {
+        if (level <= 0 || xp <= 0) return 0;
+        double bonus = xp * level * perLevel;
+        int whole = (int) Math.floor(bonus);
+        return whole + (roll < bonus - whole ? 1 : 0);
+    }
+
+    /** artisan_brewing: duração da poção bebida, {@code round(ticks · (1 + lvl·per))}. */
+    public static int potionDuration(int ticks, int level, double perLevel) {
+        return (int) Math.round(ticks * (1 + level * perLevel));
+    }
 }

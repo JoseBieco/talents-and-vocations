@@ -13,7 +13,9 @@
     "LivingEntityMixin",
     "PlayerMixin",
     "ServerPlayerMixin",
-    "ThrownTridentMixin"
+    "SmithingMenuMixin",
+    "ThrownTridentMixin",
+    "VillagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

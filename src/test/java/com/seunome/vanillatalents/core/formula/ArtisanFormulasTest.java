@@ -59,4 +59,33 @@ class ArtisanFormulasTest {
     void breakChance_reducesFifteenPercentPerLevel() {
         assertEquals(.066f, ArtisanFormulas.breakChance(.12f, 3, .15), 1e-6);
     }
+
+    @Test
+    void tradeDiscount_roundsDownWithMinimumOneUnit() {
+        assertEquals(1, ArtisanFormulas.tradeDiscount(10, 3, .05));
+        assertEquals(4, ArtisanFormulas.tradeDiscount(32, 3, .05));
+        assertEquals(1, ArtisanFormulas.tradeDiscount(1, 1, .05));
+    }
+
+    @Test
+    void tradeDiscount_levelZeroIsZero() {
+        assertEquals(0, ArtisanFormulas.tradeDiscount(10, 0, .05));
+    }
+
+    @Test
+    void mentorBonus_wholePartPlusFractionRoll() {
+        assertEquals(5, ArtisanFormulas.mentorBonus(10, 2, .25, .99));
+        assertEquals(1, ArtisanFormulas.mentorBonus(1, 1, .25, .1));
+        assertEquals(0, ArtisanFormulas.mentorBonus(1, 1, .25, .5));
+    }
+
+    @Test
+    void mentorBonus_levelZeroIsZero() {
+        assertEquals(0, ArtisanFormulas.mentorBonus(10, 0, .25, 0));
+    }
+
+    @Test
+    void potionDuration_tenPercentPerLevel() {
+        assertEquals(4680, ArtisanFormulas.potionDuration(3600, 3, .1));
+    }
 }
