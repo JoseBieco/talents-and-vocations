@@ -36,4 +36,18 @@ class BuilderFormulasTest {
         assertFalse(BuilderFormulas.glassDrop(true, false, false));
         assertFalse(BuilderFormulas.glassDrop(false, true, false));
     }
+
+    @Test
+    void refundChance_combinesThriftyAndTorchIndependently() {
+        assertEquals(.2, BuilderFormulas.refundChance(true, 4, .05, false, 0, .25), 1e-9);
+        assertEquals(.6, BuilderFormulas.refundChance(true, 4, .05, true, 2, .25), 1e-9);
+        assertEquals(0, BuilderFormulas.refundChance(false, 4, .05, false, 2, .25), 1e-9);
+    }
+
+    @Test
+    void quickDelay_onlyShortensWithBlockItem() {
+        assertEquals(2, BuilderFormulas.quickDelay(4, true, 2));
+        assertEquals(4, BuilderFormulas.quickDelay(4, false, 2));
+        assertEquals(1, BuilderFormulas.quickDelay(1, true, 2));
+    }
 }

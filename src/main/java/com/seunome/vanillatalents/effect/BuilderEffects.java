@@ -7,12 +7,15 @@ import com.seunome.vanillatalents.effect.loot.TalentLootModifier;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -69,16 +72,99 @@ public final class BuilderEffects {
         return LAST_PLACE.getOrDefault(player.getUUID(), NEVER);
     }
 
-    /** builder_height_work: grava a colocação. LOWEST para só contar o que nenhum outro listener cancelou. */
+    /**
+     * builder_height_work (grava a colocação) e builder_thrifty/builder_torch (devolução). LOWEST para só contar o que
+     * nenhum outro listener cancelou. Só ServerPlayer: dispensers, endermen e afins não contam.
+     */
     @SubscribeEvent(priority = Priority.LOWEST)
     public static void onBlockPlace(BlockEvent.EntityPlaceEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) markPlaced(player);
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        markPlaced(player);
+        maybeRefund(player, event.getPlacedBlock());
     }
 
-    /** Camas, portas e afins disparam o evento múltiplo, que tem barramento próprio. */
+    /**
+     * Camas, portas e afins disparam o evento múltiplo, que tem barramento próprio. Uma colocação = uma rolagem, no
+     * máximo 1 item devolvido (o bloco do evento é o primeiro snapshot, o mesmo que o item colocado).
+     */
     @SubscribeEvent(priority = Priority.LOWEST)
     public static void onMultiBlockPlace(BlockEvent.EntityMultiPlaceEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) markPlaced(player);
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        markPlaced(player);
+        maybeRefund(player, event.getPlacedBlock());
+    }
+
+    /**
+     * Econômico/Iluminador. Em ForgeHooks.onPlaceItemIntoWorld o evento dispara depois do useOn (que já gastou o item),
+     * mas com a mão restaurada para a cópia de antes do uso: a mão que segura o item do bloco colocado é a usada, mesmo
+     * no último bloco da pilha. Itens sem forma de item (fogo, gelo do Passo Gelado) dão AIR e são ignorados.
+     */
+    private static void maybeRefund(ServerPlayer player, BlockState placed) {
+        if (player.hasInfiniteMaterials()) return;
+        Item item = placed.getBlock().asItem();
+        if (item == Items.AIR) return;
+        InteractionHand hand = usedHand(player, item);
+        if (hand == null) return;
+        ItemStack held = player.getItemInHand(hand);
+        boolean cheap = held.is(CHEAP_BLOCKS);
+        boolean torch = item == Items.TORCH || item == Items.SOUL_TORCH || item == Items.COPPER_TORCH;
+        int thrifty = cheap ? Talents.level(player, "builder_thrifty") : 0;
+        int torchLvl = torch ? Talents.level(player, "builder_torch") : 0;
+        if (thrifty <= 0 && torchLvl <= 0) return;
+        double chance = BuilderFormulas.refundChance(
+                cheap, thrifty, thrifty > 0 ? Talents.value(player, "builder_thrifty", "per_level") : 0,
+                torch, torchLvl, torchLvl > 0 ? Talents.value(player, "builder_torch", "per_level") : 0);
+        if (player.getRandom().nextDouble() >= chance) return;
+        giveBack(player, hand, held.copyWithCount(1));
+    }
+
+    /** Mão principal se ela segura o item, senão a secundária, senão nenhuma (null). */
+    private static InteractionHand usedHand(ServerPlayer player, Item item) {
+        if (player.getMainHandItem().is(item)) return InteractionHand.MAIN_HAND;
+        if (player.getOffhandItem().is(item)) return InteractionHand.OFF_HAND;
+        return null;
+    }
+
+    /**
+     * builder_yield: cada operação de craft (clique ou cada repetição do shift-clique, que dispara o evento uma vez por
+     * craft com a cópia do resultado) com resultado na tag rola uma vez e devolve 1 unidade.
+     */
+    @SubscribeEvent
+    public static void onItemCrafted(PlayerEvent.ItemCraftedEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (player.hasInfiniteMaterials()) return;
+        ItemStack result = event.getCrafting();
+        if (result.isEmpty() || !result.is(CHEAP_BLOCKS)) return;
+        int level = Talents.level(player, "builder_yield");
+        if (level <= 0) return;
+        if (player.getRandom().nextDouble() >= HookFormulas.chance(level, Talents.value(player, "builder_yield", "per_level"))) return;
+        giveBack(player, null, result.copyWithCount(1));
+    }
+
+    /**
+     * Devolve {@code one} no próximo tick do servidor: na mão usada se ela está vazia (último bloco da pilha) ou ainda
+     * tem o mesmo item e cabe; senão no inventário; senão dropado aos pés do jogador. {@code hand} null = direto ao
+     * inventário. Usa a instância atual do jogador (morte/troca de dimensão trocam o objeto); desconectado, perde.
+     */
+    public static void giveBack(ServerPlayer player, InteractionHand hand, ItemStack one) {
+        MinecraftServer server = player.level().getServer();
+        UUID id = player.getUUID();
+        NextTick.schedule(() -> {
+            ServerPlayer current = server.getPlayerList().getPlayer(id);
+            if (current == null) return;
+            if (hand != null) {
+                ItemStack held = current.getItemInHand(hand);
+                if (held.isEmpty()) {
+                    current.setItemInHand(hand, one);
+                    return;
+                }
+                if (ItemStack.isSameItemSameComponents(held, one) && held.getCount() < held.getMaxStackSize()) {
+                    held.grow(1);
+                    return;
+                }
+            }
+            if (!current.getInventory().add(one)) current.spawnAtLocation(current.level(), one);
+        });
     }
 
     @SubscribeEvent

@@ -5,6 +5,7 @@ import com.seunome.vanillatalents.core.formula.ArcherFormulas;
 import com.seunome.vanillatalents.core.formula.BuilderFormulas;
 import com.seunome.vanillatalents.effect.Talents;
 import com.seunome.vanillatalents.core.formula.ExplorerFormulas;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.ClientInput;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.fog.FogData;
@@ -12,6 +13,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
@@ -25,7 +27,7 @@ import net.minecraftforge.event.TickEvent;
 
 /**
  * Efeitos do lado do cliente: Atirar Andando, Comer Andando, Escalador, Andaimista (subida; a descida fica em
- * ScaffoldHooks) e Olhos do Mar (o Faro Mineral fica em OreHighlights).
+ * ScaffoldHooks), Olhos do Mar (o Faro Mineral fica em OreHighlights) e Mãos Rápidas.
  * O movimento do jogador local é calculado no cliente, então estes efeitos só funcionam aqui.
  */
 public final class ClientEffects {
@@ -37,6 +39,27 @@ public final class ClientEffects {
         TickEvent.PlayerTickEvent.Post.BUS.addListener(ClientEffects::onPlayerTick);
         TickEvent.PlayerTickEvent.Post.BUS.addListener(ClientEffects::onScaffoldTick);
         ViewportEvent.RenderFog.BUS.addListener(ClientEffects::onRenderFog);
+        TickEvent.ClientTickEvent.Post.BUS.addListener(event -> onQuickHandsTick());
+    }
+
+    /**
+     * builder_quick_hands: encurta Minecraft.rightClickDelay (AT) com bloco na mão. Em Minecraft.tick a ordem é:
+     * decremento do atraso → ClientTickEvent.Pre → handleKeybinds (startUseItem põe 4) → ClientTickEvent.Post. No Post o
+     * valor ainda é o 4 recém-posto, então trocá-lo por delay_ticks dá exatamente esse intervalo entre colocações (no Pre
+     * o jogo já teria descontado um tick: 3 → 2 daria intervalo 3). A mão considerada é a que startUseItem tenta
+     * primeiro: a principal, ou a secundária só com a principal vazia — assim uma pérola, ovo ou bola de neve na mão
+     * principal com blocos na secundária não é acelerada.
+     */
+    private static void onQuickHandsTick() {
+        Minecraft minecraft = Minecraft.getInstance();
+        LocalPlayer player = minecraft.player;
+        if (player == null) return;
+        if (Talents.level(player, "builder_quick_hands") <= 0) return;
+        ItemStack main = player.getMainHandItem();
+        ItemStack used = main.isEmpty() ? player.getOffhandItem() : main;
+        boolean holdingBlock = used.getItem() instanceof BlockItem;
+        int delay = (int) Talents.value(player, "builder_quick_hands", "delay_ticks");
+        minecraft.rightClickDelay = BuilderFormulas.quickDelay(minecraft.rightClickDelay, holdingBlock, delay);
     }
 
     /**

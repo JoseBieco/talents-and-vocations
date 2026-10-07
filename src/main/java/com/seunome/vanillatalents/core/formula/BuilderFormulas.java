@@ -27,4 +27,23 @@ public final class BuilderFormulas {
     public static boolean glassDrop(boolean isGlass, boolean dropsEmpty, boolean silkTouch) {
         return isGlass && dropsEmpty && !silkTouch;
     }
+
+    /**
+     * builder_thrifty + builder_torch: chance de devolver o bloco colocado. As duas fontes são independentes (uma tocha
+     * barata conta nas duas): {@code 1 − (1 − econômico)·(1 − iluminador)}.
+     */
+    public static double refundChance(boolean cheap, int thriftyLvl, double thriftyPer,
+                                      boolean torch, int torchLvl, double torchPer) {
+        double thrifty = cheap ? HookFormulas.chance(thriftyLvl, thriftyPer) : 0;
+        double torchChance = torch ? HookFormulas.chance(torchLvl, torchPer) : 0;
+        return 1 - (1 - thrifty) * (1 - torchChance);
+    }
+
+    /**
+     * builder_quick_hands: com BlockItem na mão, o atraso do clique direito ({@code Minecraft.rightClickDelay}) cai
+     * para {@code quickDelay}; nunca aumenta um atraso que já é menor.
+     */
+    public static int quickDelay(int current, boolean holdingBlockItem, int quickDelay) {
+        return holdingBlockItem && current > quickDelay ? quickDelay : current;
+    }
 }
