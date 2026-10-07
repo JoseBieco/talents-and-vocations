@@ -9,6 +9,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.item.ItemStack;
@@ -87,7 +88,9 @@ public final class ArtisanEffects {
         float scale = stack.getOrDefault(DataComponents.POTION_DURATION_SCALE, 1.0F);
         List<PotionEffect> effects = new ArrayList<>();
         contents.forEachEffect(e -> {
-            if (!e.getEffect().value().isInstantaneous() && !e.isInfiniteDuration()) {
+            // Só efeitos benéficos/neutros: estender Veneno ou Fraqueza bebidos seria uma penalidade.
+            if (!e.getEffect().value().isInstantaneous() && !e.isInfiniteDuration()
+                    && e.getEffect().value().getCategory() != MobEffectCategory.HARMFUL) {
                 effects.add(new PotionEffect(e.getEffect(), e.getDuration(), e.getAmplifier()));
             }
         }, scale);
