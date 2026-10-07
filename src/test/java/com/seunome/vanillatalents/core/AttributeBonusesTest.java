@@ -27,7 +27,9 @@ class AttributeBonusesTest {
             n("explorer_swiftness", TreeCategory.EXPLORER, 5, 3, Map.of("per_level", 0.03)),
             n("warrior_knockback", TreeCategory.WARRIOR, 2, 0, Map.of("per_level", 0.5)),
             n("warrior_axe_speed", TreeCategory.WARRIOR, 3, 1, Map.of("per_level", 0.05)),
-            n("angler_treasure", TreeCategory.ANGLER, 3, 0, Map.of("per_level", 0.5))
+            n("angler_treasure", TreeCategory.ANGLER, 3, 0, Map.of("per_level", 0.5)),
+            n("builder_reach", TreeCategory.BUILDER, 5, 0, Map.of("per_level", 0.5)),
+            n("builder_sneak", TreeCategory.BUILDER, 3, 1, Map.of("per_level", 0.15))
     ), new ArrayList<>());
 
     static final AttributeBonuses.Context NEUTRAL = new AttributeBonuses.Context(false, false, false, 0);
@@ -122,5 +124,21 @@ class AttributeBonusesTest {
         assertEquals(AttributeBonuses.Attr.LUCK, b.attribute());
         assertEquals(AttributeBonuses.Op.ADD_VALUE, b.op());
         assertEquals(1.5, b.amount(), 1e-9);
+    }
+
+    @Test
+    void builderReachIsBlockInteractionRangeAddValue() {
+        var b = byNode(new TalentRulesTest.FakeView().cls("builder").lvl("builder_reach", 5), NEUTRAL).get("builder_reach");
+        assertEquals(AttributeBonuses.Attr.BLOCK_INTERACTION_RANGE, b.attribute());
+        assertEquals(AttributeBonuses.Op.ADD_VALUE, b.op());
+        assertEquals(2.5, b.amount(), 1e-9);
+    }
+
+    @Test
+    void builderSneakIsSneakingSpeedAddMultipliedBase() {
+        var b = byNode(new TalentRulesTest.FakeView().cls("builder").lvl("builder_sneak", 3), NEUTRAL).get("builder_sneak");
+        assertEquals(AttributeBonuses.Attr.SNEAKING_SPEED, b.attribute());
+        assertEquals(AttributeBonuses.Op.ADD_MULTIPLIED_BASE, b.op());
+        assertEquals(0.45, b.amount(), 1e-9);
     }
 }

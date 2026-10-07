@@ -12,7 +12,7 @@ public final class AttributeBonuses {
     public enum Attr {
         MAX_HEALTH, ARMOR, OXYGEN_BONUS, SUBMERGED_MINING_SPEED, BURNING_TIME, MOVEMENT_SPEED, STEP_HEIGHT,
         MOVEMENT_EFFICIENCY, SAFE_FALL_DISTANCE, SWIM_SPEED, SWEEPING_DAMAGE_RATIO, ATTACK_KNOCKBACK,
-        KNOCKBACK_RESISTANCE, ATTACK_SPEED, LUCK
+        KNOCKBACK_RESISTANCE, ATTACK_SPEED, LUCK, BLOCK_INTERACTION_RANGE, SNEAKING_SPEED
     }
 
     public enum Op { ADD_VALUE, ADD_MULTIPLIED_BASE, ADD_MULTIPLIED_TOTAL }
@@ -42,7 +42,9 @@ public final class AttributeBonuses {
             new Row("warrior_knockback", Attr.ATTACK_KNOCKBACK, Op.ADD_VALUE),
             new Row("warrior_steadfast", Attr.KNOCKBACK_RESISTANCE, Op.ADD_VALUE),
             new Row("warrior_axe_speed", Attr.ATTACK_SPEED, Op.ADD_MULTIPLIED_BASE),
-            new Row("angler_treasure", Attr.LUCK, Op.ADD_VALUE)
+            new Row("angler_treasure", Attr.LUCK, Op.ADD_VALUE),
+            new Row("builder_reach", Attr.BLOCK_INTERACTION_RANGE, Op.ADD_VALUE),
+            new Row("builder_sneak", Attr.SNEAKING_SPEED, Op.ADD_MULTIPLIED_BASE)
     );
 
     public static final List<String> NODE_IDS = ROWS.stream().map(Row::nodeId).toList();

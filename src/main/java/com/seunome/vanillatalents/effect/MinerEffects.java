@@ -269,7 +269,7 @@ public final class MinerEffects {
         return loot;
     }
 
-    private static boolean hasSilkTouch(ServerPlayer player, ItemInstance tool) {
+    static boolean hasSilkTouch(ServerPlayer player, ItemInstance tool) {
         if (tool == null) return false;
         return player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.SILK_TOUCH)
                 .map(holder -> EnchantmentHelper.getItemEnchantmentLevel(holder, tool) > 0)

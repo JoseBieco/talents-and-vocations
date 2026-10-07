@@ -95,6 +95,8 @@ public final class AttributeSync {
             case KNOCKBACK_RESISTANCE -> Attributes.KNOCKBACK_RESISTANCE;
             case ATTACK_SPEED -> Attributes.ATTACK_SPEED;
             case LUCK -> Attributes.LUCK;
+            case BLOCK_INTERACTION_RANGE -> Attributes.BLOCK_INTERACTION_RANGE;
+            case SNEAKING_SPEED -> Attributes.SNEAKING_SPEED;
         };
     }
 

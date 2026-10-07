@@ -3,6 +3,7 @@ package com.seunome.vanillatalents.effect.hooks;
 import com.seunome.vanillatalents.Config;
 import com.seunome.vanillatalents.core.formula.HookFormulas;
 import com.seunome.vanillatalents.core.formula.StackingFormulas;
+import com.seunome.vanillatalents.effect.BuilderEffects;
 import com.seunome.vanillatalents.effect.Talents;
 import com.seunome.vanillatalents.effect.pet.PetOwnership;
 import net.minecraft.core.component.DataComponents;
@@ -25,8 +26,9 @@ public final class DurabilityHooks {
     private DurabilityHooks() {}
 
     /**
-     * Nós que protegem este item agora (R4: cada fonte rola de forma independente). Hoje cada item tem no máximo um;
-     * a elitra em voo usa explorer_glider no lugar de common_armor_care.
+     * Nós que protegem este item agora (R4: cada fonte rola de forma independente). Cada item tem uma fonte própria
+     * (a elitra em voo usa explorer_glider no lugar de common_armor_care) e a ferramenta da mão principal soma
+     * builder_tool_care enquanto quebra um bloco de construção.
      */
     static List<String> nodesFor(ServerPlayer player, ItemStack stack) {
         List<String> nodes = new ArrayList<>(2);
@@ -37,6 +39,11 @@ public final class DurabilityHooks {
         else {
             Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
             if (equippable != null && equippable.slot().isArmor()) nodes.add("common_armor_care");
+        }
+        // builder_tool_care: o item da mão principal gasto ao quebrar um bloco de construção (mineBlock), qualquer
+        // ferramenta; soma-se à fonte própria do item (ex.: miner_durability) com o teto R4.
+        if (stack == player.getMainHandItem() && BuilderEffects.breakingBuildingBlock(player)) {
+            nodes.add("builder_tool_care");
         }
         return nodes;
     }

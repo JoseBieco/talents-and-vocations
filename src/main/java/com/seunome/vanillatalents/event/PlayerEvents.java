@@ -9,6 +9,7 @@ import com.seunome.vanillatalents.data.TalentRegistries;
 import com.seunome.vanillatalents.effect.ActivityTracker;
 import com.seunome.vanillatalents.effect.ArcherEffects;
 import com.seunome.vanillatalents.effect.AttributeSync;
+import com.seunome.vanillatalents.effect.BuilderEffects;
 import com.seunome.vanillatalents.effect.FarmerEffects;
 import com.seunome.vanillatalents.effect.StillTracker;
 import com.seunome.vanillatalents.effect.WarriorEffects;
@@ -83,6 +84,7 @@ public class PlayerEvents {
         ActivityTracker.forget(event.getEntity().getUUID());
         GolemBuilders.forget(event.getEntity().getUUID());
         PetScan.forget(event.getEntity().getUUID());
+        BuilderEffects.forget(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
